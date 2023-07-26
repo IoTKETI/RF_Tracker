@@ -190,7 +190,7 @@ function localMqttConnect(host) {
 		runMotor();
     });
 
-    localmqtt.on('message', function (topic, message) {
+    localmqtt.on('message', (topic, message) => {
         // console.log('topic, message => ', topic, message);
 
         if (topic == sub_motor_control_topic) { // 모터 제어 메세지 수신
@@ -389,7 +389,6 @@ function runMotor() {
                         }
                     }
                     p_step = 0.02;
-
                 }
 
                 p_in = constrain(p_in, P_MIN, P_MAX);
