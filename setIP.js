@@ -2,12 +2,11 @@
  * Created by Wonseok Jung in KETI on 2023-04-26.
  */
 
-const { exec } = require("child_process");
+const {exec} = require("child_process");
 const os = require("os");
 const mqtt = require('mqtt');
-const { nanoid } = require('nanoid');
+const {nanoid} = require('nanoid');
 
-//let conf = require('./conf');
 const fs = require("fs");
 
 const rfPort = 'eth0'; // Set to eth1 if using Crow-Cube, and set to eth0 if using Crow-D.
@@ -21,9 +20,11 @@ try {
 } catch (e) {
     console.log('can not find [ ./drone_info.json ] file');
 
+    drone_info.id = "Dione";
+    drone_info.approval_gcs = "MUV";
     drone_info.host = "121.137.228.240";
-    drone_info.drone = "UMACA1";
-    drone_info.gcs = "UMACAIR";
+    drone_info.drone = "Drone1";
+    drone_info.gcs = "KETI_GCS";
     drone_info.type = "ardupilot";
     drone_info.system_id = 1;
     drone_info.gcs_ip = "192.168.1.150";
@@ -31,7 +32,7 @@ try {
     fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
 }
 
-let IPready = { "status": "not ready" };
+let IPready = {"status": "not ready"};
 fs.writeFileSync('./readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
 
 setIPandRoute(drone_info.gcs_ip);
@@ -45,12 +46,13 @@ function local_mqtt_connect(serverip) {
             port: 1883,
             protocol: "mqtt",
             keepalive: 60,
-            clientId: 'rf_RC_RF_' + nanoid(15),
+            clientId: 'SET_IP_' + nanoid(15),
             protocolId: "MQTT",
             protocolVersion: 4,
             clean: true,
-            reconnectPeriod: 2000,
-            connectTimeout: 30000,
+            reconnectPeriod: 2 * 1000,
+            connectTimeout: 30 * 1000,
+            queueQoSZero: false,
             rejectUnauthorized: false
         }
 
@@ -66,8 +68,6 @@ function local_mqtt_connect(serverip) {
 
         local_mqtt_client.on('error', function (err) {
             console.log('[local_mqtt_client] error - ' + err.message);
-            local_mqtt_client = null;
-            local_mqtt_connect(serverip);
         });
     }
 }
@@ -77,7 +77,7 @@ function setIPandRoute(host) {
     host_arr[3] = '120';
     let drone_ip = host_arr.join('.');
 
-    var networkInterfaces = os.networkInterfaces();
+    let networkInterfaces = os.networkInterfaces();
     if (networkInterfaces.hasOwnProperty(rfPort)) {
         if (networkInterfaces[rfPort][0].family === 'IPv4') {
             if (networkInterfaces[rfPort][0].address !== drone_ip) {
@@ -93,7 +93,7 @@ function setIPandRoute(host) {
                     if (stderr) {
                         console.error(`stderr: ${stderr}`);
                     }
-                    console.log(os.networkInterfaces());
+                    // console.log(os.networkInterfaces());
                     // set route
                     exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + drone_ip, (error, stdout, stderr) => {
                         if (error) {
@@ -128,6 +128,8 @@ function setIPandRoute(host) {
                     });
                 });
             } else {
+                IPready.status = 'ready';
+                fs.writeFileSync('./readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
                 // set route
                 exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + drone_ip, (error, stdout, stderr) => {
                     if (error) {

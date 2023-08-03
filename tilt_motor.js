@@ -1,8 +1,8 @@
 const mqtt = require('mqtt');
-const { nanoid } = require("nanoid");
-const { SerialPort } = require('serialport');
+const {nanoid} = require("nanoid");
+const {SerialPort} = require('serialport');
 
-// ---------- set values ---------- 
+// ---------- set values ----------
 const TILT_CAN_ID = '000000020000';
 
 // Value limits ------
@@ -136,6 +136,7 @@ function canPortError(error) {
 }
 
 let _msg = '';
+
 function canPortData(data) {
     _msg += data.toString('hex').toLowerCase();
 
@@ -157,13 +158,13 @@ function localMqttConnect(host) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'local_' + nanoid(15),
+        clientId: 'local_tilt_motor_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
-        reconnectPeriod: 2000,
+        reconnectPeriod: 2 * 1000,
+        connectTimeout: 30 * 1000,
         queueQoSZero: false,
-        connectTimeout: 2000,
         rejectUnauthorized: false
     }
 
@@ -182,8 +183,8 @@ function localMqttConnect(host) {
         localmqtt.subscribe(sub_motor_altitude_topic + '/#', () => {
             console.log('[tilt] localmqtt subscribed -> ', sub_motor_altitude_topic);
         });
-        
-		runMotor();
+
+        runMotor();
     });
 
     localmqtt.on('message', (topic, message) => {
@@ -192,22 +193,21 @@ function localMqttConnect(host) {
         if (topic == sub_motor_control_topic) { // 모터 제어 메세지 수신
             motor_control_message = message.toString();
             // console.log(topic, motor_control_message);
-        }
-        else if (topic == sub_motor_altitude_topic) {
+        } else if (topic == sub_motor_altitude_topic) {
             motor_altitude_message = message.toString();
             if (typeof (parseInt(motor_altitude_message)) === 'number') {
                 myRelativeAltitude = motor_altitude_message;
             }
         }
-        //else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
-        //    tracker_location_msg = JSON.parse(message.toString());
+            //else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
+            //    tracker_location_msg = JSON.parse(message.toString());
             //myLatitude = tracker_location_msg.lat;
             //myLongitude = tracker_location_msg.lon;
             // myAltitude = tracker_location_msg.alt;
             // myRelativeAltitude = tracker_location_msg.relative_alt;
-        //    myHeading = Math.round(tracker_location_msg.hdg) - 180;
-        //    console.log('tracker_location_msg: ', myLatitude, myLongitude, myRelativeAltitude, myHeading);
-        //} 
+            //    myHeading = Math.round(tracker_location_msg.hdg) - 180;
+            //    console.log('tracker_location_msg: ', myLatitude, myLongitude, myRelativeAltitude, myHeading);
+        //}
         else if (topic === sub_gps_attitude_topic) {
             tracker_attitude_msg = JSON.parse(message.toString());
             myRoll = tracker_attitude_msg.roll;
@@ -223,6 +223,7 @@ function localMqttConnect(host) {
         setTimeout(localMqttConnect, 1000, local_mqtt_host);
     });
 }
+
 //---------------------------------------------------
 
 function runMotor() {
@@ -232,26 +233,22 @@ function runMotor() {
                 EnterMotorMode();
                 motormode = 1;
                 motor_control_message = '';
-            }
-            else if (motor_control_message == 'off') {
+            } else if (motor_control_message == 'off') {
                 ExitMotorMode();
                 motormode = 0;
                 motor_control_message = '';
                 run_flag = '';
-            }
-            else if (motor_control_message == 'zero') {
+            } else if (motor_control_message == 'zero') {
                 Zero();
                 p_in = 0 + p_offset;
                 motor_control_message = '';
-            }
-            else if (motor_control_message == 'init') {
+            } else if (motor_control_message == 'init') {
                 if (motormode !== 1) {
                     EnterMotorMode();
 
                     motormode = 1;
                     motor_control_message = 'zero';
-                } 
-                else {
+                } else {
                     motor_control_message = 'zero';
                 }
             }
@@ -259,25 +256,20 @@ function runMotor() {
             if (motormode === 1) {
                 if (motor_control_message == 'tilt_up') {
                     p_in = p_in + p_step;
-                }
-                else if (motor_control_message == 'tilt_down') {
+                } else if (motor_control_message == 'tilt_down') {
                     p_in = p_in - p_step;
-                }
-                else if (motor_control_message == 'stop') {
+                } else if (motor_control_message == 'stop') {
                     motor_control_message = '';
                     run_flag = '';
-                }
-                else if (motor_control_message.includes('go')) {
+                } else if (motor_control_message.includes('go')) {
                     p_target = (parseInt(motor_control_message.toString().replace('go', '')) * 0.0174533) + p_offset;
 
                     if (p_target < p_in) {
                         p_in = p_in - p_step;
-                    }
-                    else if (p_target > p_in) {
+                    } else if (p_target > p_in) {
                         p_in = p_in + p_step;
                     }
-                }
-                else if (motor_control_message == 'run') {
+                } else if (motor_control_message == 'run') {
                     target_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
                     // console.log('myPitch, target_angle', myPitch, target_angle);
                     run_flag = 'go';
@@ -323,8 +315,7 @@ function runMotor() {
                     motor_return_msg = '';
                     // console.log('[tilt] -> + ', p_target, p_in, p_out, v_out, t_out);
                 }
-            } 
-            else if (motormode === 2) {
+            } else if (motormode === 2) {
                 ExitMotorMode();
 
                 if (motor_return_msg !== '') {
@@ -363,11 +354,9 @@ function runMotor() {
 let constrain = (_in, _min, _max) => {
     if (_in < _min) {
         return _min;
-    }
-    else if (_in > _max) {
+    } else if (_in > _max) {
         return _max;
-    }
-    else {
+    } else {
         return _in;
     }
 }
@@ -378,8 +367,7 @@ let float_to_uint = (x, x_min, x_max, bits) => {
     let pgg = 0;
     if (bits === 12) {
         pgg = (x - offset) * 4095.0 / span;
-    }
-    else if (bits === 16) {
+    } else if (bits === 16) {
         pgg = (x - offset) * 65535.0 / span;
     }
 
@@ -392,8 +380,7 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
     let pgg = 0;
     if (bits === 12) {
         pgg = parseFloat(x_int) * span / 4095.0 + offset;
-    }
-    else if (bits === 16) {
+    } else if (bits === 16) {
         pgg = parseFloat(x_int) * span / 65535.0 + offset;
     }
 
@@ -462,6 +449,7 @@ function Zero() {
         // console.log(TILT_CAN_ID + 'FFFFFFFFFFFFFFFE');
     });
 }
+
 //---------------------------------------------------
 function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
     // console.log('[tilt] myLatitude, myLongitude, myRelativeAltitude: ', myLatitude, myLongitude, myRelativeAltitude);
@@ -474,7 +462,7 @@ function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
     let angle = Math.atan2(y, x);
 
     // console.log('x, y, angle: ', x, y, angle * 180 / Math.PI);
-    
+
     return Math.round(angle * 180 / Math.PI);
     // angle = angle - (myPitch * Math.PI / 180);
     // p_target = Math.round((angle + p_offset) * 50) / 50;  // 0.5단위 반올림
@@ -510,8 +498,9 @@ function sitlMqttConnect(host) {
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
-        reconnectPeriod: 2000,
-        connectTimeout: 2000,
+        reconnectPeriod: 2 * 1000,
+        connectTimeout: 30 * 1000,
+        queueQoSZero: false,
         rejectUnauthorized: false
     }
 
@@ -568,8 +557,7 @@ function sitlMqttConnect(host) {
 
                 }
 
-            }
-            catch (e) {
+            } catch (e) {
                 console.log('[tilt] SITL Mqtt connect Error', e);
             }
         }
@@ -581,6 +569,7 @@ function sitlMqttConnect(host) {
         setTimeout(sitlMqttConnect, 1000, sitl_mqtt_host);
     });
 }
+
 //---------------------------------------------------
 
 canPortOpening();
@@ -592,7 +581,7 @@ if (sitl_state === true) {
 }
 
 setTimeout(() => {
-	motor_control_message = 'init';
+    motor_control_message = 'init';
 }, 3000);
 
 

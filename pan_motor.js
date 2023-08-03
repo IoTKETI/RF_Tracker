@@ -2,7 +2,7 @@ const mqtt = require('mqtt');
 const { nanoid } = require("nanoid");
 const { SerialPort } = require('serialport');
 
-// ---------- set values ---------- 
+// ---------- set values ----------
 const PAN_CAN_ID = '000000010000';
 
 // Value limits ------
@@ -76,7 +76,7 @@ let target_relative_altitude = '';
 
 let motor_return_msg = '';
 
-let sub_drone_data_topic = '/RF/TELE_HUB/drone';
+let sub_drone_data_topic = '/Ant_Tracker/target_drone/gpi';
 let sub_motor_control_topic = '/Ant_Tracker/Control';
 let sub_motor_altitude_topic = '/Ant_Tracker/Altitude';
 let sub_gps_location_topic = '/GPS/location';
@@ -158,13 +158,13 @@ function localMqttConnect(host) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'local_' + nanoid(15),
+        clientId: 'local_pan_motor_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
-        reconnectPeriod: 2000,
+        reconnectPeriod: 2 * 1000,
+        connectTimeout: 30 * 1000,
         queueQoSZero: false,
-        connectTimeout: 2000,
         rejectUnauthorized: false
     }
 
@@ -186,7 +186,7 @@ function localMqttConnect(host) {
         localmqtt.subscribe(sub_motor_altitude_topic + '/#', () => {
             console.log('[pan] localmqtt subscribed -> ', sub_motor_altitude_topic);
         });
-        
+
 		runMotor();
 		setInterval(()=>{
 			console.log(calcTargetPanAngle(target_latitude, target_longitude));
@@ -267,7 +267,7 @@ function localMqttConnect(host) {
 				myHeading = _myHeading;
 			}
             console.log('tracker_location_msg: ', myLatitude, myLongitude, myRelativeAltitude, _myHeading, myHeading);
-            
+
             if(run_flag == 'go') {
 				target_angle = calcTargetPanAngle(target_latitude, target_longitude);
 				//console.log('myHeading, target_angle', myHeading, target_angle);
@@ -299,7 +299,7 @@ function localMqttConnect(host) {
 				}
 				p_step = 0.02;
 			}
-        } 
+        }
         else if (topic === sub_gps_attitude_topic) {
             tracker_attitude_msg = JSON.parse(message.toString());
             myRoll = tracker_attitude_msg.roll;
@@ -400,7 +400,7 @@ function runMotor() {
                         }
                     }
                     p_step = 0.02;
-                    
+
                     motor_control_message = '';
                 }
 
@@ -668,8 +668,9 @@ function sitlMqttConnect(host) {
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
-        reconnectPeriod: 2000,
-        connectTimeout: 2000,
+        reconnectPeriod: 2 * 1000,
+        connectTimeout: 30 * 1000,
+        queueQoSZero: false,
         rejectUnauthorized: false
     }
 
