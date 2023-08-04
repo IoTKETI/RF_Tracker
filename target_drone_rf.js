@@ -138,8 +138,6 @@ function gcs_mqtt_connect(serverip) {
     });
 
     gcs_mqtt_client.on('message', function (topic, message) {
-        //console.log('[gcs] topic, message => ', topic, message.toString('hex'));
-
         if (topic.includes(sub_target_gpi_topic)) {
             let mavPacket = message.toString('hex');
             if (local_mqtt_client !== null) {

@@ -45,34 +45,32 @@ let run_flag = '';
 let exit_mode_counter = 0;
 let no_response_count = 0;
 
-let can_port_num = '/dev/ttyAMA2';
-// let can_port_num = 'COM5';
-let can_baudrate = '115200';
-let can_port = null;
+let canPortNum = '/dev/ttyAMA2';
+let canBaudRate = '115200';
+let canPort = null;
 
-let local_mqtt_host = '127.0.0.1';
-let localmqtt = '';
+let local_mqtt_client = null;
 
 let localmqtt_message = '';
 let motor_control_message = '';
 let motor_altitude_message = '';
-let tracker_location_msg = '';
-let tracker_attitude_msg = '';
+let tracker_gpi = '';
+let tracker_att = '';
 
-let myLatitude = 37.4042;
-let myLongitude = 127.1608;
-let myAltitude = 0.0;
-let myRelativeAltitude = 0.0;
-let myHeading = 0.0;
+let target_latitude = 37.4042;
+let target_longitude = 127.1608;
+let target_altitude = 0.0;
+let target_relative_altitude = 0.0;
+let tracker_heading = 0.0;
 
-let myRoll = 0.0;
-let myPitch = 0.0;
-let myYaw = 0.0;
+let tracker_roll = 0.0;
+let tracker_pitch = 0.0;
+let tracker_yaw = 0.0;
 
-let target_latitude = '';
-let target_longitude = '';
-let target_altitude = '';
-let target_relative_altitude = '';
+let tracker_latitude = '';
+let tracker_longitude = '';
+let tracker_altitude = '';
+let tracker_relative_altitude = '';
 
 let motor_return_msg = '';
 
@@ -83,38 +81,33 @@ let sub_gps_attitude_topic = '/GPS/attitude';
 
 let pub_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
 
-let sitl_state = true;
-let sitl_mqtt_host = 'gcs.iotocean.org';
-let sitlmqtt = '';
-
-let sitlmqtt_message = '';
-let sub_sitl_drone_data_topic = '/Mobius/KETI_GCS/Drone_Data/KETI_Simul_1';
-
 //------------- Can communication -------------
 function canPortOpening() {
-    if (can_port == null) {
-        can_port = new SerialPort({
-            path: can_port_num,
-            baudRate: parseInt(can_baudrate, 10),
+    if (canPort == null) {
+        canPort = new SerialPort({
+            path: canPortNum,
+            baudRate: parseInt(canBaudRate, 10),
         });
 
-        can_port.on('open', canPortOpen);
-        can_port.on('close', canPortClose);
-        can_port.on('error', canPortError);
-        can_port.on('data', canPortData);
-    } else {
-        if (can_port.isOpen) {
-            can_port.close();
-            can_port = null;
+        canPort.on('open', canPortOpen);
+        canPort.on('close', canPortClose);
+        canPort.on('error', canPortError);
+        canPort.on('data', canPortData);
+    }
+    else {
+        if (canPort.isOpen) {
+            canPort.close();
+            canPort = null;
             setTimeout(canPortOpening, 2000);
-        } else {
-            can_port.open();
+        }
+        else {
+            canPort.open();
         }
     }
 }
 
 function canPortOpen() {
-    console.log('canPort open. ' + can_port_num + ' Data rate: ' + can_baudrate);
+    console.log('canPort (' + canPort.path + '), canPort rate: ' + canPort.baudRate + ' open.');
 }
 
 function canPortClose() {
@@ -124,13 +117,7 @@ function canPortClose() {
 }
 
 function canPortError(error) {
-    let error_str = error.toString();
-    console.log('[tilt] canPort error: ' + error.message);
-    if (error_str.substring(0, 14) == "Error: Opening") {
-
-    } else {
-        console.log('[tilt] canPort error : ' + error);
-    }
+    console.log('[tilt] canPort error : ' + error);
 
     setTimeout(canPortOpening, 2000);
 }
@@ -152,7 +139,7 @@ function canPortData(data) {
 //---------------------------------------------------
 
 //------------- local mqtt connect ------------------
-function localMqttConnect(host) {
+function local_mqtt_connect(host) {
     let connectOptions = {
         host: host,
         port: 1883,
@@ -168,59 +155,69 @@ function localMqttConnect(host) {
         rejectUnauthorized: false
     }
 
-    localmqtt = mqtt.connect(connectOptions);
+    local_mqtt_client = mqtt.connect(connectOptions);
 
-    localmqtt.on('connect', function () {
-        //localmqtt.subscribe(sub_gps_location_topic + '/#', () => {
-        //    console.log('[tilt] localmqtt subscribed -> ', sub_gps_location_topic);
-        //});
-        localmqtt.subscribe(sub_gps_attitude_topic + '/#', () => {
-            console.log('[tilt] localmqtt subscribed -> ', sub_gps_attitude_topic);
-        });
-        localmqtt.subscribe(sub_motor_control_topic + '/#', () => {
-            console.log('[tilt] localmqtt subscribed -> ', sub_motor_control_topic);
-        });
-        localmqtt.subscribe(sub_motor_altitude_topic + '/#', () => {
-            console.log('[tilt] localmqtt subscribed -> ', sub_motor_altitude_topic);
-        });
+    local_mqtt_client.on('connect', function () {
+        // if (sub_gps_location_topic !== '') {
+        //     local_mqtt_client.subscribe(sub_gps_location_topic, () => {
+        //         console.log('[local_mqtt] sub_gps_location_topic is subscribed -> ', sub_gps_location_topic);
+        //     });
+        // }
+        if (sub_gps_attitude_topic !== '') {
+            local_mqtt_client.subscribe(sub_gps_attitude_topic, () => {
+                console.log('[local_mqtt] sub_gps_attitude_topic is subscribed -> ', sub_gps_attitude_topic);
+            });
+        }
+        if (sub_motor_control_topic !== '') {
+            local_mqtt_client.subscribe(sub_motor_control_topic, () => {
+                console.log('[local_mqtt] sub_motor_control_topic is subscribed -> ', sub_motor_control_topic);
+            });
+        }
+        if (sub_motor_altitude_topic !== '') {
+            local_mqtt_client.subscribe(sub_motor_altitude_topic, () => {
+                console.log('[local_mqtt] sub_motor_altitude_topic is subscribed -> ', sub_motor_altitude_topic);
+            });
+        }
 
         runMotor();
     });
 
-    localmqtt.on('message', (topic, message) => {
+    local_mqtt_client.on('message', (topic, message) => {
         // console.log('topic, message => ', topic, message);
 
-        if (topic == sub_motor_control_topic) { // 모터 제어 메세지 수신
+        if (topic === sub_motor_control_topic) { // 모터 제어 메세지 수신
             motor_control_message = message.toString();
             // console.log(topic, motor_control_message);
-        } else if (topic == sub_motor_altitude_topic) {
+        }
+        else if (topic === sub_motor_altitude_topic) {
             motor_altitude_message = message.toString();
             if (typeof (parseInt(motor_altitude_message)) === 'number') {
-                myRelativeAltitude = motor_altitude_message;
+                tracker_relative_altitude = motor_altitude_message;
             }
         }
-            //else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
-            //    tracker_location_msg = JSON.parse(message.toString());
-            //myLatitude = tracker_location_msg.lat;
-            //myLongitude = tracker_location_msg.lon;
-            // myAltitude = tracker_location_msg.alt;
-            // myRelativeAltitude = tracker_location_msg.relative_alt;
-            //    myHeading = Math.round(tracker_location_msg.hdg) - 180;
-            //    console.log('tracker_location_msg: ', myLatitude, myLongitude, myRelativeAltitude, myHeading);
-        //}
+        // else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
+        //     tracker_gpi = JSON.parse(message.toString());
+        //
+        //     tracker_latitude = tracker_gpi.lat;
+        //     tracker_longitude = tracker_gpi.lon;
+        //     tracker_altitude = tracker_gpi.alt;
+        //     tracker_relative_altitude = tracker_gpi.relative_alt;
+        //     tracker_heading = Math.round(tracker_gpi.hdg) - 180;
+        //     console.log('tracker_gpi: ', tracker_latitude, tracker_longitude, tracker_relative_altitude,
+        //         tracker_heading);
+        // }
         else if (topic === sub_gps_attitude_topic) {
-            tracker_attitude_msg = JSON.parse(message.toString());
-            myRoll = tracker_attitude_msg.roll;
-            myPitch = Math.round(tracker_attitude_msg.pitch);
-            myYaw = tracker_attitude_msg.yaw;
-            // console.log('tracker_location_msg: ', myRoll, myPitch, myYaw);
+            tracker_att = JSON.parse(message.toString());
+
+            tracker_roll = tracker_att.roll;
+            tracker_pitch = Math.round(tracker_att.pitch);
+            tracker_yaw = tracker_att.yaw;
+            console.log('tracker_att: ', tracker_roll, tracker_pitch, tracker_yaw);
         }
     });
 
-    localmqtt.on('error', function (err) {
+    local_mqtt_client.on('error', function (err) {
         console.log('[tilt] local mqtt connect error ' + err.message);
-        localmqtt = null;
-        setTimeout(localMqttConnect, 1000, local_mqtt_host);
     });
 }
 
@@ -229,63 +226,75 @@ function localMqttConnect(host) {
 function runMotor() {
     setTimeout(() => {
         setInterval(() => {
-            if (motor_control_message == 'on') {
+            if (motor_control_message === 'on') {
                 EnterMotorMode();
                 motormode = 1;
                 motor_control_message = '';
-            } else if (motor_control_message == 'off') {
+            }
+            else if (motor_control_message === 'off') {
                 ExitMotorMode();
                 motormode = 0;
                 motor_control_message = '';
                 run_flag = '';
-            } else if (motor_control_message == 'zero') {
+            }
+            else if (motor_control_message === 'zero') {
                 Zero();
                 p_in = 0 + p_offset;
                 motor_control_message = '';
-            } else if (motor_control_message == 'init') {
+            }
+            else if (motor_control_message === 'init') {
                 if (motormode !== 1) {
                     EnterMotorMode();
 
                     motormode = 1;
                     motor_control_message = 'zero';
-                } else {
+                }
+                else {
                     motor_control_message = 'zero';
                 }
             }
 
             if (motormode === 1) {
-                if (motor_control_message == 'tilt_up') {
+                if (motor_control_message === 'tilt_up') {
                     p_in = p_in + p_step;
-                } else if (motor_control_message == 'tilt_down') {
+                }
+                else if (motor_control_message === 'tilt_down') {
                     p_in = p_in - p_step;
-                } else if (motor_control_message == 'stop') {
+                }
+                else if (motor_control_message === 'stop') {
                     motor_control_message = '';
                     run_flag = '';
-                } else if (motor_control_message.includes('go')) {
+                }
+                else if (motor_control_message.includes('go')) {
                     p_target = (parseInt(motor_control_message.toString().replace('go', '')) * 0.0174533) + p_offset;
 
                     if (p_target < p_in) {
                         p_in = p_in - p_step;
-                    } else if (p_target > p_in) {
+                    }
+                    else if (p_target > p_in) {
                         p_in = p_in + p_step;
                     }
-                } else if (motor_control_message == 'run') {
-                    target_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
-                    // console.log('myPitch, target_angle', myPitch, target_angle);
+                }
+                else if (motor_control_message === 'run') {
+                    target_angle = calcTargetTiltAngle(tracker_latitude, tracker_longitude, tracker_relative_altitude);
+                    // console.log('tracker_pitch, target_angle', tracker_pitch, target_angle);
                     run_flag = 'go';
 
-                    if (Math.abs(target_angle - myPitch) > 10) {
+                    if (Math.abs(target_angle - tracker_pitch) > 10) {
                         p_step = 0.02;
-                    } else if (Math.abs(target_angle - myPitch) > 5) {
+                    }
+                    else if (Math.abs(target_angle - tracker_pitch) > 5) {
                         p_step = 0.01;
-                    } else if (Math.abs(target_angle - myPitch) > 3) {
+                    }
+                    else if (Math.abs(target_angle - tracker_pitch) > 3) {
                         p_step = 0.005;
-                    } else {
+                    }
+                    else {
                         p_step = 0.001;
                     }
 
-                    if (myPitch !== target_angle) {
-                        cw = target_angle - myPitch;
+                    if (tracker_pitch !== target_angle) {
+                        cw = target_angle - tracker_pitch;
                         if (cw < 0) {
                             cw = cw + 360;
                         }
@@ -293,9 +302,11 @@ function runMotor() {
 
                         if (cw < ccw) {
                             p_in = p_in + p_step;
-                        } else if (cw > ccw) {
+                        }
+                        else if (cw > ccw) {
                             p_in = p_in - p_step;
-                        } else {
+                        }
+                        else {
                             p_in = p_in;
                         }
                     }
@@ -315,7 +326,8 @@ function runMotor() {
                     motor_return_msg = '';
                     // console.log('[tilt] -> + ', p_target, p_in, p_out, v_out, t_out);
                 }
-            } else if (motormode === 2) {
+            }
+            else if (motormode === 2) {
                 ExitMotorMode();
 
                 if (motor_return_msg !== '') {
@@ -340,11 +352,10 @@ function runMotor() {
                 motormode = 2;
             }
 
-            try {
-                localmqtt.publish(pub_motor_position_topic, myPitch.toString(), () => {
+            if (local_mqtt_client !== null) {
+                local_mqtt_client.publish(pub_motor_position_topic, tracker_pitch.toString(), () => {
                     // console.log('[tilt] send Motor angle to GCS value: ', p_out * 180 / Math.PI)
                 });
-            } catch {
             }
         }, 20);
     }, 1000);
@@ -354,9 +365,11 @@ function runMotor() {
 let constrain = (_in, _min, _max) => {
     if (_in < _min) {
         return _min;
-    } else if (_in > _max) {
+    }
+    else if (_in > _max) {
         return _max;
-    } else {
+    }
+    else {
         return _in;
     }
 }
@@ -367,7 +380,8 @@ let float_to_uint = (x, x_min, x_max, bits) => {
     let pgg = 0;
     if (bits === 12) {
         pgg = (x - offset) * 4095.0 / span;
-    } else if (bits === 16) {
+    }
+    else if (bits === 16) {
         pgg = (x - offset) * 65535.0 / span;
     }
 
@@ -380,7 +394,8 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
     let pgg = 0;
     if (bits === 12) {
         pgg = parseFloat(x_int) * span / 4095.0 + offset;
-    } else if (bits === 16) {
+    }
+    else if (bits === 16) {
         pgg = parseFloat(x_int) * span / 65535.0 + offset;
     }
 
@@ -409,9 +424,13 @@ function pack_cmd() {
     let msg_buf = TILT_CAN_ID + p_int_hex + v_int_hex + kp_int_hex + kd_int_hex + t_int_hex;
     //console.log('Can Port Send Data ===> ' + msg_buf);
 
-    can_port.write(Buffer.from(msg_buf, 'hex'), () => {
-        // console.log('can write =>', msg_buf);
-    }, 10);
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write(Buffer.from(msg_buf, 'hex'), () => {
+                // console.log('can write =>', msg_buf);
+            });
+        }
+    }
 }
 
 let unpack_reply = () => {
@@ -426,69 +445,118 @@ let unpack_reply = () => {
             v_out = uint_to_float(v_int, V_MIN, V_MAX, 12);
             t_out = uint_to_float(i_int, T_MIN, T_MAX, 12);
         }
-    } catch {
+    }
+    catch {
 
     }
 }
 
 //--------------- CAN special message ---------------
 function EnterMotorMode() {
-    can_port.write(Buffer.from(TILT_CAN_ID + 'FFFFFFFFFFFFFFFC', 'hex'), () => {
-        // console.log(TILT_CAN_ID + 'FFFFFFFFFFFFFFFC');
-    });
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write(Buffer.from(TILT_CAN_ID + 'FFFFFFFFFFFFFFFC', 'hex'), () => {
+                // console.log(TILT_CAN_ID + 'FFFFFFFFFFFFFFFC');
+            });
+        }
+    }
 }
 
 function ExitMotorMode() {
-    can_port.write(Buffer.from(TILT_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
-        // console.log(TILT_CAN_ID + 'FFFFFFFFFFFFFFFD');
-    });
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write(Buffer.from(TILT_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
+                // console.log(TILT_CAN_ID + 'FFFFFFFFFFFFFFFD');
+            });
+        }
+    }
 }
 
 function Zero() {
-    can_port.write(Buffer.from(TILT_CAN_ID + 'FFFFFFFFFFFFFFFE', 'hex'), () => {
-        // console.log(TILT_CAN_ID + 'FFFFFFFFFFFFFFFE');
-    });
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write(Buffer.from(TILT_CAN_ID + 'FFFFFFFFFFFFFFFE', 'hex'), () => {
+                // console.log(TILT_CAN_ID + 'FFFFFFFFFFFFFFFE');
+            });
+        }
+    }
 }
 
 //---------------------------------------------------
 function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
-    // console.log('[tilt] myLatitude, myLongitude, myRelativeAltitude: ', myLatitude, myLongitude, myRelativeAltitude);
-    // console.log('[tilt] targetLatitude, targetLongitude, targetAltitude: ', targetLatitude, targetLongitude, targetAltitude);
+    // console.log('[tilt] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
+    // tracker_longitude, tracker_relative_altitude); console.log('[tilt] targetLatitude, targetLongitude,
+    // targetAltitude: ', targetLatitude, targetLongitude, targetAltitude);
 
-    let dist = getDistance(myLatitude, myLongitude, targetLatitude, targetLongitude)
+    let dist = calcDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude)
     let x = dist;
-    let y = targetAltitude - myRelativeAltitude;
+    let y = targetAltitude - tracker_relative_altitude;
 
     let angle = Math.atan2(y, x);
 
     // console.log('x, y, angle: ', x, y, angle * 180 / Math.PI);
 
     return Math.round(angle * 180 / Math.PI);
-    // angle = angle - (myPitch * Math.PI / 180);
+    // angle = angle - (tracker_pitch * Math.PI / 180);
     // p_target = Math.round((angle + p_offset) * 50) / 50;  // 0.5단위 반올림
 }
 
-function getDistance(lat1, lon1, lat2, lon2) {
-    if ((lat1 == lat2) && (lon1 == lon2))
-        return 0;
+// function getDistance(lat1, lon1, lat2, lon2) {
+//     var radLat1 = Math.PI * lat1 / 180;
+//     var radLat2 = Math.PI * lat2 / 180;
+//     var theta = lon1 - lon2;
+//     var radTheta = Math.PI * theta / 180;
+//     var dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
+//     if (dist > 1) {
+//         dist = 1;
+//     }
+//     dist = Math.acos(dist);
+//     dist = dist * 180 / Math.PI;
+//     dist = dist * 60 * 1.1515 * 1.609344 * 1000;
+//
+//     return dist;
+// }
 
-    var radLat1 = Math.PI * lat1 / 180;
-    var radLat2 = Math.PI * lat2 / 180;
-    var theta = lon1 - lon2;
-    var radTheta = Math.PI * theta / 180;
-    var dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
-    if (dist > 1)
-        dist = 1;
+function calcDistance(x1, y1, x2, y2) {
+    /*
+        x1: Latitude of the first point
+        y1: Longitude of the first point
+        x2: Latitude of the second point
+        y2: Longitude of the second point
+    */
+    const R = 6371e3; // R is earth’s radius(metres) (mean radius = 6,371km)
+    const φ1 = x1 * Math.PI / 180; // φ(latitude), λ(longitude) in radians
+    const φ2 = x2 * Math.PI / 180;
+    const Δφ = (x2 - x1) * Math.PI / 180;
+    const Δλ = (y2 - y1) * Math.PI / 180;
 
-    dist = Math.acos(dist);
-    dist = dist * 180 / Math.PI;
-    dist = dist * 60 * 1.1515 * 1.609344 * 1000;
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+        Math.cos(φ1) * Math.cos(φ2) *
+        Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-    return dist;
+    let d = R * c; // in metres
+
+    return d
 }
 
+canPortOpening();
+
+local_mqtt_connect('localhost');
+
+setTimeout(() => {
+    motor_control_message = 'init';
+}, 3000);
+
 //------------- sitl mqtt connect ------------------
-function sitlMqttConnect(host) {
+let sitl_state = false;
+
+let sitl_mqtt_client = null;
+let sitlmqtt_message = '';
+let sub_sitl_drone_data_topic = '/Mobius/KETI_GCS/Drone_Data/KETI_Simul_1';
+
+//------------- sitl mqtt connect ------------------
+function sitl_mqtt_connect(host) {
     let connectOptions = {
         host: host,
         port: 1883,
@@ -504,15 +572,17 @@ function sitlMqttConnect(host) {
         rejectUnauthorized: false
     }
 
-    sitlmqtt = mqtt.connect(connectOptions);
+    sitl_mqtt_client = mqtt.connect(connectOptions);
 
-    sitlmqtt.on('connect', function () {
-        sitlmqtt.subscribe(sub_sitl_drone_data_topic + '/#', () => {
-            console.log('[tilt] sitl mqtt subscribed -> ', sub_sitl_drone_data_topic);
-        });
+    sitl_mqtt_client.on('connect', function () {
+        if (sub_sitl_drone_data_topic !== '') {
+            sitl_mqtt_client.subscribe(sub_sitl_drone_data_topic + '/#', () => {
+                console.log('[sitl_mqtt] sub_sitl_drone_data_topic is subscribed -> ', sub_sitl_drone_data_topic);
+            });
+        }
     });
 
-    sitlmqtt.on('message', function (topic, message) {
+    sitl_mqtt_client.on('message', function (topic, message) {
         // console.log('[sitl] topic, message => ', topic, message);
 
         if (topic.includes(sub_sitl_drone_data_topic)) {
@@ -530,7 +600,8 @@ function sitlMqttConnect(host) {
                     sysid = sitlmqtt_message.substring(10, 12).toLowerCase();
                     msgid = sitlmqtt_message.substring(18, 20) + sitlmqtt_message.substring(16, 18) + sitlmqtt_message.substring(14, 16);
                     base_offset = 28;
-                } else { //MAV ver.1
+                }
+                else { //MAV ver.1
                     sysid = sitlmqtt_message.substring(6, 8).toLowerCase();
                     msgid = sitlmqtt_message.substring(10, 12).toLowerCase();
                     base_offset = 20;
@@ -548,40 +619,30 @@ function sitlMqttConnect(host) {
                     base_offset += 8;
                     let relative_alt = sitlmqtt_message.substring(base_offset, base_offset + 8).toLowerCase();
 
-                    target_latitude = Buffer.from(lat, 'hex').readInt32LE(0).toString() / 10000000;
-                    target_longitude = Buffer.from(lon, 'hex').readInt32LE(0).toString() / 10000000;
-                    target_altitude = Buffer.from(alt, 'hex').readInt32LE(0).toString() / 1000;
-                    target_relative_altitude = Buffer.from(relative_alt, 'hex').readInt32LE(0).toString() / 1000;
+                    tracker_latitude = Buffer.from(lat, 'hex').readInt32LE(0).toString() / 10000000;
+                    tracker_longitude = Buffer.from(lon, 'hex').readInt32LE(0).toString() / 10000000;
+                    tracker_altitude = Buffer.from(alt, 'hex').readInt32LE(0).toString() / 1000;
+                    tracker_relative_altitude = Buffer.from(relative_alt, 'hex').readInt32LE(0).toString() / 1000;
 
-                    // console.log('target_latitude, target_longitude, target_altitude, target_relative_altitude', target_latitude, target_longitude, target_altitude, target_relative_altitude);
+                    // console.log('tracker_latitude, tracker_longitude, tracker_altitude, tracker_relative_altitude',
+                    // tracker_latitude, tracker_longitude, tracker_altitude, tracker_relative_altitude);
 
                 }
 
-            } catch (e) {
+            }
+            catch (e) {
                 console.log('[tilt] SITL Mqtt connect Error', e);
             }
         }
     });
 
-    sitlmqtt.on('error', function (err) {
+    sitl_mqtt_client.on('error', function (err) {
         console.log('[tilt] SITL mqtt connect error ' + err.message);
-        sitlmqtt = null;
-        setTimeout(sitlMqttConnect, 1000, sitl_mqtt_host);
     });
 }
 
 //---------------------------------------------------
 
-canPortOpening();
-localMqttConnect(local_mqtt_host);
-
 if (sitl_state === true) {
-    sitlMqttConnect(sitl_mqtt_host);
-
+    sitl_mqtt_connect('gcs.iotocean.org');
 }
-
-setTimeout(() => {
-    motor_control_message = 'init';
-}, 3000);
-
-
