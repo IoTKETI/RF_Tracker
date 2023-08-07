@@ -183,7 +183,7 @@ function local_mqtt_connect(host) {
 
 		runMotor();
 		setInterval(()=>{
-			console.log(calcTargetPanAngle(target_latitude, target_longitude));
+			console.log('calcTargetPanAngle ->', calcTargetPanAngle(target_latitude, target_longitude));
 		},500)
     });
 
@@ -204,6 +204,7 @@ function local_mqtt_connect(host) {
             target_longitude = target_gpi.lon / 10000000;
             target_altitude = target_gpi.alt / 1000;
             target_relative_altitude = target_gpi.relative_alt / 1000;
+            console.log('target_gpi: ', JSON.stringify(target_gpi));
         }
         else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
@@ -221,7 +222,7 @@ function local_mqtt_connect(host) {
             else {
 				tracker_heading = tracker_heading_int;
 			}
-            console.log('tracker_gpi: ', tracker_latitude, tracker_longitude, tracker_relative_altitude, tracker_heading_int, tracker_heading);
+            console.log('tracker_gpi: ', JSON.stringify(tracker_gpi), '\ntracker_heading_int -',tracker_heading_int, '\ntracker_heading -',tracker_heading);
 
             if (run_flag === 'go') {
 				target_angle = calcTargetPanAngle(target_latitude, target_longitude);
@@ -565,13 +566,14 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
     //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude, tracker_longitude, tracker_relative_altitude);
     //console.log('[pan] targetLatitude, targetLongitude: ', targetLatitude, targetLongitude);
 
-    let radmyLatitude = tracker_latitude * Math.PI / 180;
-    let radTargetLatitude = targetLatitude * Math.PI / 180;
-    let radMyLongitude = tracker_longitude * Math.PI / 180;
-    let radTargetLongitude = targetLongitude * Math.PI / 180;
+    let target_latitude_rad = targetLatitude * Math.PI / 180;
+    let target_longitude_rad = targetLongitude * Math.PI / 180;
 
-    let y = Math.sin(radTargetLongitude - radMyLongitude) * Math.cos(radTargetLatitude);
-    let x = Math.cos(radmyLatitude) * Math.sin(radTargetLatitude) - Math.sin(radmyLatitude) * Math.cos(radTargetLatitude) * Math.cos(radTargetLongitude - radMyLongitude);
+    let tracker_latitude_rad = tracker_latitude * Math.PI / 180;
+    let tracker_longitude_rad = tracker_longitude * Math.PI / 180;
+
+    let y = Math.sin(target_longitude_rad - tracker_longitude_rad) * Math.cos(target_latitude_rad);
+    let x = Math.cos(tracker_latitude_rad) * Math.sin(target_latitude_rad) - Math.sin(tracker_latitude_rad) * Math.cos(target_latitude_rad) * Math.cos(target_longitude_rad - tracker_longitude_rad);
     let angle = Math.atan2(y, x); // azimuth angle (radians)
 
     angle = (angle + p_offset) * 180 / Math.PI;

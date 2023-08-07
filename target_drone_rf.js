@@ -138,25 +138,26 @@ function gcs_mqtt_connect(serverip) {
     });
 
     gcs_mqtt_client.on('message', function (topic, message) {
-        if (topic.includes(sub_target_gpi_topic)) {
-            let mavPacket = message.toString('hex');
+        if (topic === sub_target_gpi_topic) {
             if (local_mqtt_client !== null) {
                 local_mqtt_client.publish(pub_target_gpi_topic, message, () => {
-                    console.log('Send target drone data(' + mavPacket + ') to ' + pub_target_gpi_topic);
+                    // console.log('Send target drone data to ' + pub_target_gpi_topic + '\n', mavPacket);
                 });
             }
         }
         else if (topic === sub_motor_control_topic) {
             if (local_mqtt_client !== null) {
+                // console.log('Received motor control message: ', pub_motor_control_topic, message.toString());
                 local_mqtt_client.publish(pub_motor_control_topic, message.toString(), () => {
-                    // console.log('send motor control message: ', motor_control_topic, message.toString());
+                    console.log('send motor control message: ', pub_motor_control_topic, message.toString());
                 });
             }
         }
         else if (topic === sub_motor_altitude_topic) {
             if (local_mqtt_client !== null) {
+                // console.log('Received motor altitude message: ', pub_motor_altitude_topic, message.toString());
                 local_mqtt_client.publish(pub_motor_altitude_topic, message.toString(), () => {
-                    // console.log('send motor control message: ', motor_control_topic, message.toString());
+                    console.log('send motor altitude message: ', pub_motor_altitude_topic, message.toString());
                 });
             }
         }
