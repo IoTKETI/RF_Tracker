@@ -242,7 +242,11 @@ function parseMavFromDrone(mavPacket) {
             globalpositionint_msg.vz = Buffer.from(vz, 'hex').readInt16LE(0);
             globalpositionint_msg.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
-            local_mqtt_client.publish(pub_gps_location_topic, JSON.stringify(globalpositionint_msg));
+            if (local_mqtt_client !== null) {
+                local_mqtt_client.publish(pub_gps_location_topic, JSON.stringify(globalpositionint_msg), () => {
+                    console.log('publish globalpositionint_msg to local mqtt: ', JSON.stringify(globalpositionint_msg))
+                });
+            }
         }
         else if (msg_id === mavlink.MAVLINK_MSG_ID_ATTITUDE) {
             let my_len = 28;
@@ -275,9 +279,11 @@ function parseMavFromDrone(mavPacket) {
             attitude_msg.pitchspeed = Buffer.from(pitchspeed, 'hex').readFloatLE(0);
             attitude_msg.yawspeed = Buffer.from(yawspeed, 'hex').readFloatLE(0);
 
-            local_mqtt_client.publish(pub_gps_attitude_topic, JSON.stringify(attitude_msg), () => {
-                // console.log('publish message to local mqtt: ', attitude_msg)
-            });
+            if (local_mqtt_client !== null) {
+                local_mqtt_client.publish(pub_gps_attitude_topic, JSON.stringify(attitude_msg), () => {
+                    console.log('publish attitude_msg to local mqtt: ', JSON.stringify(attitude_msg))
+                });
+            }
         }
     }
     catch (e) {
