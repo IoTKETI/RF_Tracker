@@ -25,6 +25,11 @@ let rf_sub_drone_topic = '/RF/TELE_HUB/drone';  // Recieve mavlink from GCS
 let rf_pub_gcs_topic = '/RF/TELE/gcs';
 let rf_pub_rc_topic = '/RF/RC'; // 드론에 RF 통신으로 전달하기 위한 토픽
 
+let sitl_state = true;
+
+let sitl_mqtt_client = null;
+let sub_sitl_drone_data_topic = '';
+
 let my_sortie_name = 'unknown';
 
 let drone_info = {};
@@ -58,6 +63,11 @@ function init() {
     let drone_ip = host_arr.join('.');
 
     rf_mqtt_connect(drone_ip);
+
+    if (sitl_state === true) {
+        sub_sitl_drone_data_topic = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
+        sitl_mqtt_connect('gcs.iotocean.org');
+    }
 }
 
 function local_mqtt_connect(serverip) {
@@ -324,7 +334,7 @@ function parseMavFromDrone(mavPacket) {
 
             if (local_mqtt_client !== null) {
                 local_mqtt_client.publish(pub_target_gpi_topic, JSON.stringify(global_position_int), () => {
-                    // console.log('publish to GCS - ', '/gcs/TELE_HUB/drone/rf', mavPacket);
+                    // console.log('publish to GCS - ', '/gcs/TELE_HUB/drone/rf', JSON.stringify(global_position_int));
                 });
             }
         }
@@ -338,4 +348,103 @@ function parseMavFromDrone(mavPacket) {
     catch (e) {
         console.log('[parseMavFromDrone Error]', e);
     }
+}
+
+let sitlmqtt_message = '';
+
+function sitl_mqtt_connect(host) {
+    let connectOptions = {
+        host: host,
+        port: 1883,
+        protocol: "mqtt",
+        keepalive: 10,
+        clientId: 'sitl_' + nanoid(15),
+        protocolId: "MQTT",
+        protocolVersion: 4,
+        clean: true,
+        reconnectPeriod: 2 * 1000,
+        connectTimeout: 30 * 1000,
+        queueQoSZero: false,
+        rejectUnauthorized: false
+    }
+
+    sitl_mqtt_client = mqtt.connect(connectOptions);
+
+    sitl_mqtt_client.on('connect', function () {
+        if (sub_sitl_drone_data_topic!=='') {
+            sitl_mqtt_client.subscribe(sub_sitl_drone_data_topic + '/#', () => {
+                console.log('[sitl_mqtt] sub_sitl_drone_data_topic is subscribed -> ', sub_sitl_drone_data_topic + '/#');
+            });
+        }
+    });
+
+    sitl_mqtt_client.on('message', function (topic, message) {
+        // console.log('[sitl] topic, message => ', topic, message);
+
+        if (topic.includes(sub_sitl_drone_data_topic)) {
+            sitlmqtt_message = message.toString('hex');
+            // console.log("Client1 topic => " + topic);
+            // console.log("Client1 message => " + sitlmqtt_message);
+
+            try {
+                let ver = sitlmqtt_message.substring(0, 2);
+                let sysid = '';
+                let msgid = '';
+                let base_offset = 0;
+
+                if (ver == 'fd') {//MAV ver.1
+                    sysid = sitlmqtt_message.substring(10, 12).toLowerCase();
+                    msgid = sitlmqtt_message.substring(18, 20) + sitlmqtt_message.substring(16, 18) + sitlmqtt_message.substring(14, 16);
+                    base_offset = 28;
+                } else { //MAV ver.2
+                    sysid = sitlmqtt_message.substring(6, 8).toLowerCase();
+                    msgid = sitlmqtt_message.substring(10, 12).toLowerCase();
+                    base_offset = 20;
+                }
+
+                let sys_id = parseInt(sysid, 16);
+                let msg_id = parseInt(msgid, 16);
+
+                if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) { // #33
+                    let lat = sitlmqtt_message.substring(base_offset, base_offset + 8).toLowerCase();
+                    base_offset += 8;
+                    let lon = sitlmqtt_message.substring(base_offset, base_offset + 8).toLowerCase();
+                    base_offset += 8;
+                    let alt = sitlmqtt_message.substring(base_offset, base_offset + 8).toLowerCase();
+                    base_offset += 8;
+                    let relative_alt = sitlmqtt_message.substring(base_offset, base_offset + 8).toLowerCase();
+                    base_offset += 8;
+                    let vx = sitlmqtt_message.substring(base_offset, base_offset + 4).toLowerCase();
+                    base_offset += 4;
+                    let vy = sitlmqtt_message.substring(base_offset, base_offset + 4).toLowerCase();
+                    base_offset += 4;
+                    let vz = sitlmqtt_message.substring(base_offset, base_offset + 4).toLowerCase();
+                    base_offset += 4;
+                    let hdg = sitlmqtt_message.substring(base_offset, base_offset + 4).toLowerCase();
+
+                    global_position_int.lat = Buffer.from(lat, 'hex').readInt32LE(0);
+                    global_position_int.lon = Buffer.from(lon, 'hex').readInt32LE(0);
+                    global_position_int.alt = Buffer.from(alt, 'hex').readInt32LE(0);
+                    global_position_int.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
+                    global_position_int.vx = Buffer.from(vx, 'hex').readInt16LE(0);
+                    global_position_int.vy = Buffer.from(vy, 'hex').readInt16LE(0);
+                    global_position_int.vz = Buffer.from(vz, 'hex').readInt16LE(0);
+                    global_position_int.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
+
+                    if (local_mqtt_client !== null) {
+                        local_mqtt_client.publish(pub_target_gpi_topic, JSON.stringify(global_position_int), () => {
+                            console.log('publish to GCS - ', '/gcs/TELE_HUB/drone/rf', JSON.stringify(global_position_int));
+                        });
+                    }
+                }
+            }
+            catch (e) {
+                console.log('[sitl_mqtt] SITL parse error', e);
+            }
+        }
+    });
+
+    sitl_mqtt_client.on('error', function (err) {
+        console.log('[sitl_mqtt] error - ' + err.message);
+    });
 }
