@@ -1,6 +1,6 @@
 const mqtt = require('mqtt');
-const { nanoid } = require("nanoid");
-const { SerialPort } = require('serialport');
+const {nanoid} = require("nanoid");
+const {SerialPort} = require('serialport');
 
 // ---------- set values ----------
 const PAN_CAN_ID = '000000010000';
@@ -94,12 +94,14 @@ function canPortOpening() {
         canPort.on('close', canPortClose);
         canPort.on('error', canPortError);
         canPort.on('data', canPortData);
-    } else {
+    }
+    else {
         if (canPort.isOpen) {
             canPort.close();
             canPort = null;
             setTimeout(canPortOpening, 2000);
-        } else {
+        }
+        else {
             canPort.open();
         }
     }
@@ -133,6 +135,7 @@ function canPortData(data) {
         }
     }
 }
+
 //---------------------------------------------------
 
 //------------- local mqtt connect ------------------
@@ -181,10 +184,10 @@ function local_mqtt_connect(host) {
             });
         }
 
-		runMotor();
-		setInterval(()=>{
-			console.log('calcTargetPanAngle ->', calcTargetPanAngle(target_latitude, target_longitude));
-		},500)
+        runMotor();
+        setInterval(() => {
+            console.log('calcTargetPanAngle ->', calcTargetPanAngle(target_latitude, target_longitude));
+        }, 500)
     });
 
     local_mqtt_client.on('message', function (topic, message) {
@@ -217,46 +220,51 @@ function local_mqtt_connect(host) {
             tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
             tracker_heading = tracker_gpi.hdg;
 
-            let tracker_heading_int = Math.round(tracker_gpi.hdg);
-            if (tracker_heading_int >= 180){
+            let tracker_heading_int = Math.round(tracker_heading);
+            if (tracker_heading_int >= 180) {
                 tracker_heading = tracker_heading_int - 360;
             }
             else {
-				tracker_heading = tracker_heading_int;
-			}
-            console.log('tracker_gpi: ', JSON.stringify(tracker_gpi), '\ntracker_heading_int -',tracker_heading_int, '\ntracker_heading -',tracker_heading);
+                tracker_heading = tracker_heading_int;
+            }
+            console.log('tracker_gpi: ', JSON.stringify(tracker_gpi), '\ntracker_heading_int -', tracker_heading_int, '\ntracker_heading -', tracker_heading);
 
             if (run_flag === 'go') {
-				target_angle = calcTargetPanAngle(target_latitude, target_longitude);
-				//console.log('tracker_heading, target_angle', tracker_heading, target_angle);
+                target_angle = calcTargetPanAngle(target_latitude, target_longitude);
+                //console.log('tracker_heading, target_angle', tracker_heading, target_angle);
 
-				if (Math.abs(target_angle - tracker_heading) > 15) {
-					p_step = 0.015;
-				} else if (Math.abs(target_angle - tracker_heading) > 10) {
-					p_step = 0.008;
-				} else if (Math.abs(target_angle - tracker_heading) > 5) {
-					p_step = 0.004;
-				} else {
-					p_step = 0.001;
-				}
+                if (Math.abs(target_angle - tracker_heading) > 15) {
+                    p_step = 0.015;
+                }
+                else if (Math.abs(target_angle - tracker_heading) > 10) {
+                    p_step = 0.008;
+                }
+                else if (Math.abs(target_angle - tracker_heading) > 5) {
+                    p_step = 0.004;
+                }
+                else {
+                    p_step = 0.001;
+                }
 
-				if (tracker_heading !== target_angle) {
-					cw = target_angle - tracker_heading;
-					if (cw < 0) {
-						cw = cw + 360;
-					}
-					ccw = 360 - cw;
+                if (tracker_heading !== target_angle) {
+                    cw = target_angle - tracker_heading;
+                    if (cw < 0) {
+                        cw = cw + 360;
+                    }
+                    ccw = 360 - cw;
 
-					if (cw < ccw) {
-						p_in = p_in + p_step;
-					} else if (cw > ccw) {
-						p_in = p_in - p_step;
-					} else {
-						p_in = p_in;
-					}
-				}
-				p_step = 0.02;
-			}
+                    if (cw < ccw) {
+                        p_in = p_in + p_step;
+                    }
+                    else if (cw > ccw) {
+                        p_in = p_in - p_step;
+                    }
+                    else {
+                        p_in = p_in;
+                    }
+                }
+                p_step = 0.02;
+            }
         }
         else if (topic === sub_gps_attitude_topic) {
             tracker_att = JSON.parse(message.toString());
@@ -272,6 +280,7 @@ function local_mqtt_connect(host) {
         console.log('[local_mqtt] error ' + err.message);
     });
 }
+
 //---------------------------------------------------
 
 function runMotor() {
@@ -299,7 +308,8 @@ function runMotor() {
                     // initAction();
                     motor_control_message = 'zero';
                     EnterMotorMode();
-                } else {
+                }
+                else {
                     // initAction();
                     motor_control_message = 'zero';
                 }
@@ -527,7 +537,8 @@ let unpack_reply = () => {
             v_out = uint_to_float(v_int, V_MIN, V_MAX, 12);
             t_out = uint_to_float(i_int, T_MIN, T_MAX, 12);
         }
-    } catch {
+    }
+    catch {
 
     }
 }
@@ -562,11 +573,13 @@ function Zero() {
         }
     }
 }
+
 //---------------------------------------------------
 
 function calcTargetPanAngle(targetLatitude, targetLongitude) {
-    //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude, tracker_longitude, tracker_relative_altitude);
-    //console.log('[pan] targetLatitude, targetLongitude: ', targetLatitude, targetLongitude);
+    //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
+    // tracker_longitude, tracker_relative_altitude); console.log('[pan] targetLatitude, targetLongitude: ',
+    // targetLatitude, targetLongitude);
 
     let target_latitude_rad = targetLatitude * Math.PI / 180;
     let target_longitude_rad = targetLongitude * Math.PI / 180;
@@ -641,9 +654,5 @@ canPortOpening();
 local_mqtt_connect('localhost');
 
 setTimeout(() => {
-	motor_control_message = 'init';
+    motor_control_message = 'init';
 }, 3000);
-
-setTimeout(() => {
-    motor_control_message = 'run';
-}, 10000);

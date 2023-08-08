@@ -376,6 +376,8 @@ function sitl_mqtt_connect(host) {
                 console.log('[sitl_mqtt] sub_sitl_drone_data_topic is subscribed -> ', sub_sitl_drone_data_topic + '/#');
             });
         }
+
+        local_mqtt_client.publish('/Ant_Tracker/Control', 'run');
     });
 
     sitl_mqtt_client.on('message', function (topic, message) {

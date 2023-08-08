@@ -61,7 +61,7 @@ let tracker_att = '';
 let tracker_latitude = 37.4036621604629;
 let tracker_longitude = 127.16176249708046;
 let tracker_altitude = 0.0;
-let trackerrelative_altitude = 0.0;
+let tracker_relative_altitude = 0.0;
 let tracker_heading = 0.0;
 
 let tracker_roll = 0.0;
@@ -162,16 +162,16 @@ function local_mqtt_connect(host) {
     local_mqtt_client = mqtt.connect(connectOptions);
 
     local_mqtt_client.on('connect', function () {
-        // if (sub_gps_location_topic !== '') {
-        //     local_mqtt_client.subscribe(sub_gps_location_topic, () => {
-        //         console.log('[local_mqtt] sub_gps_location_topic is subscribed -> ', sub_gps_location_topic);
-        //     });
-        // }
         if (sub_drone_data_topic !== '') {
             local_mqtt_client.subscribe(sub_drone_data_topic, () => {
                 console.log('[local_mqtt] sub_drone_data_topic is subscribed -> ', sub_drone_data_topic);
             });
         }
+        // if (sub_gps_location_topic !== '') {
+        //     local_mqtt_client.subscribe(sub_gps_location_topic, () => {
+        //         console.log('[local_mqtt] sub_gps_location_topic is subscribed -> ', sub_gps_location_topic);
+        //     });
+        // }
         if (sub_gps_attitude_topic !== '') {
             local_mqtt_client.subscribe(sub_gps_attitude_topic, () => {
                 console.log('[local_mqtt] sub_gps_attitude_topic is subscribed -> ', sub_gps_attitude_topic);
@@ -204,16 +204,16 @@ function local_mqtt_connect(host) {
                 tracker_relative_altitude = motor_altitude_message;
             }
         }
-        // else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
-        //     tracker_gpi = JSON.parse(message.toString());
-        //
-        //     tracker_latitude = tracker_gpi.lat;
-        //     tracker_longitude = tracker_gpi.lon;
-        //     tracker_altitude = tracker_gpi.alt;
-        //     tracker_relative_altitude = tracker_gpi.relative_alt;
-        //     tracker_heading = Math.round(tracker_gpi.hdg) - 180;
-        //     console.log('tracker_gpi: ', tracker_latitude, tracker_longitude, tracker_relative_altitude,
-        //         tracker_heading);
+            // else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
+            //     tracker_gpi = JSON.parse(message.toString());
+            //
+            //     tracker_latitude = tracker_gpi.lat;
+            //     tracker_longitude = tracker_gpi.lon;
+            //     tracker_altitude = tracker_gpi.alt;
+            //     tracker_relative_altitude = tracker_gpi.relative_alt;
+            //     tracker_heading = Math.round(tracker_gpi.hdg) - 180;
+            //     console.log('tracker_gpi: ', tracker_latitude, tracker_longitude, tracker_relative_altitude,
+            //         tracker_heading);
         // }
         else if (topic === sub_drone_data_topic) { // 드론데이터 수신
             target_gpi = JSON.parse(message.toString());
@@ -223,6 +223,43 @@ function local_mqtt_connect(host) {
             target_altitude = target_gpi.alt / 1000;
             target_relative_altitude = target_gpi.relative_alt / 1000;
             console.log('target_gpi: ', JSON.stringify(target_gpi));
+
+            if (run_flag === 'go') {
+                target_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
+                // console.log('myPitch, target_angle', myPitch, target_angle);
+
+                if (Math.abs(target_angle - tracker_pitch) > 10) {
+                    p_step = 0.02;
+                }
+                else if (Math.abs(target_angle - tracker_pitch) > 5) {
+                    p_step = 0.01;
+                }
+                else if (Math.abs(target_angle - tracker_pitch) > 3) {
+                    p_step = 0.005;
+                }
+                else {
+                    p_step = 0.001;
+                }
+
+                if (tracker_pitch !== target_angle) {
+                    cw = target_angle - tracker_pitch;
+                    if (cw < 0) {
+                        cw = cw + 360;
+                    }
+                    ccw = 360 - cw;
+
+                    if (cw < ccw) {
+                        p_in = p_in + p_step;
+                    }
+                    else if (cw > ccw) {
+                        p_in = p_in - p_step;
+                    }
+                    else {
+                        p_in = p_in;
+                    }
+                }
+                p_step = 0.02;
+            }
         }
         else if (topic === sub_gps_attitude_topic) {
             tracker_att = JSON.parse(message.toString());
@@ -294,7 +331,7 @@ function runMotor() {
                     }
                 }
                 else if (motor_control_message === 'run') {
-                    target_angle = calcTargetTiltAngle(tracker_latitude, tracker_longitude, tracker_relative_altitude);
+                    target_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
                     // console.log('tracker_pitch, target_angle', tracker_pitch, target_angle);
                     run_flag = 'go';
 
@@ -502,11 +539,12 @@ function Zero() {
 
 //---------------------------------------------------
 function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
-    // console.log('[tilt] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
-    // tracker_longitude, tracker_relative_altitude); console.log('[tilt] targetLatitude, targetLongitude,
-    // targetAltitude: ', targetLatitude, targetLongitude, targetAltitude);
+    // console.log('[tilt] myLatitude, myLongitude, myRelativeAltitude: ', myLatitude, myLongitude,
+    // myRelativeAltitude);
+    // console.log('[tilt] targetLatitude, targetLongitude, targetAltitude: ', targetLatitude, targetLongitude,
+    // targetAltitude);
 
-    let dist = calcDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude)
+    let dist = getDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude)
     let x = dist;
     let y = targetAltitude - tracker_relative_altitude;
 
@@ -519,21 +557,21 @@ function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
     // p_target = Math.round((angle + p_offset) * 50) / 50;  // 0.5단위 반올림
 }
 
-// function getDistance(lat1, lon1, lat2, lon2) {
-//     var radLat1 = Math.PI * lat1 / 180;
-//     var radLat2 = Math.PI * lat2 / 180;
-//     var theta = lon1 - lon2;
-//     var radTheta = Math.PI * theta / 180;
-//     var dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
-//     if (dist > 1) {
-//         dist = 1;
-//     }
-//     dist = Math.acos(dist);
-//     dist = dist * 180 / Math.PI;
-//     dist = dist * 60 * 1.1515 * 1.609344 * 1000;
-//
-//     return dist;
-// }
+function getDistance(lat1, lon1, lat2, lon2) {
+    var radLat1 = Math.PI * lat1 / 180;
+    var radLat2 = Math.PI * lat2 / 180;
+    var theta = lon1 - lon2;
+    var radTheta = Math.PI * theta / 180;
+    var dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
+    if (dist > 1)
+        dist = 1;
+
+    dist = Math.acos(dist);
+    dist = dist * 180 / Math.PI;
+    dist = dist * 60 * 1.1515 * 1.609344 * 1000;
+
+    return dist;
+}
 
 function calcDistance(x1, y1, x2, y2) {
     /*
