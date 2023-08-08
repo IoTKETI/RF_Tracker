@@ -67,6 +67,8 @@ let tracker_roll = 0.0;
 let tracker_pitch = 0.0;
 let tracker_yaw = 0.0;
 
+let target_gpi = {};
+
 let tracker_latitude = '';
 let tracker_longitude = '';
 let tracker_altitude = '';
@@ -74,6 +76,7 @@ let tracker_relative_altitude = '';
 
 let motor_return_msg = '';
 
+let sub_drone_data_topic = '/Ant_Tracker/target_drone/gpi';
 let sub_motor_control_topic = '/Ant_Tracker/Control';
 let sub_motor_altitude_topic = '/Ant_Tracker/Altitude';
 //let sub_gps_location_topic = '/GPS/location';
@@ -163,6 +166,11 @@ function local_mqtt_connect(host) {
         //         console.log('[local_mqtt] sub_gps_location_topic is subscribed -> ', sub_gps_location_topic);
         //     });
         // }
+        if (sub_drone_data_topic !== '') {
+            local_mqtt_client.subscribe(sub_drone_data_topic, () => {
+                console.log('[local_mqtt] sub_drone_data_topic is subscribed -> ', sub_drone_data_topic);
+            });
+        }
         if (sub_gps_attitude_topic !== '') {
             local_mqtt_client.subscribe(sub_gps_attitude_topic, () => {
                 console.log('[local_mqtt] sub_gps_attitude_topic is subscribed -> ', sub_gps_attitude_topic);
@@ -206,6 +214,15 @@ function local_mqtt_connect(host) {
         //     console.log('tracker_gpi: ', tracker_latitude, tracker_longitude, tracker_relative_altitude,
         //         tracker_heading);
         // }
+        else if (topic === sub_drone_data_topic) { // 드론데이터 수신
+            target_gpi = JSON.parse(message.toString());
+
+            target_latitude = target_gpi.lat / 10000000;
+            target_longitude = target_gpi.lon / 10000000;
+            target_altitude = target_gpi.alt / 1000;
+            target_relative_altitude = target_gpi.relative_alt / 1000;
+            console.log('target_gpi: ', JSON.stringify(target_gpi));
+        }
         else if (topic === sub_gps_attitude_topic) {
             tracker_att = JSON.parse(message.toString());
 

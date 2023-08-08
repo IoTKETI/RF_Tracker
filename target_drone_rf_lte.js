@@ -334,7 +334,7 @@ function parseMavFromDrone(mavPacket) {
 
             if (local_mqtt_client !== null) {
                 local_mqtt_client.publish(pub_target_gpi_topic, JSON.stringify(global_position_int), () => {
-                    // console.log('publish to GCS - ', '/gcs/TELE_HUB/drone/rf', JSON.stringify(global_position_int));
+                    // console.log('publish to GCS - ', pub_target_gpi_topic, JSON.stringify(global_position_int));
                 });
             }
         }
@@ -433,7 +433,7 @@ function sitl_mqtt_connect(host) {
 
                     if (local_mqtt_client !== null) {
                         local_mqtt_client.publish(pub_target_gpi_topic, JSON.stringify(global_position_int), () => {
-                            console.log('publish to GCS - ', '/gcs/TELE_HUB/drone/rf', JSON.stringify(global_position_int));
+                            console.log('publish to GCS - ', pub_target_gpi_topic, JSON.stringify(global_position_int));
                         });
                     }
                 }
