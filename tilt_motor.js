@@ -57,10 +57,11 @@ let motor_altitude_message = '';
 let tracker_gpi = '';
 let tracker_att = '';
 
-let target_latitude = 37.4042;
-let target_longitude = 127.1608;
-let target_altitude = 0.0;
-let target_relative_altitude = 0.0;
+
+let tracker_latitude = 37.4036621604629;
+let tracker_longitude = 127.16176249708046;
+let tracker_altitude = 0.0;
+let trackerrelative_altitude = 0.0;
 let tracker_heading = 0.0;
 
 let tracker_roll = 0.0;
@@ -69,10 +70,10 @@ let tracker_yaw = 0.0;
 
 let target_gpi = {};
 
-let tracker_latitude = '';
-let tracker_longitude = '';
-let tracker_altitude = '';
-let tracker_relative_altitude = '';
+let target_latitude = '';
+let target_longitude = '';
+let target_altitude = '';
+let target_relative_altitude = '';
 
 let motor_return_msg = '';
 

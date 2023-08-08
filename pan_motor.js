@@ -57,8 +57,8 @@ let motor_altitude_message = '';
 let tracker_gpi = '';
 let tracker_att = '';
 
-let tracker_latitude = 37.4042;
-let tracker_longitude = 127.1608;
+let tracker_latitude = 37.4036621604629;
+let tracker_longitude = 127.16176249708046;
 let tracker_altitude = 0.0;
 let tracker_relative_altitude = 0.0;
 let tracker_heading = 0.0;
@@ -643,3 +643,7 @@ local_mqtt_connect('localhost');
 setTimeout(() => {
 	motor_control_message = 'init';
 }, 3000);
+
+setTimeout(() => {
+    motor_control_message = 'run';
+}, 10000);
