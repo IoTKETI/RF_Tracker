@@ -209,10 +209,12 @@ function local_mqtt_connect(host) {
         else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
-            tracker_latitude = tracker_gpi.lat;
-            tracker_longitude = tracker_gpi.lon;
-            tracker_altitude = tracker_gpi.alt;
-            tracker_relative_altitude = tracker_gpi.relative_alt;
+            if (tracker_gpi.lat > 0 && tracker_gpi.lon > 0) {
+                tracker_latitude = tracker_gpi.lat / 10000000;
+                tracker_longitude = tracker_gpi.lon / 10000000;
+            }
+            tracker_altitude = tracker_gpi.alt / 1000;
+            tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
             tracker_heading = tracker_gpi.hdg;
 
             let tracker_heading_int = Math.round(tracker_gpi.hdg);
