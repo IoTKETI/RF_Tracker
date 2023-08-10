@@ -184,10 +184,10 @@ function local_mqtt_connect(host) {
             });
         }
 
-        runMotor();
-        setInterval(() => {
-            console.log('calcTargetPanAngle ->', calcTargetPanAngle(target_latitude, target_longitude));
-        }, 500)
+        //runMotor();
+        //setInterval(() => {
+        //    console.log('calcTargetPanAngle ->', calcTargetPanAngle(target_latitude, target_longitude));
+        //}, 500)
     });
 
     local_mqtt_client.on('message', function (topic, message) {
@@ -212,12 +212,12 @@ function local_mqtt_connect(host) {
         else if (topic === sub_gps_location_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
-            if (tracker_gpi.lat > 0 && tracker_gpi.lon > 0) {
-                tracker_latitude = tracker_gpi.lat / 10000000;
-                tracker_longitude = tracker_gpi.lon / 10000000;
-            }
-            tracker_altitude = tracker_gpi.alt / 1000;
-            tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
+            //if (tracker_gpi.lat > 0 && tracker_gpi.lon > 0) {
+                //tracker_latitude = tracker_gpi.lat / 10000000;
+                //tracker_longitude = tracker_gpi.lon / 10000000;
+            //}
+            //tracker_altitude = tracker_gpi.alt / 1000;
+            //tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
             tracker_heading = tracker_gpi.hdg;
 
             let tracker_heading_int = Math.round(tracker_heading);
@@ -282,6 +282,118 @@ function local_mqtt_connect(host) {
 }
 
 //---------------------------------------------------
+
+let stateMotor = 'toExit';
+let enter_mode_counter = 0;
+
+setTimeout(commMotor, 1000);
+
+function commMotor() {
+    if(stateMotor === 'toExit') {
+        ExitMotorMode();
+
+        stateMotor = 'exit';
+        setTimeout(commMotor, 50);
+    }
+    else if(stateMotor === 'exit') {
+        
+        if (motor_return_msg !== '') {
+            unpack_reply();
+            exit_mode_counter++;
+
+            motor_return_msg = '';
+            //p_in = p_out + p_offset;
+
+            console.log('[pan] ExitMotorMode', p_in, p_out, v_out, t_out);
+            if (exit_mode_counter > 5) {
+                exit_mode_counter = 0;
+                
+                stateMotor = 'toEnter';
+                Zero();
+            }
+            else {
+                stateMotor = 'toExit';
+            }
+        }
+        else {
+            stateMotor = 'toExit';
+        }
+        
+        setTimeout(commMotor, 500);
+    }
+    else if(stateMotor === 'toEnter') {
+        EnterMotorMode();
+        
+        //stateMotor = 'enter';
+        //setTimeout(commMotor, 5);
+        
+        Zero();
+        p_in = 0 + p_offset;
+        
+        stateMotor = 'zero';
+        setTimeout(commMotor, 0);
+    }
+    else if(stateMotor === 'enter') {
+        if (motor_return_msg !== '') {
+            unpack_reply();
+            enter_mode_counter++;
+
+            motor_return_msg = '';
+            
+            console.log('[pan] EnterMotorMode -> ', p_target, p_in, p_out, v_out, t_out);
+            console.log('[pan] p_offset -> ', p_in - p_out);
+            //p_offset = p_in - p_out;
+            
+            if (enter_mode_counter >= 1) {
+                enter_mode_counter = 0;
+                
+                stateMotor = 'toZero';
+            }
+            else {
+                stateMotor = 'toEnter';
+            }
+        }
+        else {
+            stateMotor = 'toEnter';
+        }
+        
+        setTimeout(commMotor, 5);
+        
+        //stateMotor = 'toZero';
+        //setTimeout(commMotor, 20);
+        
+        //Zero();
+        //p_in = 0 + p_offset;
+        
+        //stateMotor = 'zero';
+        //setTimeout(commMotor, 200);
+    }
+    else if(stateMotor === 'toZero') {
+        Zero();
+        //p_in = 0 + p_offset;
+        
+        stateMotor = 'zero';
+        setTimeout(commMotor, 10);
+    }
+    else if(stateMotor === 'zero') {
+        //p_in = constrain(p_in, P_MIN, P_MAX);
+
+        pack_cmd();
+
+        no_response_count++;
+
+        if (motor_return_msg !== '') {
+            unpack_reply();
+            no_response_count = 0;
+
+            motor_return_msg = '';
+            console.log('[pan] Zero -> + ', p_target, p_in, p_out, v_out, t_out);
+        }
+        
+        stateMotor = 'zero';
+        setTimeout(commMotor, 20);
+    }
+}
 
 function runMotor() {
     setTimeout(() => {
@@ -422,7 +534,6 @@ function runMotor() {
             }
         }, 20);
     }, 1000);
-
 }
 
 let constrain = (_in, _min, _max) => {
@@ -548,7 +659,7 @@ function EnterMotorMode() {
     if (canPort !== null) {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(PAN_CAN_ID + 'FFFFFFFFFFFFFFFC', 'hex'), () => {
-                // console.log(PAN_CAN_ID + 'FFFFFFFFFFFFFFFC');
+                console.log(PAN_CAN_ID + 'FFFFFFFFFFFFFFFC');
             });
         }
     }
