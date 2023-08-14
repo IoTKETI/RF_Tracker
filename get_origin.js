@@ -312,9 +312,9 @@ function parseMavFromDrone(mavPacket) {
 
             let _attitude_msg = {};
             _attitude_msg.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
-            _attitude_msg.roll = Buffer.from(roll, 'hex').readFloatLE(0) * 180 / Math.PI;
-            _attitude_msg.pitch = Buffer.from(pitch, 'hex').readFloatLE(0) * 180 / Math.PI;
-            _attitude_msg.yaw = Buffer.from(yaw, 'hex').readFloatLE(0) * 180 / Math.PI;
+            _attitude_msg.roll = Buffer.from(roll, 'hex').readFloatLE(0);
+            _attitude_msg.pitch = Buffer.from(pitch, 'hex').readFloatLE(0);
+            _attitude_msg.yaw = Buffer.from(yaw, 'hex').readFloatLE(0);
             _attitude_msg.rollspeed = Buffer.from(rollspeed, 'hex').readFloatLE(0);
             _attitude_msg.pitchspeed = Buffer.from(pitchspeed, 'hex').readFloatLE(0);
             _attitude_msg.yawspeed = Buffer.from(yawspeed, 'hex').readFloatLE(0);

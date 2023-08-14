@@ -187,9 +187,9 @@ function local_mqtt_connect(host) {
                 tracker_att.yaw += (2 * Math.PI);
             }
 
-            console.log('yaw', tracker_att.yaw);
+            tracker_heading = ((tracker_att.yaw * 180)/Math.PI);
 
-            tracker_heading = tracker_att.yaw;
+            console.log('yaw', tracker_heading);
 
             //console.log('[attitude] -> ', tracker_att.roll, tracker_att.pitch, tracker_att.yaw);
 
