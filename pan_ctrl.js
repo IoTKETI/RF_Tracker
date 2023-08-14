@@ -532,7 +532,7 @@ function watchdogPanCtrl() {
         setTimeout(watchdogPanCtrl, 300);
     }
     else if(statePan === 'toReady') {
-        if(pan_motor.getState() === 'zero') {
+        if(pan_motor.getState() === 'enter') {
             if(flagBPM) {
                 offsetPan = tracker_heading;
                 console.log('[offsePan] -> ', offsetPan);
@@ -605,7 +605,7 @@ local_mqtt_connect('localhost');
 
 watchdogPanCtrl();
 
-setTimeout(() => {
-    statePan = 'toReady';
-}, 15000);
+// setTimeout(() => {
+//     statePan = 'toReady';
+// }, 15000);
 

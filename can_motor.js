@@ -107,10 +107,10 @@ function commMotor() {
     if(stateMotor === 'toExit') {
         ExitMotorMode();
 
-        stateMotor = 'exit';
+        stateMotor = 'exiting';
         setTimeout(commMotor, 50);
     }
-    else if(stateMotor === 'exit') {
+    else if(stateMotor === 'exiting') {
         if (motor_return_msg !== '') {
             unpack_reply();
             exit_mode_counter++;
@@ -122,10 +122,10 @@ function commMotor() {
                 exit_mode_counter = 0;
 
                 console.log('[exit] -> ', p_in, p_out, v_out, t_out);
-                stateMotor = 'toEnter';
+                stateMotor = 'exit';
             }
             else {
-                console.log('[exit] :: ', p_in, p_out, v_out, t_out);
+                console.log('[exiting] :: ', p_in, p_out, v_out, t_out);
                 stateMotor = 'toExit';
             }
         }
@@ -133,6 +133,9 @@ function commMotor() {
             stateMotor = 'toExit';
         }
 
+        setTimeout(commMotor, 250);
+    }
+    else if(stateMotor === 'exit') {
         setTimeout(commMotor, 250);
     }
     else if(stateMotor === 'toEnter') {
