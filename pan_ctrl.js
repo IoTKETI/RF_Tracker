@@ -187,9 +187,9 @@ function local_mqtt_connect(host) {
                 tracker_att.yaw += (2 * Math.PI);
             }
 
-            // console.log('yaw', ((this.att.yaw * 180) / Math.PI));
+            console.log('yaw', ((tracker_att.yaw * 180) / Math.PI));
 
-            tracker_heading = ((this.att.yaw * 180)/Math.PI);
+            tracker_heading = ((tracker_att.yaw * 180)/Math.PI);
 
             //console.log('[attitude] -> ', tracker_att.roll, tracker_att.pitch, tracker_att.yaw);
 
@@ -200,147 +200,6 @@ function local_mqtt_connect(host) {
     local_mqtt_client.on('error', function (err) {
         console.log('[local_mqtt] error ' + err.message);
     });
-}
-
-function runMotor() {
-    setTimeout(() => {
-        setInterval(() => {
-            if (motor_control_message === 'on') {
-                EnterMotorMode();
-                motormode = 1;
-                motor_control_message = '';
-            }
-            else if (motor_control_message === 'off') {
-                ExitMotorMode();
-                motormode = 0;
-                motor_control_message = '';
-                run_flag = '';
-            }
-            else if (motor_control_message === 'zero') {
-                Zero();
-                p_in = 0 + p_offset;
-                motor_control_message = '';
-            }
-            else if (motor_control_message === 'init') {
-                if (motormode !== 1) {
-                    motormode = 1;
-                    // initAction();
-                    motor_control_message = 'zero';
-                    EnterMotorMode();
-                }
-                else {
-                    // initAction();
-                    motor_control_message = 'zero';
-                }
-            }
-
-            if (motormode === 1) {
-                if (motor_control_message === 'pan_up') {
-                    p_in = p_in + p_step;
-                }
-                else if (motor_control_message === 'pan_down') {
-                    p_in = p_in - p_step;
-                }
-                else if (motor_control_message === 'stop') {
-                    motor_control_message = '';
-                    run_flag = '';
-                }
-                else if (motor_control_message.includes('go')) {
-                    p_target = (parseInt(motor_control_message.toString().replace('go', '')) * 0.0174533) + p_offset;
-
-                    if (p_target < p_in) {
-                        p_in = p_in - p_step;
-                    }
-                    else if (p_target > p_in) {
-                        p_in = p_in + p_step;
-                    }
-                }
-                else if (motor_control_message === 'run') {
-                    target_angle = calcTargetPanAngle(target_latitude, target_longitude);
-                    //console.log('tracker_heading, target_angle', tracker_heading, target_angle);
-                    run_flag = 'go';
-
-                    if (Math.abs(target_angle - tracker_heading) > 15) {
-                        p_step = 0.015;
-                    }
-                    else if (Math.abs(target_angle - tracker_heading) > 10) {
-                        p_step = 0.008;
-                    }
-                    else if (Math.abs(target_angle - tracker_heading) > 5) {
-                        p_step = 0.004;
-                    }
-                    else {
-                        p_step = 0.001;
-                    }
-
-                    if (tracker_heading !== target_angle) {
-                        cw = target_angle - tracker_heading;
-                        if (cw < 0) {
-                            cw = cw + 360;
-                        }
-                        ccw = 360 - cw;
-
-                        if (cw < ccw) {
-                            p_in = p_in + p_step;
-                        }
-                        else if (cw > ccw) {
-                            p_in = p_in - p_step;
-                        }
-                        else {
-                            p_in = p_in;
-                        }
-                    }
-                    p_step = 0.02;
-
-                    motor_control_message = '';
-                }
-
-                p_in = constrain(p_in, P_MIN, P_MAX);
-
-                pack_cmd();
-
-                no_response_count++;
-
-                if (motor_return_msg !== '') {
-                    unpack_reply();
-                    no_response_count = 0;
-
-                    motor_return_msg = '';
-                    // console.log('[pan] -> + ', p_target, p_in, p_out, v_out, t_out);
-                }
-            }
-            else if (motormode === 2) {
-                ExitMotorMode();
-
-                if (motor_return_msg !== '') {
-                    unpack_reply();
-                    exit_mode_counter++;
-
-                    motor_return_msg = '';
-                    p_in = p_out + p_offset;
-
-                    console.log('[pan] ExitMotorMode', p_in, p_out, v_out, t_out);
-                    if (exit_mode_counter > 5) {
-                        motormode = 3;
-                        exit_mode_counter = 0;
-                    }
-                }
-            }
-
-            if (no_response_count > 48) {
-                console.log('[pan] no_response_count', no_response_count);
-                no_response_count = 0;
-                motor_return_msg = null;
-                motormode = 2;
-            }
-
-            if (local_mqtt_client !== null) {
-                local_mqtt_client.publish(pub_motor_position_topic, tracker_heading.toString(), () => {
-                    // console.log('[pan] send Motor angle to GCS value: ', p_out * 180 / Math.PI)
-                });
-            }
-        }, 20);
-    }, 1000);
 }
 
 let constrain = (_in, _min, _max) => {
