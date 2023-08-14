@@ -449,9 +449,3 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
     //     // console.log('-------------------------------');
     // }
 }
-
-local_mqtt_connect('localhost');
-
-setTimeout(() => {
-    motor_control_message = 'init';
-}, 3000);
