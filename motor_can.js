@@ -101,7 +101,9 @@ function canPortData(data) {
 let stateMotor = 'toExit';
 let enter_mode_counter = 0;
 
-setTimeout(commMotor, 1000);
+exports.loop = function () {
+    setTimeout(commMotor, 1000);
+}
 
 function commMotor() {
     if(stateMotor === 'toExit') {
@@ -447,8 +449,6 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
     //     // console.log('-------------------------------');
     // }
 }
-
-canPortOpening();
 
 local_mqtt_connect('localhost');
 
