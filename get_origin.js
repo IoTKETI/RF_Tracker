@@ -262,20 +262,20 @@ function parseMavFromDrone(mavPacket) {
             _globalpositionint_msg.lon = Buffer.from(lon, 'hex').readInt32LE(0);
             _globalpositionint_msg.alt = Buffer.from(alt, 'hex').readInt32LE(0);
             _globalpositionint_msg.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
-            
+
             console.log(_globalpositionint_msg.lat, _globalpositionint_msg.lon);
-            
+
             _globalpositionint_msg.vx = Buffer.from(vx, 'hex').readInt16LE(0);
             _globalpositionint_msg.vy = Buffer.from(vy, 'hex').readInt16LE(0);
             _globalpositionint_msg.vz = Buffer.from(vz, 'hex').readInt16LE(0);
             _globalpositionint_msg.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
-            
-            
+
+
             let _lat = _globalpositionint_msg.lat / 10000000;
             let _lon = _globalpositionint_msg.lon / 10000000
             if((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132) )) {
                 console.log('[_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
-                
+
                 globalpositionint_msg = JSON.parse(JSON.stringify(_globalpositionint_msg));
                 position_refresh_flag = 1;
 
@@ -285,7 +285,7 @@ function parseMavFromDrone(mavPacket) {
 
                 _globalpositionint_msg.lat = globalpositionint_msg.lat;
                 _globalpositionint_msg.lon = globalpositionint_msg.lon;
-                
+
                 globalpositionint_msg = JSON.parse(JSON.stringify(_globalpositionint_msg));
                 position_refresh_flag = 1;
             }
@@ -313,15 +313,23 @@ function parseMavFromDrone(mavPacket) {
             base_offset += 8;
             let yawspeed = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
 
-            attitude_msg.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
-            attitude_msg.roll = Buffer.from(roll, 'hex').readFloatLE(0) * 180 / Math.PI;
-            attitude_msg.pitch = Buffer.from(pitch, 'hex').readFloatLE(0) * 180 / Math.PI;
-            attitude_msg.yaw = Buffer.from(yaw, 'hex').readFloatLE(0) * 180 / Math.PI;
-            attitude_msg.rollspeed = Buffer.from(rollspeed, 'hex').readFloatLE(0);
-            attitude_msg.pitchspeed = Buffer.from(pitchspeed, 'hex').readFloatLE(0);
-            attitude_msg.yawspeed = Buffer.from(yawspeed, 'hex').readFloatLE(0);
-            
-            pre_attitude_msg = JSON.parse(JSON.stringify(attitude_msg));
+            let _attitude_msg = {};
+            _attitude_msg.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
+            _attitude_msg.roll = Buffer.from(roll, 'hex').readFloatLE(0) * 180 / Math.PI;
+            _attitude_msg.pitch = Buffer.from(pitch, 'hex').readFloatLE(0) * 180 / Math.PI;
+            _attitude_msg.yaw = Buffer.from(yaw, 'hex').readFloatLE(0) * 180 / Math.PI;
+            _attitude_msg.rollspeed = Buffer.from(rollspeed, 'hex').readFloatLE(0);
+            _attitude_msg.pitchspeed = Buffer.from(pitchspeed, 'hex').readFloatLE(0);
+            _attitude_msg.yawspeed = Buffer.from(yawspeed, 'hex').readFloatLE(0);
+
+            if(_attitude_msg.yaw < 0) {
+                _attitude_msg.yaw += (2 * Math.PI);
+            }
+
+            let tracker_heading = ((_attitude_msg.yaw * 180)/Math.PI);
+            console.log('[heading] -> ', tracker_heading);
+
+            attitude_msg = JSON.parse(JSON.stringify(_attitude_msg));
 
             attitude_refresh_flag = 1;
         }
@@ -358,15 +366,15 @@ let sendAttitude = () => {
             });
         }
     }
-    else {
-        if (local_mqtt_client !== null) {
-            local_mqtt_client.publish(pub_gps_attitude_topic, JSON.stringify(pre_attitude_msg), () => {
-                console.log('publish attitude_msg to local mqtt('+pub_gps_attitude_topic+') : ', JSON.stringify(pre_attitude_msg));
-            });
-        }
-    }
+    // else {
+    //     if (local_mqtt_client !== null) {
+    //         local_mqtt_client.publish(pub_gps_attitude_topic, JSON.stringify(pre_attitude_msg), () => {
+    //             console.log('publish attitude_msg to local mqtt('+pub_gps_attitude_topic+') : ', JSON.stringify(pre_attitude_msg));
+    //         });
+    //     }
+    // }
 }
 
 setInterval(sendPosition, 2000);
-//setInterval(sendAttitude, 1000);
+setInterval(sendAttitude, 1000);
 

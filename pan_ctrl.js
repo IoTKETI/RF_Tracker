@@ -81,13 +81,13 @@ function local_mqtt_connect(host) {
                 console.log('[local_mqtt] sub_gps_attitude_topic is subscribed -> ', sub_gps_attitude_topic);
             });
         }
-           
+
         if (sub_gps_position_topic !== '') {
             local_mqtt_client.subscribe(sub_gps_position_topic, () => {
                 console.log('[local_mqtt] sub_gps_position_topic is subscribed -> ', sub_gps_position_topic);
             });
-        }     
-        
+        }
+
         if (sub_motor_control_topic !== '') {
             local_mqtt_client.subscribe(sub_motor_control_topic, () => {
                 console.log('[local_mqtt] sub_motor_control_topic is subscribed -> ', sub_motor_control_topic);
@@ -123,7 +123,7 @@ function local_mqtt_connect(host) {
             tracker_gpi = JSON.parse(message.toString());
 
             //console.log('[position] -> ', tracker_gpi.lat, tracker_gpi.lon, tracker_gpi.relative_alt, tracker_gpi.alt, tracker_gpi.hdg);
-            
+
             countBPM++;
 
             ////if (tracker_gpi.lat > 0 && tracker_gpi.lon > 0) {
@@ -183,8 +183,16 @@ function local_mqtt_connect(host) {
         else if (topic === sub_gps_attitude_topic) {
             tracker_att = JSON.parse(message.toString());
 
+            if(tracker_att.yaw < 0) {
+                tracker_att.yaw += (2 * Math.PI);
+            }
+
+            // console.log('yaw', ((this.att.yaw * 180) / Math.PI));
+
+            tracker_heading = ((this.att.yaw * 180)/Math.PI);
+
             //console.log('[attitude] -> ', tracker_att.roll, tracker_att.pitch, tracker_att.yaw);
-            
+
             countBPM++;
         }
     });
@@ -510,7 +518,7 @@ function watchdogPanCtrl() {
                 pan_motor.setState('toEnter');
                 setTimeout(() => {
                     pan_motor.setState('toZero');
-                    
+
                     statePan = 'motor';
                     setTimeout(watchdogPanCtrl, 0);
                 }, 3000);
@@ -526,12 +534,12 @@ function watchdogPanCtrl() {
     else if(statePan === 'toReady') {
         if(pan_motor.getState() === 'zero') {
             if(flagBPM) {
-                offsetPan = parseInt(tracker_gpi.hdg/100);
+                offsetPan = tracker_heading;
                 console.log('[offsePan] -> ', offsetPan);
                 setTimeout(() => {
                     anglePan = 0;
                     targetPan = (anglePan - offsetPan) > 180 ?  (anglePan - offsetPan) - 360 : (anglePan - offsetPan);
-                    
+
                     console.log('[targetPan] -> ', targetPan);
 
                     pan_motor.setTarget(targetPan);
@@ -560,7 +568,7 @@ function watchdogPanCtrl() {
     }
     else if(statePan === 'ready') {
         setTimeout(watchdogPanCtrl, 300);
-    } 
+    }
 }
 
 
@@ -584,11 +592,11 @@ function watchdogPanCtrl() {
 
 //setInterval(() => {
     //pan_motor.setState('toExit');
-    
+
     //enterMotorMode(() => {
         //console.log('zero');
     //});
-    
+
     //initAction();
 //}, 60000);
 
