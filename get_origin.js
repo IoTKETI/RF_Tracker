@@ -262,9 +262,6 @@ function parseMavFromDrone(mavPacket) {
             _globalpositionint_msg.lon = Buffer.from(lon, 'hex').readInt32LE(0);
             _globalpositionint_msg.alt = Buffer.from(alt, 'hex').readInt32LE(0);
             _globalpositionint_msg.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
-
-            console.log(_globalpositionint_msg.lat, _globalpositionint_msg.lon);
-
             _globalpositionint_msg.vx = Buffer.from(vx, 'hex').readInt16LE(0);
             _globalpositionint_msg.vy = Buffer.from(vy, 'hex').readInt16LE(0);
             _globalpositionint_msg.vz = Buffer.from(vz, 'hex').readInt16LE(0);
@@ -274,14 +271,14 @@ function parseMavFromDrone(mavPacket) {
             let _lat = _globalpositionint_msg.lat / 10000000;
             let _lon = _globalpositionint_msg.lon / 10000000
             if((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132) )) {
-                console.log('[_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
+                // console.log('[_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
 
                 globalpositionint_msg = JSON.parse(JSON.stringify(_globalpositionint_msg));
                 position_refresh_flag = 1;
 
             }
             else {
-                console.log('[pre_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
+                // console.log('[pre_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
 
                 _globalpositionint_msg.lat = globalpositionint_msg.lat;
                 _globalpositionint_msg.lon = globalpositionint_msg.lon;
