@@ -402,19 +402,22 @@ function watchdogPanCtrl() {
                     console.log('[targetPan] -> ', targetPan);
 
                     pan_motor.setTarget(targetPan);
-                    //setTimeout(() => {
-                        //valuePan = -79;
-                        //targetPan = valuePan - offsetPan;
-                        //pan_motor.setTarget(targetPan);
-                        //setTimeout(() => {
-                            //pan_motor.setDelta(-20);
-                            //setTimeout(() => {
-                                //valuePan = -99;
-                                //targetPan = valuePan - offsetPan;
-                                //pan_motor.setTarget(targetPan);
-                            //}, 10000);
-                        //}, 10000);
-                    //}, 10000);
+                    setTimeout(() => {
+                        anglePan = 30;
+                        targetPan = (anglePan - offsetPan) > 180 ?  (anglePan - offsetPan) - 360 : (anglePan - offsetPan);
+
+                        console.log('[targetPan] -> ', targetPan);
+
+                        pan_motor.setTarget(targetPan);
+                        // setTimeout(() => {
+                        //     pan_motor.setDelta(-20);
+                        //     setTimeout(() => {
+                        //         valuePan = -99;
+                        //         targetPan = valuePan - offsetPan;
+                        //         pan_motor.setTarget(targetPan);
+                        //     }, 10000);
+                        // }, 10000);
+                    }, 20000);
                 },1000);
             }
             else {

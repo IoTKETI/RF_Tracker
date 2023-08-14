@@ -167,25 +167,25 @@ function commMotor() {
 
         let p_diff = (p_target - p_in) * (180 / 3.14);
         if(p_diff < -15) {
-            p_step = -0.016;
+            p_step = -0.015;
         }
         else if(-15 <= p_diff && p_diff < -5) {
-            p_step = -0.011;
+            p_step = -0.010;
         }
         else if(-5 <= p_diff && p_diff < -0.1) {
-            p_step = -0.006;
+            p_step = -0.005;
         }
         else if(-0.1 <= p_diff && p_diff < 0.1) {
             p_step = 0.000;
         }
         else if(0.5 <= p_diff && p_diff < 5) {
-            p_step = 0.006;
+            p_step = 0.005;
         }
         else if(5 <= p_diff && p_diff < 15) {
-            p_step = 0.011;
+            p_step = 0.010;
         }
         else if(15 <= p_diff) {
-            p_step = 0.016;
+            p_step = 0.015;
         }
 
         if(p_step !== 0) {
