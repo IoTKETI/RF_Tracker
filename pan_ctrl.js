@@ -464,7 +464,7 @@ local_mqtt_connect('localhost');
 
 watchdogPanCtrl();
 
-// setTimeout(() => {
-//     statePan = 'toReady';
-// }, 15000);
+setTimeout(() => {
+    statePan = 'toReady';
+}, 15000);
 
