@@ -19,7 +19,7 @@ const T_MAX = 18.000;
 
 let p_offset = 0.24;
 
-let p_in = 0.000 + p_offset;
+let p_in = 0.000;
 let v_in = 0.000;
 let kp_in = 20.000;
 let kd_in = 1.000;
@@ -124,7 +124,7 @@ function commMotor() {
             exit_mode_counter++;
 
             motor_return_msg = '';
-            p_in = p_out + p_offset;
+            p_in = p_out;
 
             if (exit_mode_counter > 4) {
                 exit_mode_counter = 0;
@@ -167,7 +167,7 @@ function commMotor() {
             exit_mode_counter++;
 
             motor_return_msg = '';
-            p_in = p_out + p_offset;
+            p_in = p_out;
 
             if (exit_mode_counter > 0) {
                 exit_mode_counter = 0;
@@ -194,12 +194,12 @@ function commMotor() {
 
             motor_return_msg = '';
 
-            let target_angle = ((p_target-p_offset) * 180)/Math.PI;
+            let target_angle = (p_target * 180)/Math.PI;
             if(target_angle < 0) {
                 target_angle += 360;
             }
 
-            let cur_angle = ((p_in-p_offset) * 180)/Math.PI;
+            let cur_angle = (p_in * 180)/Math.PI;
             if(cur_angle < 0) {
                 cur_angle += 360;
             }
@@ -207,7 +207,7 @@ function commMotor() {
             console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, '(', cur_angle.toFixed(1), ')', p_in, p_out, v_out, t_out);
         }
 
-        let p_diff = (p_target - (p_out+p_offset)) * (180 / 3.14);
+        let p_diff = (p_target - p_out) * (180 / 3.14);
         if(p_diff < -15) {
             p_step = -0.012;
             p_in = p_in + p_step;
@@ -247,7 +247,7 @@ function commMotor() {
     }
     else if(stateMotor === 'toZero') {
         Zero();
-        p_in = 0.24;
+        p_in = 0.0;
         p_step = 0.0;
         p_target = p_in;
         pack_cmd();
@@ -298,7 +298,7 @@ function V() {
 
 exports.setDelta = function (angle) {
     P();
-    p_target = p_in + (angle * 0.0174533 + p_offset);
+    p_target = p_in + (angle * 0.0174533);
     V();
 }
 
@@ -372,7 +372,7 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
 }
 
 function pack_cmd() {
-    let p_des = constrain(p_in, P_MIN, P_MAX);
+    let p_des = constrain((p_in+p_offset), P_MIN, P_MAX);
     let v_des = constrain(v_in, V_MIN, V_MAX);
     let kp = constrain(kp_in, KP_MIN, KP_MAX);
     let kd = constrain(kd_in, KD_MIN, KD_MAX);
@@ -455,76 +455,3 @@ function Zero() {
 }
 
 //---------------------------------------------------
-
-function calcTargetPanAngle(targetLatitude, targetLongitude) {
-    //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
-    // tracker_longitude, tracker_relative_altitude); console.log('[pan] targetLatitude, targetLongitude: ',
-    // targetLatitude, targetLongitude);
-
-    let target_latitude_rad = targetLatitude * Math.PI / 180;
-    let target_longitude_rad = targetLongitude * Math.PI / 180;
-
-    let tracker_latitude_rad = tracker_latitude * Math.PI / 180;
-    let tracker_longitude_rad = tracker_longitude * Math.PI / 180;
-
-    let y = Math.sin(target_longitude_rad - tracker_longitude_rad) * Math.cos(target_latitude_rad);
-    let x = Math.cos(tracker_latitude_rad) * Math.sin(target_latitude_rad) - Math.sin(tracker_latitude_rad) * Math.cos(target_latitude_rad) * Math.cos(target_longitude_rad - tracker_longitude_rad);
-    let angle = Math.atan2(y, x); // azimuth angle (radians)
-
-    angle = (angle + p_offset) * 180 / Math.PI;
-    return Math.round(angle);
-
-    // let turn_target = Math.round((angle + p_offset) * 50) / 50;  // 0.5단위 반올림
-    // turn_angle = (turn_target * 180 / Math.PI + 360) % 360; // azimuth angle (convert to degree)
-
-    // turn_angle = turn_angle - tracker_heading;
-    // if (run_flag === 'reset') {
-    //     run_flag = 'go';
-    //     motor_control_message = 'run';
-    // }
-    // else if (run_flag === 'go') {
-    //     if (parseInt(Math.abs(cur_angle)) === 360) {
-    //         motor_control_message = 'zero';
-    //         cur_angle = 0;
-    //         run_flag = 'reset';
-    //     }
-
-    //     if (turn_angle < 0) {
-    //         temp_angle = turn_angle + 360;
-    //     }
-    //     else {
-    //         temp_angle = turn_angle;
-    //     }
-
-    //     if (temp_angle - cur_angle < 0) {
-    //         cw = 360 - cur_angle + temp_angle;
-    //         ccw = (360 - cw) * (-1);
-    //     }
-    //     else {
-    //         if (temp_angle - cur_angle >= 360) {
-    //             cw = temp_angle - cur_angle - 360;
-    //             ccw = (360 - cw) * (-1);
-    //         }
-    //         else {
-    //             cw = temp_angle - cur_angle;
-    //             ccw = (360 - cw) * (-1);
-    //         }
-    //     }
-
-    //     if (Math.abs(cw) <= Math.abs(ccw)) {
-    //         p_target = (cur_angle + cw) * 0.0174533 + p_offset;
-    //     }
-    //     else {
-    //         p_target = (cur_angle + ccw) * 0.0174533 + p_offset;
-    //     }
-    //     cur_angle = (p_target - p_offset) * 180 / Math.PI;
-
-    //     // console.log('-------------------------------');
-    //     // console.log('turnAngle: ', turnAngle);
-    //     // console.log('cur_angle: ', cur_angle);
-    //     // console.log('temp_angle: ', temp_angle);
-    //     // console.log('cw, ccw: ', cw, ccw);
-    //     // console.log('p_target: ', p_target);
-    //     // console.log('-------------------------------');
-    // }
-}
