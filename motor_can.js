@@ -220,8 +220,9 @@ exports.setState = function (state) {
 
 exports.setTarget = function (angle) {
     let cur_angle = 0;
-    if(p_in < 0) {
-        let cur_p_in = p_in + (2 * Math.PI);
+    let ori_p_in = p_in - p_offset;
+    if(ori_p_in < 0) {
+        let cur_p_in = ori_p_in + (2 * Math.PI);
         cur_angle = ((cur_p_in * 180)/Math.PI);
     }
 
