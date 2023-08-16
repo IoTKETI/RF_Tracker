@@ -92,7 +92,7 @@ function canPortData(data) {
     _msg += data.toString('hex').toLowerCase();
 
     if (_msg.length >= 24) {
-        if (_msg.substring(0, 10) === CAN_ID) {
+        if (_msg.substring(0, 10) === ('00' + CAN_ID)) {
             motor_return_msg = _msg.substring(0, 24);
             _msg = _msg.substring(24, _msg.length);
         }
