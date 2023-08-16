@@ -354,10 +354,10 @@ let panCanPortNum = '/dev/ttyAMA1';
 pan_motor.canPortOpening(panCanPortNum);
 pan_motor.loop();
 
-
-let tiltCanPortNum = '/dev/ttyAMA2';
-tilt_motor.canPortOpening(tiltCanPortNum);
-tilt_motor.loop();
+//
+// let tiltCanPortNum = '/dev/ttyAMA2';
+// tilt_motor.canPortOpening(tiltCanPortNum);
+// tilt_motor.loop();
 
 
 let offsetPan = 0;
