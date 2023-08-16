@@ -167,7 +167,6 @@ function commMotor() {
             exit_mode_counter++;
 
             motor_return_msg = '';
-            p_in = p_out;
 
             if (exit_mode_counter > 0) {
                 exit_mode_counter = 0;
@@ -285,8 +284,32 @@ function commMotor() {
 
         //p_in = 0 + p_offset;
 
-        stateMotor = 'enter';
+        stateMotor = 'zeroing';
         setTimeout(commMotor, 0);
+    }
+    else if(stateMotor === 'zeroing') {
+        if (motor_return_msg !== '') {
+            unpack_reply();
+            exit_mode_counter++;
+
+            motor_return_msg = '';
+
+            if (exit_mode_counter > 1) {
+                exit_mode_counter = 0;
+
+                console.log('[enter] -> ', p_in, p_out, v_out, t_out);
+                stateMotor = 'enter';
+            }
+            else {
+                console.log('[zeroing] :: ', p_in, p_out, v_out, t_out);
+                stateMotor = 'toZero';
+            }
+        }
+        else {
+            stateMotor = 'toZero';
+        }
+
+        setTimeout(commMotor, 250);
     }
 }
 
