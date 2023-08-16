@@ -42,8 +42,7 @@ let canPort = null;
 let motor_return_msg = '';
 
 //------------- Can communication -------------
-exports.canPortOpening = function (canPortNum, ID)
-{
+exports.canPortOpening = (canPortNum, ID) => {
     PAN_CAN_ID = ID;
     if (canPort == null) {
         canPort = new SerialPort({
