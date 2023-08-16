@@ -96,6 +96,9 @@ function canPortData(data) {
             motor_return_msg = _msg.substring(0, 24);
             _msg = _msg.substring(24, _msg.length);
         }
+        else {
+            console.log('[canPortData] diff ID - msgid =>', _msg.substring(0, 10), 'CAN_ID =>', '00' + CAN_ID);
+        }
     }
 }
 
@@ -404,9 +407,12 @@ let unpack_reply = () => {
             v_out = uint_to_float(v_int, V_MIN, V_MAX, 12);
             t_out = uint_to_float(i_int, T_MIN, T_MAX, 12);
         }
+        else {
+            console.log('[unpack_reply] diff ID - msgid =>', id, 'CAN_ID =>', CAN_ID);
+        }
     }
-    catch {
-
+    catch (e) {
+        console.log('[unpack_reply] Error -', e);
     }
 }
 
