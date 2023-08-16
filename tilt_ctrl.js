@@ -349,7 +349,8 @@ let initMotor = () => {
 
 
 let canPortNum = '/dev/ttyAMA2';
-can_motor.canPortOpening(canPortNum);
+const CAN_ID = '000000020000';
+can_motor.canPortOpening(canPortNum, CAN_ID);
 can_motor.loop();
 
 let offsetCtrl = 0;

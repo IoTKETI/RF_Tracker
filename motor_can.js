@@ -1,7 +1,7 @@
 const {SerialPort} = require('serialport');
 
 // ---------- set values ----------
-const PAN_CAN_ID = '000000010000';
+let PAN_CAN_ID = '000000010000';
 
 // Value limits ------
 const P_MIN = -12.500;
@@ -42,8 +42,9 @@ let canPort = null;
 let motor_return_msg = '';
 
 //------------- Can communication -------------
-exports.canPortOpening = function (canPortNum)
+exports.canPortOpening = function (canPortNum, ID)
 {
+    PAN_CAN_ID = ID;
     if (canPort == null) {
         canPort = new SerialPort({
             path: canPortNum,
