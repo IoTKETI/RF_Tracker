@@ -218,15 +218,15 @@ function commMotor() {
             p_in = p_in + p_step;
             pack_cmd();
         }
-        else if(-5 <= p_diff && p_diff < -0.1) {
+        else if(-5 <= p_diff && p_diff < -0.2) {
             p_step = -0.004;
             p_in = p_in + p_step;
             pack_cmd();
         }
-        else if(-0.1 <= p_diff && p_diff < 0.1) {
+        else if(-0.2 <= p_diff && p_diff < 0.2) {
             p_step = 0.000;
         }
-        else if(0.1 <= p_diff && p_diff < 5) {
+        else if(0.2 <= p_diff && p_diff < 5) {
             p_step = 0.004;
             p_in = p_in + p_step;
             pack_cmd();
@@ -243,7 +243,7 @@ function commMotor() {
         }
         V();
 
-        setTimeout(commMotor, 20);
+        setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'toZero') {
         Zero();
