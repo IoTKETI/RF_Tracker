@@ -20,7 +20,7 @@ const T_MAX = 18.000;
 let p_offset = 0.24;
 
 let p_in = 0.000;
-let v_in = -25.000;
+let v_in = 0.000;
 let kp_in = 20.000;
 let kd_in = 1.000;
 let t_in = 0.000;
@@ -208,84 +208,74 @@ function commMotor() {
             console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, p_in, '(', cur_angle.toFixed(1), ')', p_out, v_out, t_out);
         }
 
-        // let target_angle = (p_target * 180)/Math.PI;
-        // if(target_angle <= 0) {
-        //     target_angle += 360;
-        // }
-        // target_angle %= 360;
-        //
-        // let cur_angle = (p_out * 180)/Math.PI;
-        // if(cur_angle <= 0) {
-        //     cur_angle += 360;
-        // }
-        // cur_angle %= 360;
-        //
-        // target_angle += 360;
-        // cur_angle += 360;
-        //
-        // let p_diff = 0;
-        // let diff1 = (target_angle - cur_angle);
-        // let diff2 = 0;
-        // if(diff1 > 0) {
-        //     diff2 = diff1 - 360;
-        // }
-        // else {
-        //     diff2 = diff1 + 360;
-        // }
-        //
-        // if(Math.abs(diff1) >= Math.abs(diff2)) {
-        //     p_diff = diff2;
-        // }
-        // else {
-        //     p_diff = diff1;
-        // }
-        //
-        // if(-0.2 <= p_diff && p_diff < 0.2) {
-        //     p_step = 0.000;
-        // }
-        // else {
-        //     p_in = p_in + (p_diff * 0.0174533);
-        //     pack_cmd();
-        // }
+        let target_angle = (p_target * 180)/Math.PI;
+        if(target_angle <= 0) {
+            target_angle += 360;
+        }
+        target_angle %= 360;
 
-        //EnterMotorMode();
+        let cur_angle = (p_out * 180)/Math.PI;
+        if(cur_angle <= 0) {
+            cur_angle += 360;
+        }
+        cur_angle %= 360;
 
-        // if(p_diff < -15) {
-        //     p_step = -0.016;
-        //     p_in = p_in + p_step;
-        //     pack_cmd();
-        // }
-        // else if(-15 <= p_diff && p_diff < -5) {
-        //     p_step = -0.008;
-        //     p_in = p_in + p_step;
-        //     pack_cmd();
-        // }
-        // else if(-5 <= p_diff && p_diff < -0.2) {
-        //     p_step = -0.004;
-        //     p_in = p_in + p_step;
-        //     pack_cmd();
-        // }
-        // else if(-0.2 <= p_diff && p_diff < 0.2) {
-        //     p_step = 0.000;
-        // }
-        // else if(0.2 <= p_diff && p_diff < 5) {
-        //     p_step = 0.004;
-        //     p_in = p_in + p_step;
-        //     pack_cmd();
-        // }
-        // else if(5 <= p_diff && p_diff < 15) {
-        //     p_step = 0.008;
-        //     p_in = p_in + p_step;
-        //     pack_cmd();
-        // }
-        // else if(15 <= p_diff) {
-        //     p_step = 0.016;
-        //     p_in = p_in + p_step;
-        //     pack_cmd();
-        // }
+        target_angle += 360;
+        cur_angle += 360;
+
+        let p_diff = 0;
+        let diff1 = (target_angle - cur_angle);
+        let diff2 = 0;
+        if(diff1 > 0) {
+            diff2 = diff1 - 360;
+        }
+        else {
+            diff2 = diff1 + 360;
+        }
+
+        if(Math.abs(diff1) >= Math.abs(diff2)) {
+            p_diff = diff2;
+        }
+        else {
+            p_diff = diff1;
+        }
+
+        if(p_diff < -15) {
+            p_step = -0.016;
+            p_in = p_in + p_step;
+            pack_cmd();
+        }
+        else if(-15 <= p_diff && p_diff < -5) {
+            p_step = -0.008;
+            p_in = p_in + p_step;
+            pack_cmd();
+        }
+        else if(-5 <= p_diff && p_diff < -0.2) {
+            p_step = -0.004;
+            p_in = p_in + p_step;
+            pack_cmd();
+        }
+        else if(-0.2 <= p_diff && p_diff < 0.2) {
+            p_step = 0.000;
+        }
+        else if(0.2 <= p_diff && p_diff < 5) {
+            p_step = 0.004;
+            p_in = p_in + p_step;
+            pack_cmd();
+        }
+        else if(5 <= p_diff && p_diff < 15) {
+            p_step = 0.008;
+            p_in = p_in + p_step;
+            pack_cmd();
+        }
+        else if(15 <= p_diff) {
+            p_step = 0.016;
+            p_in = p_in + p_step;
+            pack_cmd();
+        }
         V();
 
-        setTimeout(commMotor, 1000);
+        setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'toZero') {
         Zero();
@@ -334,20 +324,6 @@ exports.setState = function (state) {
     console.log('[setState] -> ', stateMotor);
 }
 
-exports.setTarget = function (angle) {
-    if(angle < 0) {
-        angle += 360;
-    }
-
-    let ori_p_in = p_in;
-    if(ori_p_in < 0) {
-        ori_p_in = ori_p_in + (2 * Math.PI);
-    }
-    let cur_angle = ((ori_p_in * 180)/Math.PI);
-
-    let diff = (angle - cur_angle);
-    this.setDelta(diff);
-}
 
 let S = 1;
 function P() {
@@ -362,49 +338,27 @@ function V() {
     S += 1;
 }
 
-exports.setDelta = function (angle) {
+exports.setTarget = function (angle) {
+    if(angle < 0) {
+        angle += 360;
+    }
+    angle %= 360;
+
+    p_target = angle * 0.0174533;
+
+    // let ori_p_in = p_out;
+    // if(ori_p_in < 0) {
+    //     ori_p_in = ori_p_in + (2 * Math.PI);
+    // }
+    // let cur_angle = ((ori_p_in * 180)/Math.PI);
+    //
+    // let diff = (angle - cur_angle);
+    // this.setDelta(diff);
+}
+
+exports.setDelta = function (diff_angle) {
     P();
-    p_target = p_in + (angle * 0.0174533);
-
-    let target_angle = (p_target * 180)/Math.PI;
-    if(target_angle <= 0) {
-        target_angle += 360;
-    }
-    target_angle %= 360;
-
-    let cur_angle = (p_out * 180)/Math.PI;
-    if(cur_angle <= 0) {
-        cur_angle += 360;
-    }
-    cur_angle %= 360;
-
-    target_angle += 360;
-    cur_angle += 360;
-
-    let p_diff = 0;
-    let diff1 = (target_angle - cur_angle);
-    let diff2 = 0;
-    if(diff1 > 0) {
-        diff2 = diff1 - 360;
-    }
-    else {
-        diff2 = diff1 + 360;
-    }
-
-    if(Math.abs(diff1) >= Math.abs(diff2)) {
-        p_diff = diff2;
-    }
-    else {
-        p_diff = diff1;
-    }
-
-    if(-0.2 <= p_diff && p_diff < 0.2) {
-        p_step = 0.000;
-    }
-    else {
-        p_in = p_in + (p_diff * 0.0174533);
-        pack_cmd();
-    }
+    p_target = p_out + (diff_angle * 0.0174533);
     V();
 }
 
