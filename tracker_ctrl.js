@@ -419,11 +419,12 @@ function testAction() {
 
         can_motor.setTarget(targetAngle);
     }
+
+    let period = 5 + parseInt(Math.random() * 5);
+    setTimeout(testAction, period);
 }
 
-setInterval(() => {
-    testAction();
-}, 10000);
+setTimeout(testAction, 10000);
 
 //initMotor();
 //initAction();
