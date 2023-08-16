@@ -155,8 +155,33 @@ function commMotor() {
         // Zero();
         // p_in = 0 + p_offset;
 
-        stateMotor = 'enter';
+        stateMotor = 'entering';
         setTimeout(commMotor, 0);
+    }
+    else if(stateMotor === 'entering') {
+        if (motor_return_msg !== '') {
+            unpack_reply();
+            exit_mode_counter++;
+
+            motor_return_msg = '';
+            p_in = p_out + p_offset;
+
+            if (exit_mode_counter > 4) {
+                exit_mode_counter = 0;
+
+                console.log('[enter] -> ', p_in, p_out, v_out, t_out);
+                stateMotor = 'enter';
+            }
+            else {
+                console.log('[entering] :: ', p_in, p_out, v_out, t_out);
+                stateMotor = 'toEnter';
+            }
+        }
+        else {
+            stateMotor = 'toEnter';
+        }
+
+        setTimeout(commMotor, 250);
     }
     else if(stateMotor === 'enter') {
         P();
