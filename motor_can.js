@@ -410,7 +410,7 @@ function Zero() {
     if (canPort !== null) {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFE', 'hex'), () => {
-                // console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFE');
+                console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFE');
             });
         }
     }
