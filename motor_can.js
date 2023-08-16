@@ -102,7 +102,7 @@ let stateMotor = 'toExit';
 let enter_mode_counter = 0;
 
 exports.loop = function () {
-    setTimeout(commMotor, 1000);
+    setTimeout(commMotor, 3000);
 }
 
 function commMotor() {
