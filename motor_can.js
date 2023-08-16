@@ -59,7 +59,7 @@ exports.canPortOpening = function (canPortNum)
         if (canPort.isOpen) {
             canPort.close();
             canPort = null;
-            setTimeout(canPortOpening, 2000);
+            setTimeout(this.canPortOpening, 2000);
         }
         else {
             canPort.open();
@@ -74,13 +74,13 @@ function canPortOpen() {
 function canPortClose() {
     console.log('[pan] canPort closed.');
 
-    setTimeout(canPortOpening, 2000);
+    setTimeout(this.canPortOpening, 2000);
 }
 
 function canPortError(error) {
     console.log('[pan] canPort error : ' + error);
 
-    setTimeout(canPortOpening, 2000);
+    setTimeout(this.canPortOpening, 2000);
 }
 
 let _msg = '';
