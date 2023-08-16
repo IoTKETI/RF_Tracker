@@ -1,6 +1,7 @@
 const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
 const pan_motor = require('./motor_can');
+const {setTarget} = require("./motor_can");
 
 
 let cw = 0;
@@ -403,30 +404,10 @@ function watchdogPanCtrl() {
                     console.log('[targetPan] -> ', targetPan);
 
                     pan_motor.setTarget(targetPan);
+
                     setTimeout(() => {
-                        anglePan = 30;
-                        targetPan = (anglePan - offsetPan);
-
-                        console.log('[targetPan] -> ', targetPan);
-
-                        pan_motor.setTarget(targetPan);
-                        setTimeout(() => {
-                            anglePan = 0;
-                            targetPan = (anglePan - offsetPan);
-
-                            console.log('[targetPan] -> ', targetPan);
-
-                            pan_motor.setTarget(targetPan);
-                            // setTimeout(() => {
-                            //     pan_motor.setDelta(-20);
-                            //     setTimeout(() => {
-                            //         valuePan = -99;
-                            //         targetPan = valuePan - offsetPan;
-                            //         pan_motor.setTarget(targetPan);
-                            //     }, 10000);
-                            // }, 10000);
-                        }, 40000);
-                    }, 40000);
+                        statePan = 'ready';
+                    }, 1000)
                 },1000);
             }
             else {
@@ -442,6 +423,20 @@ function watchdogPanCtrl() {
     }
 }
 
+function testAction() {
+    if(statePan === 'ready') {
+        anglePan = parseInt(Math.random() * 180);
+        targetPan =(anglePan - offsetPan);
+
+        console.log('[targetPan] -> ', targetPan);
+
+        pan_motor.setTarget(targetPan);
+    }
+}
+
+setInterval(() => {
+    testAction();
+}, 10000);
 
 //initMotor();
 //initAction();
