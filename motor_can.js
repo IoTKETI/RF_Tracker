@@ -207,7 +207,7 @@ function commMotor() {
             console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, '(', cur_angle.toFixed(1), ')', p_in, p_out, v_out, t_out);
         }
 
-        let p_diff = (p_target - p_in) * (180 / 3.14);
+        let p_diff = (p_target - (p_out+p_offset)) * (180 / 3.14);
         if(p_diff < -15) {
             p_step = -0.012;
         }
