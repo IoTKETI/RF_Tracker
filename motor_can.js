@@ -199,15 +199,44 @@ function commMotor() {
                 target_angle += 360;
             }
 
-            let cur_angle = (p_in * 180)/Math.PI;
+            let cur_angle = (p_out * 180)/Math.PI;
             if(cur_angle < 0) {
                 cur_angle += 360;
             }
 
-            console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, '(', cur_angle.toFixed(1), ')', p_in, p_out, v_out, t_out);
+            console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, p_in, '(', cur_angle.toFixed(1), ')', p_out, v_out, t_out);
         }
 
-        let p_diff = (p_target - p_out) * (180 / 3.14);
+        let target_angle = (p_target * 180)/Math.PI;
+        if(target_angle < 0) {
+            target_angle += 360;
+        }
+
+        let cur_angle = (p_out * 180)/Math.PI;
+        if(cur_angle < 0) {
+            cur_angle += 360;
+        }
+
+        target_angle += 360;
+        cur_angle += 360;
+
+        let p_diff = 0;
+        let diff1 = (target_angle - cur_angle);
+        let diff2 = 0;
+        if(diff1 > 0) {
+            diff2 = diff1 - 360;
+        }
+        else {
+            diff2 = diff1 + 360;
+        }
+
+        if(Math.abs(diff1) >= Math.abs(diff2)) {
+            p_diff = diff2;
+        }
+        else {
+            p_diff = diff1;
+        }
+
         if(p_diff < -15) {
             p_step = -0.012;
             p_in = p_in + p_step;
