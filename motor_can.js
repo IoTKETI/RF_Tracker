@@ -166,7 +166,7 @@ function commMotor() {
             motor_return_msg = '';
             p_in = p_out + p_offset;
 
-            if (exit_mode_counter > 4) {
+            if (exit_mode_counter > 0) {
                 exit_mode_counter = 0;
 
                 console.log('[enter] -> ', p_in, p_out, v_out, t_out);

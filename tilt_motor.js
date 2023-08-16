@@ -296,10 +296,12 @@ function runMotor() {
                 Zero();
                 p_in = 0 + p_offset;
                 motor_control_message = '';
+                pack_cmd();
             }
             else if (motor_control_message === 'init') {
                 if (motormode !== 1) {
                     EnterMotorMode();
+                    pack_cmd();
 
                     motormode = 1;
                     motor_control_message = 'zero';
