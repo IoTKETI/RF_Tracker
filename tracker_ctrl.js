@@ -412,7 +412,7 @@ function watchdogCtrl() {
 
 function testAction() {
     if(stateCtrl === 'ready') {
-        angleCtrl = parseInt(Math.random() * 180);
+        angleCtrl = parseInt(Math.random() * 90);
         targetAngle =(angleCtrl - offsetCtrl);
 
         console.log('[targetAngle] -> ', targetAngle);
