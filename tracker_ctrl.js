@@ -1,6 +1,6 @@
 const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
-const can_motor = require('./motor_can');
+const motor_can = require('./motor_can');
 
 let local_mqtt_client = null;
 
@@ -43,7 +43,7 @@ function local_mqtt_connect(host) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'local_can_motor_' + nanoid(15),
+        clientId: 'local_motor_can_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
@@ -314,15 +314,15 @@ setInterval(() => {
 }, 5000)
 
 let initAction = () => {
-    if(can_motor.getState() === 'zero') {
+    if(motor_can.getState() === 'zero') {
         setTimeout(() => {
-            can_motor.setTarget(-20);
+            motor_can.setTarget(-20);
             setTimeout(() => {
-                can_motor.setTarget(20);
+                motor_can.setTarget(20);
                 setTimeout(() => {
-                    can_motor.setDelta(-20);
+                    motor_can.setDelta(-20);
                     setTimeout(() => {
-                        can_motor.setTarget(0);
+                        motor_can.setTarget(0);
                     }, 2500);
                 }, 5000);
             }, 2500);
@@ -334,11 +334,11 @@ let initAction = () => {
 }
 
 let initMotor = () => {
-    if(can_motor.getState() === 'exit') {
+    if(motor_can.getState() === 'exit') {
         setTimeout(() => {
-            can_motor.setState('toEnter');
+            motor_can.setState('toEnter');
             setTimeout(() => {
-                can_motor.setState('toZero');
+                motor_can.setState('toZero');
             },3000);
         },3000);
     }
@@ -351,8 +351,8 @@ let initMotor = () => {
 
 const canPortNum = process.argv[2];
 const CAN_ID = process.argv[3];
-can_motor.canPortOpening(canPortNum, CAN_ID);
-can_motor.loop();
+motor_can.canPortOpening(canPortNum, CAN_ID);
+motor_can.loop();
 
 let offsetCtrl = 0;
 let angleCtrl = 0;
@@ -360,11 +360,11 @@ let targetAngle = 0;
 let stateCtrl = 'toMotor'
 function watchdogCtrl() {
     if(stateCtrl === 'toMotor') {
-        if(can_motor.getState() === 'exit') {
+        if(motor_can.getState() === 'exit') {
             setTimeout(() => {
-                can_motor.setState('toEnter');
+                motor_can.setState('toEnter');
                 setTimeout(() => {
-                    can_motor.setState('toZero');
+                    motor_can.setState('toZero');
 
                     stateCtrl = 'motor';
                     setTimeout(watchdogCtrl, 0);
@@ -379,7 +379,7 @@ function watchdogCtrl() {
         setTimeout(watchdogCtrl, 300);
     }
     else if(stateCtrl === 'toReady') {
-        if(can_motor.getState() === 'enter') {
+        if(motor_can.getState() === 'enter') {
             if(flagBPM) {
                 //offsetCtrl = tracker_heading;
                 offsetCtrl = 0;
@@ -390,7 +390,7 @@ function watchdogCtrl() {
 
                     console.log('[targetAngle] -> ', targetAngle);
 
-                    can_motor.setTarget(targetAngle);
+                    motor_can.setTarget(targetAngle);
 
                     setTimeout(() => {
                         stateCtrl = 'ready';
@@ -417,7 +417,7 @@ function testAction() {
 
         console.log('[targetAngle] -> ', targetAngle);
 
-        can_motor.setTarget(targetAngle);
+        motor_can.setTarget(targetAngle);
     }
 
     let period = (5 + parseInt(Math.random() * 5)) * 1000;
@@ -430,11 +430,11 @@ setTimeout(testAction, 10000);
 //initAction();
 
 //function enterMotorMode(callback) {
-//if(can_motor.getState() === 'exit') {
+//if(motor_can.getState() === 'exit') {
 //setTimeout(() => {
-//can_motor.setState('toEnter');
+//motor_can.setState('toEnter');
 //setTimeout(() => {
-//can_motor.setState('toZero');
+//motor_can.setState('toZero');
 //callback();
 //}, 3000, callback);
 //}, 3000, callback);
@@ -445,7 +445,7 @@ setTimeout(testAction, 10000);
 //}
 
 //setInterval(() => {
-//can_motor.setState('toExit');
+//motor_can.setState('toExit');
 
 //enterMotorMode(() => {
 //console.log('zero');

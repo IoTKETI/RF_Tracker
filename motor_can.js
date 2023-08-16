@@ -186,7 +186,6 @@ function commMotor() {
         setTimeout(commMotor, 250);
     }
     else if(stateMotor === 'enter') {
-        P();
         if (motor_return_msg !== '') {
             unpack_reply();
             enter_mode_counter++;
@@ -241,45 +240,38 @@ function commMotor() {
         }
 
         if(p_diff < -15) {
-            p_step = -0.016;
-            p_in = p_in + p_step;
-            EnterMotorMode();
+            // p_step = -0.016;
+            // p_in = p_in + p_step;
             pack_cmd();
         }
         else if(-15 <= p_diff && p_diff < -5) {
-            p_step = -0.008;
-            p_in = p_in + p_step;
-            EnterMotorMode();
+            // p_step = -0.008;
+            // p_in = p_in + p_step;
             pack_cmd();
         }
         else if(-5 <= p_diff && p_diff < -0.2) {
-            p_step = -0.004;
-            p_in = p_in + p_step;
-            EnterMotorMode();
+            // p_step = -0.004;
+            // p_in = p_in + p_step;
             pack_cmd();
         }
         else if(-0.2 <= p_diff && p_diff < 0.2) {
             p_step = 0.000;
         }
         else if(0.2 <= p_diff && p_diff < 5) {
-            p_step = 0.004;
-            p_in = p_in + p_step;
-            EnterMotorMode();
+            // p_step = 0.004;
+            // p_in = p_in + p_step;
             pack_cmd();
         }
         else if(5 <= p_diff && p_diff < 15) {
-            p_step = 0.008;
-            p_in = p_in + p_step;
-            EnterMotorMode();
+            // p_step = 0.008;
+            // p_in = p_in + p_step;
             pack_cmd();
         }
         else if(15 <= p_diff) {
-            p_step = 0.016;
-            p_in = p_in + p_step;
-            EnterMotorMode();
+            // p_step = 0.016;
+            // p_in = p_in + p_step;
             pack_cmd();
         }
-        V();
 
         setTimeout(commMotor, 50);
     }
@@ -344,6 +336,43 @@ function V() {
     S += 1;
 }
 
+function runTarget() {
+    let target_angle = (p_target * 180)/Math.PI;
+    if(target_angle <= 0) {
+        target_angle += 360;
+    }
+    target_angle %= 360;
+
+    let cur_angle = (p_out * 180)/Math.PI;
+    if(cur_angle <= 0) {
+        cur_angle += 360;
+    }
+    cur_angle %= 360;
+
+    target_angle += 360;
+    cur_angle += 360;
+
+    let p_diff = 0;
+    let diff1 = (target_angle - cur_angle);
+    let diff2 = 0;
+    if(diff1 > 0) {
+        diff2 = diff1 - 360;
+    }
+    else {
+        diff2 = diff1 + 360;
+    }
+
+    if(Math.abs(diff1) >= Math.abs(diff2)) {
+        p_diff = diff2;
+    }
+    else {
+        p_diff = diff1;
+    }
+
+    p_in = p_in + p_diff;
+    pack_cmd();
+}
+
 exports.setTarget = function (angle) {
     if(angle < 0) {
         angle += 360;
@@ -351,6 +380,8 @@ exports.setTarget = function (angle) {
     angle %= 360;
 
     p_target = angle * 0.0174533;
+
+    runTarget();
 
     // let ori_p_in = p_out;
     // if(ori_p_in < 0) {
