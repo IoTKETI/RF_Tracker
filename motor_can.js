@@ -94,7 +94,7 @@ function canPortData(data) {
     if (_msg.length >= 24) {
         if (_msg.substring(0, 10) === ('00' + CAN_ID)) {
             motor_return_msg = _msg.substring(0, 24);
-            _msg = _msg.substring(24, _msg.length);
+            _msg = _msg.substring(24);
         }
         else {
             console.log('[canPortData] diff ID - msgid =>', _msg.substring(0, 10), 'CAN_ID =>', '00' + CAN_ID);
