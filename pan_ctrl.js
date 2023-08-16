@@ -189,7 +189,7 @@ function local_mqtt_connect(host) {
 
             tracker_heading = ((tracker_att.yaw * 180)/Math.PI);
 
-            console.log('yaw', tracker_heading);
+            //console.log('yaw', tracker_heading);
 
             //console.log('[attitude] -> ', tracker_att.roll, tracker_att.pitch, tracker_att.yaw);
 
@@ -410,14 +410,22 @@ function watchdogPanCtrl() {
                         console.log('[targetPan] -> ', targetPan);
 
                         pan_motor.setTarget(targetPan);
-                        // setTimeout(() => {
-                        //     pan_motor.setDelta(-20);
-                        //     setTimeout(() => {
-                        //         valuePan = -99;
-                        //         targetPan = valuePan - offsetPan;
-                        //         pan_motor.setTarget(targetPan);
-                        //     }, 10000);
-                        // }, 10000);
+                        setTimeout(() => {
+                            anglePan = 0;
+                            targetPan = (anglePan - offsetPan);
+
+                            console.log('[targetPan] -> ', targetPan);
+
+                            pan_motor.setTarget(targetPan);
+                            // setTimeout(() => {
+                            //     pan_motor.setDelta(-20);
+                            //     setTimeout(() => {
+                            //         valuePan = -99;
+                            //         targetPan = valuePan - offsetPan;
+                            //         pan_motor.setTarget(targetPan);
+                            //     }, 10000);
+                            // }, 10000);
+                        }, 40000);
                     }, 40000);
                 },1000);
             }

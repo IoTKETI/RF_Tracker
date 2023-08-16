@@ -219,6 +219,10 @@ exports.setState = function (state) {
 }
 
 exports.setTarget = function (angle) {
+    if(angle < 0) {
+        angle += 360;
+    }
+
     let cur_angle = 0;
     let ori_p_in = p_in - p_offset;
     if(ori_p_in < 0) {
