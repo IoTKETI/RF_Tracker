@@ -198,11 +198,13 @@ function commMotor() {
             if(target_angle < 0) {
                 target_angle += 360;
             }
+            target_angle %= 360;
 
             let cur_angle = (p_out * 180)/Math.PI;
             if(cur_angle < 0) {
                 cur_angle += 360;
             }
+            cur_angle %= 360;
 
             console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, p_in, '(', cur_angle.toFixed(1), ')', p_out, v_out, t_out);
         }
@@ -238,7 +240,7 @@ function commMotor() {
         }
 
         if(p_diff < -15) {
-            p_step = -0.012;
+            p_step = -0.016;
             p_in = p_in + p_step;
             pack_cmd();
         }
@@ -266,7 +268,7 @@ function commMotor() {
             pack_cmd();
         }
         else if(15 <= p_diff) {
-            p_step = 0.012;
+            p_step = 0.016;
             p_in = p_in + p_step;
             pack_cmd();
         }
