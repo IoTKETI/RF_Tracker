@@ -1,6 +1,7 @@
 const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
 const pan_motor = require('./motor_can');
+const tilt_motor = require('./motor_can');
 const {setTarget} = require("./motor_can");
 
 let local_mqtt_client = null;
@@ -348,9 +349,15 @@ let initMotor = () => {
     }
 }
 
-let canPortNum = '/dev/ttyAMA1';
-pan_motor.canPortOpening(canPortNum);
+
+let panCanPortNum = '/dev/ttyAMA1';
+pan_motor.canPortOpening(panCanPortNum);
 pan_motor.loop();
+
+
+let tiltCanPortNum = '/dev/ttyAMA2';
+tilt_motor.canPortOpening(tiltCanPortNum);
+tilt_motor.loop();
 
 
 let offsetPan = 0;
