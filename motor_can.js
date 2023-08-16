@@ -156,6 +156,7 @@ function commMotor() {
         setTimeout(commMotor, 0);
     }
     else if(stateMotor === 'enter') {
+        P();
         if (motor_return_msg !== '') {
             unpack_reply();
             enter_mode_counter++;
@@ -202,6 +203,7 @@ function commMotor() {
             p_in = p_in + p_step;
             pack_cmd();
         }
+        V();
 
         setTimeout(commMotor, 50);
     }
@@ -233,19 +235,33 @@ exports.setTarget = function (angle) {
         angle += 360;
     }
 
-    let cur_angle = 0;
     let ori_p_in = p_in;
     if(ori_p_in < 0) {
         ori_p_in = ori_p_in + (2 * Math.PI);
     }
-    cur_angle = ((ori_p_in * 180)/Math.PI);
+    let cur_angle = ((ori_p_in * 180)/Math.PI);
 
     let diff = (angle - cur_angle);
     this.setDelta(diff);
 }
 
+let S = 1;
+function P() {
+    while(S === 0) {
+        console.log('waiting................................................');
+    }
+
+    S -= 1;
+}
+
+function V() {
+    S += 1;
+}
+
 exports.setDelta = function (angle) {
+    P();
     p_target = p_in + (angle * 0.0174533 + p_offset);
+    V();
 }
 
 let constrain = (_in, _min, _max) => {

@@ -3,20 +3,6 @@ const {nanoid} = require("nanoid");
 const pan_motor = require('./motor_can');
 const {setTarget} = require("./motor_can");
 
-
-let cw = 0;
-let ccw = 0;
-let cur_angle = 0;
-let temp_angle = 0;
-let turn_angle = 0.0;
-let target_angle = 0.0;
-
-let motormode = 2;
-let run_flag = '';
-let exit_mode_counter = 0;
-let no_response_count = 0;
-
-
 let local_mqtt_client = null;
 
 let target_gpi = {};
