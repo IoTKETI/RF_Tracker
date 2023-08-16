@@ -219,7 +219,14 @@ exports.setState = function (state) {
 }
 
 exports.setTarget = function (angle) {
-    p_target = angle * 0.0174533 + p_offset;
+    let cur_angle = 0;
+    if(p_in < 0) {
+        let cur_p_in = p_in + (2 * Math.PI);
+        cur_angle = ((cur_p_in * 180)/Math.PI);
+    }
+
+    let diff = (angle - cur_angle);
+    this.setDelta(diff);
 }
 
 exports.setDelta = function (angle) {
