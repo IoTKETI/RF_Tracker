@@ -397,7 +397,7 @@ function ExitMotorMode() {
     if (canPort !== null) {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(PAN_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
-                // console.log(PAN_CAN_ID + 'FFFFFFFFFFFFFFFD');
+                console.log(PAN_CAN_ID + 'FFFFFFFFFFFFFFFD');
             });
         }
     }
