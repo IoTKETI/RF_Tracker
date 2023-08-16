@@ -1,8 +1,6 @@
 const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
 const can_motor = require('./motor_can');
-const tilt_motor = require('./motor_can');
-const {setTarget} = require("./motor_can");
 
 let local_mqtt_client = null;
 
@@ -132,7 +130,7 @@ function local_mqtt_connect(host) {
             //console.log('tracker_gpi: ', JSON.stringify(tracker_gpi), '\ntracker_heading_int -', tracker_heading_int, '\ntracker_heading -', tracker_heading);
 
             //if (run_flag === 'go') {
-                //target_angle = calcTargetPanAngle(target_latitude, target_longitude);
+                //target_angle = calctargetAngleAngle(target_latitude, target_longitude);
                 ////console.log('tracker_heading, target_angle', tracker_heading, target_angle);
 
                 //if (Math.abs(target_angle - tracker_heading) > 15) {
@@ -230,7 +228,7 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
     return parseFloat(pgg);
 }
 
-function calcTargetPanAngle(targetLatitude, targetLongitude) {
+function calctargetAngleAngle(targetLatitude, targetLongitude) {
     //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
     // tracker_longitude, tracker_relative_altitude); console.log('[pan] targetLatitude, targetLongitude: ',
     // targetLatitude, targetLongitude);
@@ -354,19 +352,19 @@ let canPortNum = '/dev/ttyAMA1';
 can_motor.canPortOpening(canPortNum);
 can_motor.loop();
 
-let offsetPan = 0;
-let anglePan = 0;
-let targetPan = 0;
-let statePan = 'toMotor'
+let offsetCtrl = 0;
+let angleCtrl = 0;
+let targetAngle = 0;
+let stateCtrl = 'toMotor'
 function watchdogPanCtrl() {
-    if(statePan === 'toMotor') {
+    if(stateCtrl === 'toMotor') {
         if(can_motor.getState() === 'exit') {
             setTimeout(() => {
                 can_motor.setState('toEnter');
                 setTimeout(() => {
                     can_motor.setState('toZero');
 
-                    statePan = 'motor';
+                    stateCtrl = 'motor';
                     setTimeout(watchdogPanCtrl, 0);
                 }, 2000);
             }, 2000);
@@ -375,25 +373,25 @@ function watchdogPanCtrl() {
             setTimeout(watchdogPanCtrl, 500);
         }
     }
-    else if(statePan === 'motor') {
+    else if(stateCtrl === 'motor') {
         setTimeout(watchdogPanCtrl, 300);
     }
-    else if(statePan === 'toReady') {
+    else if(stateCtrl === 'toReady') {
         if(can_motor.getState() === 'enter') {
             if(flagBPM) {
-                //offsetPan = tracker_heading;
-                offsetPan = 0;
-                console.log('[offsePan] -> ', offsetPan);
+                //offsetCtrl = tracker_heading;
+                offsetCtrl = 0;
+                console.log('[offsePan] -> ', offsetCtrl);
                 setTimeout(() => {
-                    anglePan = 0;
-                    targetPan =(anglePan - offsetPan);
+                    angleCtrl = 0;
+                    targetAngle =(angleCtrl - offsetCtrl);
 
-                    console.log('[targetPan] -> ', targetPan);
+                    console.log('[targetAngle] -> ', targetAngle);
 
-                    can_motor.setTarget(targetPan);
+                    can_motor.setTarget(targetAngle);
 
                     setTimeout(() => {
-                        statePan = 'ready';
+                        stateCtrl = 'ready';
                     }, 1000)
                 },1000);
             }
@@ -405,19 +403,19 @@ function watchdogPanCtrl() {
             setTimeout(watchdogPanCtrl, 300);
         }
     }
-    else if(statePan === 'ready') {
+    else if(stateCtrl === 'ready') {
         setTimeout(watchdogPanCtrl, 300);
     }
 }
 
 function testAction() {
-    if(statePan === 'ready') {
-        anglePan = parseInt(Math.random() * 180);
-        targetPan =(anglePan - offsetPan);
+    if(stateCtrl === 'ready') {
+        angleCtrl = parseInt(Math.random() * 180);
+        targetAngle =(angleCtrl - offsetCtrl);
 
-        console.log('[targetPan] -> ', targetPan);
+        console.log('[targetAngle] -> ', targetAngle);
 
-        can_motor.setTarget(targetPan);
+        can_motor.setTarget(targetAngle);
     }
 }
 
@@ -459,6 +457,6 @@ local_mqtt_connect('localhost');
 watchdogPanCtrl();
 
 setTimeout(() => {
-    statePan = 'toReady';
+    stateCtrl = 'toReady';
 }, 15000);
 
