@@ -226,9 +226,9 @@ exports.setTarget = function (angle) {
     let cur_angle = 0;
     let ori_p_in = p_in - p_offset;
     if(ori_p_in < 0) {
-        let cur_p_in = ori_p_in + (2 * Math.PI);
-        cur_angle = ((cur_p_in * 180)/Math.PI);
+        ori_p_in = ori_p_in + (2 * Math.PI);
     }
+    cur_angle = ((ori_p_in * 180)/Math.PI);
 
     let diff = (angle - cur_angle);
     this.setDelta(diff);
