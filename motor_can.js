@@ -162,7 +162,8 @@ function commMotor() {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> ', p_target, p_in, p_out, v_out, t_out);
+            console.log('[enter] -> ', '(', (p_target * 180)/Math.PI, ')', p_target,
+                '(', (p_in * 180)/Math.PI, ')', p_in, p_out, v_out, t_out);
         }
 
         let p_diff = (p_target - p_in) * (180 / 3.14);
