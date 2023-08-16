@@ -1,7 +1,7 @@
 const {SerialPort} = require('serialport');
 
 // ---------- set values ----------
-let PAN_CAN_ID = '000000010000';
+let PAN_CAN_ID = '000000020000';
 
 // Value limits ------
 const P_MIN = -12.500;
