@@ -162,8 +162,17 @@ function commMotor() {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> ', '(', (p_target * 180)/Math.PI, ')', p_target,
-                '(', (p_in * 180)/Math.PI, ')', p_in, p_out, v_out, t_out);
+            let target_angle = ((p_target-p_offset) * 180)/Math.PI;
+            if(target_angle < 0) {
+                target_angle += 360;
+            }
+
+            let cur_angle = ((p_in-p_offset) * 180)/Math.PI;
+            if(cur_angle < 0) {
+                cur_angle += 360;
+            }
+
+            console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, '(', cur_angle.toFixed(1), ')', p_in, p_out, v_out, t_out);
         }
 
         let p_diff = (p_target - p_in) * (180 / 3.14);
