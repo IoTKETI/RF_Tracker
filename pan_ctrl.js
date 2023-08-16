@@ -380,8 +380,8 @@ function watchdogPanCtrl() {
 
                     statePan = 'motor';
                     setTimeout(watchdogPanCtrl, 0);
-                }, 3000);
-            }, 3000);
+                }, 2000);
+            }, 2000);
         }
         else {
             setTimeout(watchdogPanCtrl, 500);

@@ -224,7 +224,7 @@ exports.setTarget = function (angle) {
     }
 
     let cur_angle = 0;
-    let ori_p_in = p_in - p_offset;
+    let ori_p_in = p_in;
     if(ori_p_in < 0) {
         ori_p_in = ori_p_in + (2 * Math.PI);
     }
