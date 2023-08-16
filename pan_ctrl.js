@@ -393,7 +393,8 @@ function watchdogPanCtrl() {
     else if(statePan === 'toReady') {
         if(pan_motor.getState() === 'enter') {
             if(flagBPM) {
-                offsetPan = tracker_heading;
+                //offsetPan = tracker_heading;
+                offsetPan = 0;
                 console.log('[offsePan] -> ', offsetPan);
                 setTimeout(() => {
                     anglePan = 0;
