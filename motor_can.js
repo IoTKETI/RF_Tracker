@@ -210,27 +210,34 @@ function commMotor() {
         let p_diff = (p_target - (p_out+p_offset)) * (180 / 3.14);
         if(p_diff < -15) {
             p_step = -0.012;
+            p_in = p_in + p_step;
+            pack_cmd();
         }
         else if(-15 <= p_diff && p_diff < -5) {
             p_step = -0.008;
+            p_in = p_in + p_step;
+            pack_cmd();
         }
-        else if(-5 <= p_diff && p_diff < -0.2) {
+        else if(-5 <= p_diff && p_diff < -0.1) {
             p_step = -0.004;
+            p_in = p_in + p_step;
+            pack_cmd();
         }
-        else if(-0.2 <= p_diff && p_diff < 0.2) {
+        else if(-0.1 <= p_diff && p_diff < 0.1) {
             p_step = 0.000;
         }
-        else if(0.2 <= p_diff && p_diff < 5) {
+        else if(0.1 <= p_diff && p_diff < 5) {
             p_step = 0.004;
+            p_in = p_in + p_step;
+            pack_cmd();
         }
         else if(5 <= p_diff && p_diff < 15) {
             p_step = 0.008;
+            p_in = p_in + p_step;
+            pack_cmd();
         }
         else if(15 <= p_diff) {
             p_step = 0.012;
-        }
-
-        if(p_step !== 0) {
             p_in = p_in + p_step;
             pack_cmd();
         }
