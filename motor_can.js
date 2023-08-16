@@ -7,8 +7,8 @@ let MOTOR_CAN_ID = CAN_ID + '0000';
 // Value limits ------
 const P_MIN = -12.500;
 const P_MAX = 12.500;
-const V_MIN = -65.000;
-const V_MAX = 65.000;
+const V_MIN = -50.000;
+const V_MAX = 50.000;
 const KP_MIN = 0.000;
 const KP_MAX = 500.000;
 const KD_MIN = 0.000;
