@@ -1,6 +1,6 @@
 const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
-const pan_motor = require('./motor_can');
+const can_motor = require('./motor_can');
 const tilt_motor = require('./motor_can');
 const {setTarget} = require("./motor_can");
 
@@ -45,7 +45,7 @@ function local_mqtt_connect(host) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'local_pan_motor_' + nanoid(15),
+        clientId: 'local_can_motor_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
@@ -316,15 +316,15 @@ setInterval(() => {
 }, 5000)
 
 let initAction = () => {
-    if(pan_motor.getState() === 'zero') {
+    if(can_motor.getState() === 'zero') {
         setTimeout(() => {
-            pan_motor.setTarget(-20);
+            can_motor.setTarget(-20);
             setTimeout(() => {
-                pan_motor.setTarget(20);
+                can_motor.setTarget(20);
                 setTimeout(() => {
-                    pan_motor.setDelta(-20);
+                    can_motor.setDelta(-20);
                     setTimeout(() => {
-                        pan_motor.setTarget(0);
+                        can_motor.setTarget(0);
                     }, 2500);
                 }, 5000);
             }, 2500);
@@ -336,11 +336,11 @@ let initAction = () => {
 }
 
 let initMotor = () => {
-    if(pan_motor.getState() === 'exit') {
+    if(can_motor.getState() === 'exit') {
         setTimeout(() => {
-            pan_motor.setState('toEnter');
+            can_motor.setState('toEnter');
             setTimeout(() => {
-                pan_motor.setState('toZero');
+                can_motor.setState('toZero');
             },3000);
         },3000);
     }
@@ -350,15 +350,9 @@ let initMotor = () => {
 }
 
 
-let panCanPortNum = '/dev/ttyAMA1';
-pan_motor.canPortOpening(panCanPortNum);
-pan_motor.loop();
-
-//
-// let tiltCanPortNum = '/dev/ttyAMA2';
-// tilt_motor.canPortOpening(tiltCanPortNum);
-// tilt_motor.loop();
-
+let canPortNum = '/dev/ttyAMA1';
+can_motor.canPortOpening(canPortNum);
+can_motor.loop();
 
 let offsetPan = 0;
 let anglePan = 0;
@@ -366,11 +360,11 @@ let targetPan = 0;
 let statePan = 'toMotor'
 function watchdogPanCtrl() {
     if(statePan === 'toMotor') {
-        if(pan_motor.getState() === 'exit') {
+        if(can_motor.getState() === 'exit') {
             setTimeout(() => {
-                pan_motor.setState('toEnter');
+                can_motor.setState('toEnter');
                 setTimeout(() => {
-                    pan_motor.setState('toZero');
+                    can_motor.setState('toZero');
 
                     statePan = 'motor';
                     setTimeout(watchdogPanCtrl, 0);
@@ -385,7 +379,7 @@ function watchdogPanCtrl() {
         setTimeout(watchdogPanCtrl, 300);
     }
     else if(statePan === 'toReady') {
-        if(pan_motor.getState() === 'enter') {
+        if(can_motor.getState() === 'enter') {
             if(flagBPM) {
                 //offsetPan = tracker_heading;
                 offsetPan = 0;
@@ -396,7 +390,7 @@ function watchdogPanCtrl() {
 
                     console.log('[targetPan] -> ', targetPan);
 
-                    pan_motor.setTarget(targetPan);
+                    can_motor.setTarget(targetPan);
 
                     setTimeout(() => {
                         statePan = 'ready';
@@ -423,7 +417,7 @@ function testAction() {
 
         console.log('[targetPan] -> ', targetPan);
 
-        pan_motor.setTarget(targetPan);
+        can_motor.setTarget(targetPan);
     }
 }
 
@@ -435,11 +429,11 @@ setInterval(() => {
 //initAction();
 
 //function enterMotorMode(callback) {
-    //if(pan_motor.getState() === 'exit') {
+    //if(can_motor.getState() === 'exit') {
         //setTimeout(() => {
-            //pan_motor.setState('toEnter');
+            //can_motor.setState('toEnter');
             //setTimeout(() => {
-                //pan_motor.setState('toZero');
+                //can_motor.setState('toZero');
                 //callback();
             //}, 3000, callback);
         //}, 3000, callback);
@@ -450,7 +444,7 @@ setInterval(() => {
 //}
 
 //setInterval(() => {
-    //pan_motor.setState('toExit');
+    //can_motor.setState('toExit');
 
     //enterMotorMode(() => {
         //console.log('zero');
