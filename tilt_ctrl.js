@@ -33,7 +33,7 @@ let sub_gps_attitude_topic = '/GPS/attitude';
 let sub_gps_position_topic = '/GPS/position';
 
 
-let pub_motor_position_topic = '/Ant_Tracker/Motor_Pan';
+let pub_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
 
 
 //------------- local mqtt connect ------------------
@@ -113,8 +113,8 @@ function local_mqtt_connect(host) {
             countBPM++;
 
             ////if (tracker_gpi.lat > 0 && tracker_gpi.lon > 0) {
-                ////tracker_latitude = tracker_gpi.lat / 10000000;
-                ////tracker_longitude = tracker_gpi.lon / 10000000;
+            ////tracker_latitude = tracker_gpi.lat / 10000000;
+            ////tracker_longitude = tracker_gpi.lon / 10000000;
             ////}
             ////tracker_altitude = tracker_gpi.alt / 1000;
             ////tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
@@ -122,48 +122,48 @@ function local_mqtt_connect(host) {
 
             //let tracker_heading_int = Math.round(tracker_heading);
             //if (tracker_heading_int >= 180) {
-                //tracker_heading = tracker_heading_int - 360;
+            //tracker_heading = tracker_heading_int - 360;
             //}
             //else {
-                //tracker_heading = tracker_heading_int;
+            //tracker_heading = tracker_heading_int;
             //}
             //console.log('tracker_gpi: ', JSON.stringify(tracker_gpi), '\ntracker_heading_int -', tracker_heading_int, '\ntracker_heading -', tracker_heading);
 
             //if (run_flag === 'go') {
-                //target_angle = calctargetAngleAngle(target_latitude, target_longitude);
-                ////console.log('tracker_heading, target_angle', tracker_heading, target_angle);
+            //target_angle = calctargetAngleAngle(target_latitude, target_longitude);
+            ////console.log('tracker_heading, target_angle', tracker_heading, target_angle);
 
-                //if (Math.abs(target_angle - tracker_heading) > 15) {
-                    //p_step = 0.015;
-                //}
-                //else if (Math.abs(target_angle - tracker_heading) > 10) {
-                    //p_step = 0.008;
-                //}
-                //else if (Math.abs(target_angle - tracker_heading) > 5) {
-                    //p_step = 0.004;
-                //}
-                //else {
-                    //p_step = 0.001;
-                //}
+            //if (Math.abs(target_angle - tracker_heading) > 15) {
+            //p_step = 0.015;
+            //}
+            //else if (Math.abs(target_angle - tracker_heading) > 10) {
+            //p_step = 0.008;
+            //}
+            //else if (Math.abs(target_angle - tracker_heading) > 5) {
+            //p_step = 0.004;
+            //}
+            //else {
+            //p_step = 0.001;
+            //}
 
-                //if (tracker_heading !== target_angle) {
-                    //cw = target_angle - tracker_heading;
-                    //if (cw < 0) {
-                        //cw = cw + 360;
-                    //}
-                    //ccw = 360 - cw;
+            //if (tracker_heading !== target_angle) {
+            //cw = target_angle - tracker_heading;
+            //if (cw < 0) {
+            //cw = cw + 360;
+            //}
+            //ccw = 360 - cw;
 
-                    //if (cw < ccw) {
-                        //p_in = p_in + p_step;
-                    //}
-                    //else if (cw > ccw) {
-                        //p_in = p_in - p_step;
-                    //}
-                    //else {
-                        //p_in = p_in;
-                    //}
-                //}
-                //p_step = 0.02;
+            //if (cw < ccw) {
+            //p_in = p_in + p_step;
+            //}
+            //else if (cw > ccw) {
+            //p_in = p_in - p_step;
+            //}
+            //else {
+            //p_in = p_in;
+            //}
+            //}
+            //p_step = 0.02;
             //}
         }
         else if (topic === sub_gps_attitude_topic) {
@@ -229,7 +229,7 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
 }
 
 function calctargetAngleAngle(targetLatitude, targetLongitude) {
-    //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
+    //console.log('[tilt] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
     // tracker_longitude, tracker_relative_altitude); console.log('[pan] targetLatitude, targetLongitude: ',
     // targetLatitude, targetLongitude);
 
@@ -348,7 +348,7 @@ let initMotor = () => {
 }
 
 
-let canPortNum = '/dev/ttyAMA1';
+let canPortNum = '/dev/ttyAMA2';
 can_motor.canPortOpening(canPortNum);
 can_motor.loop();
 
@@ -419,36 +419,36 @@ function testAction() {
     }
 }
 
-setInterval(() => {
-    testAction();
-}, 10000);
+// setInterval(() => {
+//     testAction();
+// }, 10000);
 
 //initMotor();
 //initAction();
 
 //function enterMotorMode(callback) {
-    //if(can_motor.getState() === 'exit') {
-        //setTimeout(() => {
-            //can_motor.setState('toEnter');
-            //setTimeout(() => {
-                //can_motor.setState('toZero');
-                //callback();
-            //}, 3000, callback);
-        //}, 3000, callback);
-    //}
-    //else {
-        //setTimeout(enterMotorMode, 500, callback);
-    //}
+//if(can_motor.getState() === 'exit') {
+//setTimeout(() => {
+//can_motor.setState('toEnter');
+//setTimeout(() => {
+//can_motor.setState('toZero');
+//callback();
+//}, 3000, callback);
+//}, 3000, callback);
+//}
+//else {
+//setTimeout(enterMotorMode, 500, callback);
+//}
 //}
 
 //setInterval(() => {
-    //can_motor.setState('toExit');
+//can_motor.setState('toExit');
 
-    //enterMotorMode(() => {
-        //console.log('zero');
-    //});
+//enterMotorMode(() => {
+//console.log('zero');
+//});
 
-    //initAction();
+//initAction();
 //}, 60000);
 
 
