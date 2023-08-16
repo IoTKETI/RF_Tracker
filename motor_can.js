@@ -395,7 +395,7 @@ function pack_cmd() {
 let unpack_reply = () => {
     try {
         let id = parseInt(motor_return_msg.substring(9, 10), 16);
-        if (id === 1) {
+        if (id === parseInt(CAN_ID, 16)) {
             let p_int = parseInt(motor_return_msg.substring(10, 14), 16);
             let v_int = parseInt(motor_return_msg.substring(14, 17), 16);
             let i_int = parseInt(motor_return_msg.substring(17, 20), 16);
