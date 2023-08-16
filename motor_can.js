@@ -236,7 +236,7 @@ function commMotor() {
         }
         V();
 
-        setTimeout(commMotor, 40);
+        setTimeout(commMotor, 20);
     }
     else if(stateMotor === 'toZero') {
         Zero();
