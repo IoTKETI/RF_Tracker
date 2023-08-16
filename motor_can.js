@@ -248,7 +248,7 @@ function commMotor() {
         //     pack_cmd();
         // }
 
-        EnterMotorMode();
+        //EnterMotorMode();
 
         // if(p_diff < -15) {
         //     p_step = -0.016;
