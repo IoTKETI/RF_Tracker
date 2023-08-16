@@ -1,7 +1,8 @@
 const {SerialPort} = require('serialport');
 
 // ---------- set values ----------
-let PAN_CAN_ID = '000000020000';
+let CAN_ID = '00000002';
+let MOTOR_CAN_ID = CAN_ID + '0000';
 
 // Value limits ------
 const P_MIN = -12.500;
@@ -43,7 +44,9 @@ let motor_return_msg = '';
 
 //------------- Can communication -------------
 exports.canPortOpening = (canPortNum, ID) => {
-    PAN_CAN_ID = ID;
+    CAN_ID = ID;
+    MOTOR_CAN_ID = ID + '0000';
+
     if (canPort == null) {
         canPort = new SerialPort({
             path: canPortNum,
@@ -89,7 +92,7 @@ function canPortData(data) {
     _msg += data.toString('hex').toLowerCase();
 
     if (_msg.length >= 24) {
-        if (_msg.substring(0, 10) === '0000000001') {
+        if (_msg.substring(0, 10) === CAN_ID) {
             motor_return_msg = _msg.substring(0, 24);
             _msg = _msg.substring(24, _msg.length);
         }
@@ -352,7 +355,7 @@ function pack_cmd() {
     let kd_int_hex = kd_int.toString(16).padStart(3, '0');
     let t_int_hex = t_int.toString(16).padStart(3, '0');
 
-    let msg_buf = PAN_CAN_ID + p_int_hex + v_int_hex + kp_int_hex + kd_int_hex + t_int_hex;
+    let msg_buf = MOTOR_CAN_ID + p_int_hex + v_int_hex + kp_int_hex + kd_int_hex + t_int_hex;
     //console.log('Can Port Send Data ===> ' + msg_buf);
 
     if (canPort !== null) {
@@ -386,8 +389,8 @@ let unpack_reply = () => {
 function EnterMotorMode() {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write(Buffer.from(PAN_CAN_ID + 'FFFFFFFFFFFFFFFC', 'hex'), () => {
-                console.log(PAN_CAN_ID + 'FFFFFFFFFFFFFFFC');
+            canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFC', 'hex'), () => {
+                console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFC');
             });
         }
     }
@@ -396,8 +399,8 @@ function EnterMotorMode() {
 function ExitMotorMode() {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write(Buffer.from(PAN_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
-                console.log(PAN_CAN_ID + 'FFFFFFFFFFFFFFFD');
+            canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
+                console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD');
             });
         }
     }
@@ -406,8 +409,8 @@ function ExitMotorMode() {
 function Zero() {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write(Buffer.from(PAN_CAN_ID + 'FFFFFFFFFFFFFFFE', 'hex'), () => {
-                // console.log(PAN_CAN_ID + 'FFFFFFFFFFFFFFFE');
+            canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFE', 'hex'), () => {
+                // console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFE');
             });
         }
     }
