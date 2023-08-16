@@ -257,6 +257,8 @@ function commMotor() {
         }
         else if(-0.2 <= p_diff && p_diff < 0.2) {
             p_step = 0.000;
+            p_in = p_in + p_step;
+            pack_cmd();
         }
         else if(0.2 <= p_diff && p_diff < 5) {
             p_step = 0.004;
