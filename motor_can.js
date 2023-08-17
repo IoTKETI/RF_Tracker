@@ -309,19 +309,28 @@ function turnTarget() {
     }
 
     if (p_diff < -15) {
-         p_step = -(2.1 * 0.0174533);
-         p_in = p_in + p_step;
+        p_step = -(2.1 * 0.0174533);
+        p_in = p_in + p_step;
+        if(p_in <= g_target) {
+         p_in = g_target;
+        }
         pack_cmd();
     }
     else if (-15 <= p_diff && p_diff < -5) {
         p_step = -(1.1 * 0.0174533);
         p_in = p_in + p_step;
+        if(p_in <= g_target) {
+            p_in = g_target;
+        }
         pack_cmd();
 
     }
     else if (-5 <= p_diff && p_diff < -0.5) {
         p_step = -(0.5 * 0.0174533);
         p_in = p_in + p_step;
+        if(p_in <= g_target) {
+            p_in = g_target;
+        }
         pack_cmd();
 
     }
@@ -333,18 +342,27 @@ function turnTarget() {
     else if (0.5 <= p_diff && p_diff < 5) {
         p_step = (0.5 * 0.0174533);
         p_in = p_in + p_step;
+        if(p_in >= g_target) {
+            p_in = g_target;
+        }
         pack_cmd();
 
     }
     else if (5 <= p_diff && p_diff < 15) {
         p_step = (1.1 * 0.0174533);
         p_in = p_in + p_step;
+        if(p_in >= g_target) {
+            p_in = g_target;
+        }
         pack_cmd();
 
     }
     else if (15 <= p_diff) {
         p_step = (2.1 * 0.0174533);
         p_in = p_in + p_step;
+        if(p_in >= g_target) {
+            p_in = g_target;
+        }
         pack_cmd();
     }
 
