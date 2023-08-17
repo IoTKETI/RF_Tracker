@@ -208,84 +208,7 @@ function commMotor() {
         }
 
         if(turn_flag === 1) {
-            let target_angle = (p_target * 180) / Math.PI;
-            if (target_angle <= 0) {
-                target_angle += 360;
-            }
-            target_angle %= 360;
-
-            let cur_angle = (p_out * 180) / Math.PI;
-            if (cur_angle <= 0) {
-                cur_angle += 360;
-            }
-            cur_angle %= 360;
-
-            target_angle += 360;
-            cur_angle += 360;
-
-            let p_diff = 0;
-            let diff1 = (target_angle - cur_angle);
-            let diff2 = 0;
-            if (diff1 > 0) {
-                diff2 = diff1 - 360;
-            }
-            else {
-                diff2 = diff1 + 360;
-            }
-
-            if (Math.abs(diff1) >= Math.abs(diff2)) {
-                p_diff = diff2;
-            }
-            else {
-                p_diff = diff1;
-            }
-
-            if (p_diff < -15) {
-                // p_step = -0.016;
-                // p_in = p_in + p_step;
-                //EnterMotorMode();
-                pack_cmd();
-
-
-            }
-            else if (-15 <= p_diff && p_diff < -5) {
-                // p_step = -0.008;
-                // p_in = p_in + p_step;
-                //EnterMotorMode();
-                pack_cmd();
-
-            }
-            else if (-5 <= p_diff && p_diff < -0.2) {
-                // p_step = -0.004;
-                // p_in = p_in + p_step;
-                //EnterMotorMode();
-                pack_cmd();
-
-            }
-            else if (-0.2 <= p_diff && p_diff < 0.2) {
-                p_step = 0.000;
-                turn_flag = 0;
-            }
-            else if (0.2 <= p_diff && p_diff < 5) {
-                // p_step = 0.004;
-                // p_in = p_in + p_step;
-                //EnterMotorMode();
-                pack_cmd();
-
-            }
-            else if (5 <= p_diff && p_diff < 15) {
-                // p_step = 0.008;
-                // p_in = p_in + p_step;
-                //EnterMotorMode();
-                pack_cmd();
-
-            }
-            else if (15 <= p_diff) {
-                // p_step = 0.016;
-                // p_in = p_in + p_step;
-                //EnterMotorMode();
-                pack_cmd();
-            }
+            turnTarget();
         }
 
         setTimeout(commMotor, 50);
@@ -359,7 +282,7 @@ function turnTarget() {
     }
     target_angle %= 360;
 
-    let cur_angle = (p_out * 180)/Math.PI;
+    let cur_angle = (p_in * 180)/Math.PI;
     if(cur_angle <= 0) {
         cur_angle += 360;
     }
@@ -385,10 +308,54 @@ function turnTarget() {
         p_diff = diff1;
     }
 
-    p_in = p_in + (p_diff * 0.0174533);
-    EnterMotorMode();
+    if (p_diff < -15) {
+         p_step = -0.016;
+         p_in = p_in + p_step;
+        pack_cmd();
+    }
+    else if (-15 <= p_diff && p_diff < -5) {
+        p_step = -0.008;
+        p_in = p_in + p_step;
+        pack_cmd();
+
+    }
+    else if (-5 <= p_diff && p_diff < -0.2) {
+        p_step = -0.004;
+        p_in = p_in + p_step;
+        pack_cmd();
+
+    }
+    else if (-0.2 <= p_diff && p_diff < 0.2) {
+        p_step = 0.000;
+        turn_flag = 0;
+    }
+    else if (0.2 <= p_diff && p_diff < 5) {
+        p_step = 0.004;
+        p_in = p_in + p_step;
+        pack_cmd();
+
+    }
+    else if (5 <= p_diff && p_diff < 15) {
+        p_step = 0.008;
+        p_in = p_in + p_step;
+        pack_cmd();
+
+    }
+    else if (15 <= p_diff) {
+        p_step = 0.016;
+        p_in = p_in + p_step;
+        pack_cmd();
+    }
+
+    // if(Math.abs(diff2) > 15) {
+    //     p_in = p_in + (2 * 0.0174533);
+    // }
+    // else {
+    //     p_in = p_in + (p_diff * 0.0174533);
+    // }
+
+    //p_in = p_in + (p_diff * 0.0174533);
     pack_cmd();
-    turn_flag = 1;
 }
 
 exports.setTarget = function (angle) {
@@ -400,6 +367,7 @@ exports.setTarget = function (angle) {
     p_target = angle * 0.0174533;
 
     turnTarget();
+    turn_flag = 1;
 
     // let ori_p_in = p_out;
     // if(ori_p_in < 0) {
