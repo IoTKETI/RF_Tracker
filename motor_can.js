@@ -276,7 +276,7 @@ function V() {
 
 let turn_flag = 0;
 function turnTarget() {
-    let target_angle = Math.round(((p_target * 180)/Math.PI) * 10)/10;
+    let target_angle = Math.round(((g_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
     }
@@ -358,13 +358,14 @@ function turnTarget() {
     pack_cmd();
 }
 
+let g_target = 0;
 exports.setTarget = function (angle) {
-    if(angle < 0) {
-        angle += 360;
-    }
-    angle %= 360;
+    // if(angle < 0) {
+    //     angle += 360;
+    // }
+    // angle %= 360;
 
-    p_target = angle * 0.0174533;
+    g_target = angle * 0.0174533;
 
     turnTarget();
     turn_flag = 1;
