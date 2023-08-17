@@ -356,7 +356,7 @@ function turnTarget() {
     // }
 
     //p_in = p_in + (p_diff * 0.0174533);
-    pack_cmd();
+    //pack_cmd();
 }
 
 let g_target = 0;
@@ -366,6 +366,7 @@ exports.setTarget = function (angle) {
     // }
     // angle %= 360;
 
+    turn_flag = 0;
     g_target = angle * 0.0174533;
 
     turnTarget();
