@@ -188,23 +188,10 @@ function commMotor() {
     else if(stateMotor === 'enter') {
         if (motor_return_msg !== '') {
             unpack_reply();
-            enter_mode_counter++;
 
             motor_return_msg = '';
 
-            let target_angle = Math.round(((p_target * 180)/Math.PI) * 10) / 10;
-            if(target_angle <= 0) {
-                target_angle += 360;
-            }
-            target_angle %= 360;
-
-            let cur_angle = Math.round(((p_out * 180)/Math.PI) * 10) / 10;
-            if(cur_angle <= 0) {
-                cur_angle += 360;
-            }
-            cur_angle %= 360;
-
-            console.log('[enter] -> ', '(', target_angle, ')', p_target, p_in, '(', cur_angle, ')', p_out, v_out, t_out);
+            console.log('[enter] -> ', g_target, p_in, p_out);
         }
 
         if(turn_flag === 1) {
@@ -317,7 +304,7 @@ function turnTarget() {
         pack_cmd();
     }
     else if (-15 <= p_diff && p_diff < -5) {
-        p_step = -(2.1 * 0.0174533);
+        p_step = -(3.1 * 0.0174533);
         p_in = p_in + p_step;
         if(p_in <= g_target) {
             p_in = g_target;
@@ -349,7 +336,7 @@ function turnTarget() {
 
     }
     else if (5 <= p_diff && p_diff < 15) {
-        p_step = (2.1 * 0.0174533);
+        p_step = (3.1 * 0.0174533);
         p_in = p_in + p_step;
         if(p_in >= g_target) {
             p_in = g_target;
