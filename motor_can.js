@@ -211,7 +211,7 @@ function commMotor() {
             turnTarget();
         }
 
-        setTimeout(commMotor, 50);
+        setTimeout(commMotor, 20);
     }
     else if(stateMotor === 'toZero') {
         Zero();
