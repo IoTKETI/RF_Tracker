@@ -325,6 +325,8 @@ function turnTarget() {
         p_step = 0.000;
         turn_flag = 0;
         pack_cmd();
+
+        console.log('<------------------------------------------->');
     }
     else if (0.5 <= p_diff && p_diff < 5) {
         p_step = (1.1 * 0.0174533);
