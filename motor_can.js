@@ -207,81 +207,84 @@ function commMotor() {
             console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, p_in, '(', cur_angle.toFixed(1), ')', p_out, v_out, t_out);
         }
 
-        let target_angle = (p_target * 180)/Math.PI;
-        if(target_angle <= 0) {
+        if(run_flag === 1) {
+            let target_angle = (p_target * 180) / Math.PI;
+            if (target_angle <= 0) {
+                target_angle += 360;
+            }
+            target_angle %= 360;
+
+            let cur_angle = (p_out * 180) / Math.PI;
+            if (cur_angle <= 0) {
+                cur_angle += 360;
+            }
+            cur_angle %= 360;
+
             target_angle += 360;
-        }
-        target_angle %= 360;
-
-        let cur_angle = (p_out * 180)/Math.PI;
-        if(cur_angle <= 0) {
             cur_angle += 360;
-        }
-        cur_angle %= 360;
 
-        target_angle += 360;
-        cur_angle += 360;
+            let p_diff = 0;
+            let diff1 = (target_angle - cur_angle);
+            let diff2 = 0;
+            if (diff1 > 0) {
+                diff2 = diff1 - 360;
+            }
+            else {
+                diff2 = diff1 + 360;
+            }
 
-        let p_diff = 0;
-        let diff1 = (target_angle - cur_angle);
-        let diff2 = 0;
-        if(diff1 > 0) {
-            diff2 = diff1 - 360;
-        }
-        else {
-            diff2 = diff1 + 360;
-        }
+            if (Math.abs(diff1) >= Math.abs(diff2)) {
+                p_diff = diff2;
+            }
+            else {
+                p_diff = diff1;
+            }
 
-        if(Math.abs(diff1) >= Math.abs(diff2)) {
-            p_diff = diff2;
-        }
-        else {
-            p_diff = diff1;
-        }
+            if (p_diff < -15) {
+                // p_step = -0.016;
+                // p_in = p_in + p_step;
+                //pack_cmd();
+                EnterMotorMode();
 
-        if(p_diff < -15) {
-            // p_step = -0.016;
-            // p_in = p_in + p_step;
-            //pack_cmd();
-            EnterMotorMode();
+            }
+            else if (-15 <= p_diff && p_diff < -5) {
+                // p_step = -0.008;
+                // p_in = p_in + p_step;
+                //pack_cmd();
+                EnterMotorMode();
 
-        }
-        else if(-15 <= p_diff && p_diff < -5) {
-            // p_step = -0.008;
-            // p_in = p_in + p_step;
-            //pack_cmd();
-            EnterMotorMode();
+            }
+            else if (-5 <= p_diff && p_diff < -0.2) {
+                // p_step = -0.004;
+                // p_in = p_in + p_step;
+                //pack_cmd();
+                EnterMotorMode();
 
-        }
-        else if(-5 <= p_diff && p_diff < -0.2) {
-            // p_step = -0.004;
-            // p_in = p_in + p_step;
-            //pack_cmd();
-            EnterMotorMode();
+            }
+            else if (-0.2 <= p_diff && p_diff < 0.2) {
+                p_step = 0.000;
+                run_flag = 0;
+            }
+            else if (0.2 <= p_diff && p_diff < 5) {
+                // p_step = 0.004;
+                // p_in = p_in + p_step;
+                //pack_cmd();
+                EnterMotorMode();
 
-        }
-        else if(-0.2 <= p_diff && p_diff < 0.2) {
-            p_step = 0.000;
-        }
-        else if(0.2 <= p_diff && p_diff < 5) {
-            // p_step = 0.004;
-            // p_in = p_in + p_step;
-            //pack_cmd();
-            EnterMotorMode();
+            }
+            else if (5 <= p_diff && p_diff < 15) {
+                // p_step = 0.008;
+                // p_in = p_in + p_step;
+                //pack_cmd();
+                EnterMotorMode();
 
-        }
-        else if(5 <= p_diff && p_diff < 15) {
-            // p_step = 0.008;
-            // p_in = p_in + p_step;
-            //pack_cmd();
-            EnterMotorMode();
-
-        }
-        else if(15 <= p_diff) {
-            // p_step = 0.016;
-            // p_in = p_in + p_step;
-            //pack_cmd();
-            EnterMotorMode();
+            }
+            else if (15 <= p_diff) {
+                // p_step = 0.016;
+                // p_in = p_in + p_step;
+                //pack_cmd();
+                EnterMotorMode();
+            }
         }
 
         setTimeout(commMotor, 100);
@@ -347,6 +350,7 @@ function V() {
     S += 1;
 }
 
+let run_flag = 0;
 function runTarget() {
     let target_angle = (p_target * 180)/Math.PI;
     if(target_angle <= 0) {
@@ -382,6 +386,7 @@ function runTarget() {
 
     p_in = p_in + (p_diff * 0.0174533);
     pack_cmd();
+    run_flag = 1;
 }
 
 exports.setTarget = function (angle) {
