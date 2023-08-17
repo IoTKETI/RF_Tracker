@@ -325,6 +325,7 @@ function turnTarget() {
         p_step = 0.000;
         turn_flag = 0;
         ExitMotorMode();
+        pack_cmd();
         EnterMotorMode();
         pack_cmd();
 
