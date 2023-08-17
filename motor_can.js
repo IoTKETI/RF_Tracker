@@ -324,6 +324,7 @@ function turnTarget() {
     else if (-0.5 <= p_diff && p_diff < 0.5) {
         p_step = 0.000;
         turn_flag = 0;
+        ExitMotorMode();
         EnterMotorMode();
         pack_cmd();
 
