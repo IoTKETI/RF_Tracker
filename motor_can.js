@@ -328,6 +328,7 @@ function turnTarget() {
     else if (-0.5 <= p_diff && p_diff < 0.5) {
         p_step = 0.000;
         turn_flag = 0;
+        pack_cmd();
     }
     else if (0.5 <= p_diff && p_diff < 5) {
         p_step = (0.5 * 0.0174533);
