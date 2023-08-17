@@ -309,18 +309,18 @@ function turnTarget() {
     }
 
     if (p_diff < -15) {
-         p_step = -(2.5 * 0.0174533);
+         p_step = -(2.1 * 0.0174533);
          p_in = p_in + p_step;
         pack_cmd();
     }
     else if (-15 <= p_diff && p_diff < -5) {
-        p_step = -(1.5 * 0.0174533);
+        p_step = -(1.1 * 0.0174533);
         p_in = p_in + p_step;
         pack_cmd();
 
     }
     else if (-5 <= p_diff && p_diff < -0.2) {
-        p_step = -(0.9 * 0.0174533);
+        p_step = -(0.7 * 0.0174533);
         p_in = p_in + p_step;
         pack_cmd();
 
@@ -330,19 +330,19 @@ function turnTarget() {
         turn_flag = 0;
     }
     else if (0.2 <= p_diff && p_diff < 5) {
-        p_step = (0.9 * 0.0174533);
+        p_step = (0.7 * 0.0174533);
         p_in = p_in + p_step;
         pack_cmd();
 
     }
     else if (5 <= p_diff && p_diff < 15) {
-        p_step = (1.5 * 0.0174533);
+        p_step = (1.1 * 0.0174533);
         p_in = p_in + p_step;
         pack_cmd();
 
     }
     else if (15 <= p_diff) {
-        p_step = (2.5 * 0.0174533);
+        p_step = (2.1 * 0.0174533);
         p_in = p_in + p_step;
         pack_cmd();
     }
