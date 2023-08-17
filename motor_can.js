@@ -243,22 +243,23 @@ function commMotor() {
             if (p_diff < -15) {
                 // p_step = -0.016;
                 // p_in = p_in + p_step;
-                //pack_cmd();
                 EnterMotorMode();
+                pack_cmd();
+
 
             }
             else if (-15 <= p_diff && p_diff < -5) {
                 // p_step = -0.008;
                 // p_in = p_in + p_step;
-                //pack_cmd();
                 EnterMotorMode();
+                pack_cmd();
 
             }
             else if (-5 <= p_diff && p_diff < -0.2) {
                 // p_step = -0.004;
                 // p_in = p_in + p_step;
-                //pack_cmd();
                 EnterMotorMode();
+                pack_cmd();
 
             }
             else if (-0.2 <= p_diff && p_diff < 0.2) {
@@ -268,22 +269,22 @@ function commMotor() {
             else if (0.2 <= p_diff && p_diff < 5) {
                 // p_step = 0.004;
                 // p_in = p_in + p_step;
-                //pack_cmd();
                 EnterMotorMode();
+                pack_cmd();
 
             }
             else if (5 <= p_diff && p_diff < 15) {
                 // p_step = 0.008;
                 // p_in = p_in + p_step;
-                //pack_cmd();
                 EnterMotorMode();
+                pack_cmd();
 
             }
             else if (15 <= p_diff) {
                 // p_step = 0.016;
                 // p_in = p_in + p_step;
-                //pack_cmd();
                 EnterMotorMode();
+                pack_cmd();
             }
         }
 
@@ -385,6 +386,7 @@ function turnTarget() {
     }
 
     p_in = p_in + (p_diff * 0.0174533);
+    EnterMotorMode();
     pack_cmd();
     turn_flag = 1;
 }
