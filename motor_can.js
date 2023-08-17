@@ -369,7 +369,7 @@ function runTarget() {
         p_diff = diff1;
     }
 
-    p_in = p_in + p_diff;
+    p_in = p_in + (p_diff * 0.0174533);
     pack_cmd();
 }
 
