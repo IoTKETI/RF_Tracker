@@ -415,7 +415,7 @@ function testAction() {
         angleCtrl = parseInt(Math.random() * 90);
         targetAngle =(angleCtrl - offsetCtrl);
 
-        console.log('[targetAngle] -> ', targetAngle);
+        console.log('[targetAngle] -> ', targetAngle, (targetAngle * 0.0174533));
 
         motor_can.setTarget(targetAngle);
     }
