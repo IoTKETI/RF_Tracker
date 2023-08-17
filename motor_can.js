@@ -296,62 +296,49 @@ function turnTarget() {
     }
 
     if (p_diff < -15) {
-        p_step = -(3.1 * 0.0174533);
-        p_in = p_in + p_step;
+        p_in = p_in - (3.1 * 0.0174533);
         if(p_in <= g_target) {
-         p_in = g_target;
+            p_in = g_target;
         }
         pack_cmd();
     }
     else if (-15 <= p_diff && p_diff < -5) {
-        p_step = -(2.1 * 0.0174533);
-        p_in = p_in + p_step;
+        p_in = p_in - (2.1 * 0.0174533);
         if(p_in <= g_target) {
             p_in = g_target;
         }
         pack_cmd();
-
     }
     else if (-5 <= p_diff && p_diff < -0.5) {
-        p_step = -(1.1 * 0.0174533);
-        p_in = p_in + p_step;
+        p_in = p_in - (1.1 * 0.0174533);
         if(p_in <= g_target) {
             p_in = g_target;
         }
         pack_cmd();
-
     }
     else if (-0.5 <= p_diff && p_diff < 0.5) {
         p_step = 0.000;
         turn_flag = 0;
-        ExitMotorMode();
-        pack_cmd();
-        EnterMotorMode();
         pack_cmd();
 
         console.log('<------------------------------------------->');
     }
     else if (0.5 <= p_diff && p_diff < 5) {
-        p_step = (1.1 * 0.0174533);
-        p_in = p_in + p_step;
+        p_in = p_in + (1.1 * 0.0174533);
         if(p_in >= g_target) {
             p_in = g_target;
         }
         pack_cmd();
-
     }
     else if (5 <= p_diff && p_diff < 15) {
-        p_step = (2.1 * 0.0174533);
-        p_in = p_in + p_step;
+        p_in = p_in + (2.1 * 0.0174533);
         if(p_in >= g_target) {
             p_in = g_target;
         }
         pack_cmd();
-
     }
     else if (15 <= p_diff) {
-        p_step = (3.1 * 0.0174533);
-        p_in = p_in + p_step;
+        p_in = p_in + (3.1 * 0.0174533);
         if(p_in >= g_target) {
             p_in = g_target;
         }
