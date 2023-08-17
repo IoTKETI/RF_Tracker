@@ -319,18 +319,18 @@ function turnTarget() {
         pack_cmd();
 
     }
-    else if (-5 <= p_diff && p_diff < -0.2) {
-        p_step = -(0.7 * 0.0174533);
+    else if (-5 <= p_diff && p_diff < -0.5) {
+        p_step = -(0.5 * 0.0174533);
         p_in = p_in + p_step;
         pack_cmd();
 
     }
-    else if (-0.2 <= p_diff && p_diff < 0.2) {
+    else if (-0.5 <= p_diff && p_diff < 0.5) {
         p_step = 0.000;
         turn_flag = 0;
     }
-    else if (0.2 <= p_diff && p_diff < 5) {
-        p_step = (0.7 * 0.0174533);
+    else if (0.5 <= p_diff && p_diff < 5) {
+        p_step = (0.5 * 0.0174533);
         p_in = p_in + p_step;
         pack_cmd();
 
