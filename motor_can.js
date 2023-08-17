@@ -192,19 +192,19 @@ function commMotor() {
 
             motor_return_msg = '';
 
-            let target_angle = (p_target * 180)/Math.PI;
+            let target_angle = Math.roudn(((p_target * 180)/Math.PI) * 10) / 10;
             if(target_angle <= 0) {
                 target_angle += 360;
             }
             target_angle %= 360;
 
-            let cur_angle = (p_out * 180)/Math.PI;
+            let cur_angle = Math.round(((p_out * 180)/Math.PI) * 10) / 10;
             if(cur_angle <= 0) {
                 cur_angle += 360;
             }
             cur_angle %= 360;
 
-            console.log('[enter] -> ', '(', target_angle.toFixed(1), ')', p_target, p_in, '(', cur_angle.toFixed(1), ')', p_out, v_out, t_out);
+            console.log('[enter] -> ', '(', target_angle, ')', p_target, p_in, '(', cur_angle, ')', p_out, v_out, t_out);
         }
 
         if(turn_flag === 1) {
@@ -276,13 +276,13 @@ function V() {
 
 let turn_flag = 0;
 function turnTarget() {
-    let target_angle = (p_target * 180)/Math.PI;
+    let target_angle = Math.round(((p_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
     }
     target_angle %= 360;
 
-    let cur_angle = (p_in * 180)/Math.PI;
+    let cur_angle = Math.round(((p_in * 180)/Math.PI) * 10)/10;
     if(cur_angle <= 0) {
         cur_angle += 360;
     }
