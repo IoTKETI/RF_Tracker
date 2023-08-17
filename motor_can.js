@@ -192,7 +192,7 @@ function commMotor() {
 
             motor_return_msg = '';
 
-            let target_angle = Math.roudn(((p_target * 180)/Math.PI) * 10) / 10;
+            let target_angle = Math.round(((p_target * 180)/Math.PI) * 10) / 10;
             if(target_angle <= 0) {
                 target_angle += 360;
             }
