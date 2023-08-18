@@ -420,7 +420,7 @@ function testAction() {
         motor_can.setTarget(targetAngle);
     }
 
-    let period = (10 + parseInt(Math.random() * 5)) * 1000;
+    let period = (1 + parseInt(Math.random() * 5)) * 1000;
     setTimeout(testAction, period);
 }
 
