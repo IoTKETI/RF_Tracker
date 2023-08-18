@@ -195,7 +195,7 @@ function commMotor() {
         }
 
         if(turn_flag === 1) {
-            turnTarget();
+            turnTarget(p_in, g_target);
         }
 
         setTimeout(commMotor, 100);
@@ -262,15 +262,15 @@ function V() {
 }
 
 let turn_flag = 0;
-function turnTarget() {
+function turnTarget(_in, _target) {
     P();
-    let target_angle = Math.round(((g_target * 180)/Math.PI) * 10)/10;
+    let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
     }
     target_angle %= 360;
 
-    let cur_angle = Math.round(((p_in * 180)/Math.PI) * 10)/10;
+    let cur_angle = Math.round(((_in * 180)/Math.PI) * 10)/10;
     if(cur_angle <= 0) {
         cur_angle += 360;
     }
@@ -297,52 +297,60 @@ function turnTarget() {
     }
 
     if (p_diff < -15) {
-        p_in = p_in - (3.1 * 0.0174533);
-        if(p_in <= g_target) {
-            p_in = g_target;
+        _in = _in - (3.1 * 0.0174533);
+        if(_in <= _target) {
+            _in = _target;
         }
+        p_in = _in;
         pack_cmd();
     }
     else if (-15 <= p_diff && p_diff < -5) {
-        p_in = p_in - (2.1 * 0.0174533);
-        if(p_in <= g_target) {
-            p_in = g_target;
+        _in = _in - (2.1 * 0.0174533);
+        if(_in <= _target) {
+            _in = _target;
         }
+        p_in = _in;
         pack_cmd();
     }
     else if (-5 <= p_diff && p_diff < -0.5) {
-        p_in = p_in - (1.1 * 0.0174533);
-        if(p_in <= g_target) {
-            p_in = g_target;
+        _in = _in - (1.1 * 0.0174533);
+        if(_in <= _target) {
+            _in = _target;
         }
+        p_in = _in;
         pack_cmd();
     }
     else if (-0.5 <= p_diff && p_diff < 0.5) {
         p_step = 0.000;
         turn_flag = 0;
+
+        p_in = _in;
         pack_cmd();
 
         console.log('<------------------------------------------->');
     }
     else if (0.5 <= p_diff && p_diff < 5) {
-        p_in = p_in + (1.1 * 0.0174533);
-        if(p_in >= g_target) {
-            p_in = g_target;
+        _in = _in + (1.1 * 0.0174533);
+        if(_in >= _target) {
+            _in = _target;
         }
+        p_in = _in;
         pack_cmd();
     }
     else if (5 <= p_diff && p_diff < 15) {
-        p_in = p_in + (2.1 * 0.0174533);
-        if(p_in >= g_target) {
-            p_in = g_target;
+        _in = _in + (2.1 * 0.0174533);
+        if(_in >= _target) {
+            _in = _target;
         }
+        p_in = _in;
         pack_cmd();
     }
     else if (15 <= p_diff) {
-        p_in = p_in + (3.1 * 0.0174533);
-        if(p_in >= g_target) {
-            p_in = g_target;
+        _in = _in + (3.1 * 0.0174533);
+        if(_in >= _target) {
+            _in = _target;
         }
+        p_in = _in;
         pack_cmd();
     }
     V();
@@ -368,7 +376,7 @@ exports.setTarget = function (angle) {
     turn_flag = 0;
     g_target = angle * 0.0174533;
 
-    turnTarget();
+    turnTarget(p_in, g_target);
     turn_flag = 1;
 
     // let ori_p_in = p_out;
