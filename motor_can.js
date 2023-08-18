@@ -251,7 +251,7 @@ exports.setState = function (state) {
 let S = 1;
 function P() {
     while(S === 0) {
-        console.log('waiting................................................');
+        console.log('.............waiting................................................');
     }
 
     S -= 1;
@@ -263,6 +263,7 @@ function V() {
 
 let turn_flag = 0;
 function turnTarget() {
+    P();
     let target_angle = Math.round(((g_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
@@ -344,6 +345,7 @@ function turnTarget() {
         }
         pack_cmd();
     }
+    V();
 
     // if(Math.abs(diff2) > 15) {
     //     p_in = p_in + (2 * 0.0174533);
