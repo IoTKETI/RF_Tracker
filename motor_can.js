@@ -17,7 +17,7 @@ const T_MIN = -18.000;
 const T_MAX = 18.000;
 // -------------------
 
-let p_offset = 0.24;
+const p_offset = 0.24;
 
 let p_in = 0.000;
 let v_in = 0.000;
@@ -29,13 +29,9 @@ let p_out = 0.000;
 let v_out = 0.000;
 let t_out = 0.000;
 
-let p_step = 0.005;
-let p_target = 0.0;
+let g_target = 0.0;
 
-let motormode = 2;
-let run_flag = '';
-let exit_mode_counter = 0;
-let no_response_count = 0;
+let mode_counter = 0;
 
 let canBaudRate = '115200';
 let canPort = null;
@@ -70,17 +66,17 @@ exports.canPortOpening = (canPortNum, ID) => {
     }
 }
 
-function canPortOpen() {
+let canPortOpen = () => {
     console.log('canPort (' + canPort.path + '), canPort rate: ' + canPort.baudRate + ' open.');
 }
 
-function canPortClose() {
+let canPortClose = () => {
     console.log('[pan] canPort closed.');
 
     setTimeout(this.canPortOpening, 2000);
 }
 
-function canPortError(error) {
+let canPortError = (error) => {
     console.log('[pan] canPort error : ' + error);
 
     setTimeout(this.canPortOpening, 2000);
@@ -88,7 +84,7 @@ function canPortError(error) {
 
 let _msg = '';
 
-function canPortData(data) {
+let canPortData = (data) => {
     _msg += data.toString('hex').toLowerCase();
 
     if (_msg.length >= 24) {
@@ -105,29 +101,29 @@ function canPortData(data) {
 //---------------------------------------------------
 
 let stateMotor = 'toExit';
-let enter_mode_counter = 0;
 
-exports.loop = function () {
+exports.loop = () => {
     setTimeout(commMotor, 3000);
 }
 
-function commMotor() {
+let commMotor = () => {
     if(stateMotor === 'toExit') {
-        ExitMotorMode();
-
-        stateMotor = 'exiting';
-        setTimeout(commMotor, 50);
+        ExitMotorMode(() => {
+            stateMotor = 'exiting';
+            setTimeout(commMotor, 50);
+        });
     }
     else if(stateMotor === 'exiting') {
         if (motor_return_msg !== '') {
             unpack_reply();
-            exit_mode_counter++;
+            mode_counter++;
 
             motor_return_msg = '';
+
             p_in = p_out;
 
-            if (exit_mode_counter > 4) {
-                exit_mode_counter = 0;
+            if (mode_counter > 4) {
+                mode_counter = 0;
 
                 console.log('[exit] -> ', p_in, p_out, v_out, t_out);
                 stateMotor = 'exit';
@@ -147,29 +143,23 @@ function commMotor() {
         setTimeout(commMotor, 250);
     }
     else if(stateMotor === 'toEnter') {
-        EnterMotorMode();
-        p_step = 0.0;
-        p_target = p_in;
-        pack_cmd();
-
-        //stateMotor = 'enter';
-        //setTimeout(commMotor, 5);
-
-        // Zero();
-        // p_in = 0 + p_offset;
-
-        stateMotor = 'entering';
-        setTimeout(commMotor, 0);
+        EnterMotorMode(() => {
+            g_target = p_in;
+            pack_cmd(p_in, () => {
+                stateMotor = 'entering';
+                setTimeout(commMotor, 0);
+            });
+        });
     }
     else if(stateMotor === 'entering') {
         if (motor_return_msg !== '') {
             unpack_reply();
-            exit_mode_counter++;
+            mode_counter++;
 
             motor_return_msg = '';
 
-            if (exit_mode_counter > 0) {
-                exit_mode_counter = 0;
+            if (mode_counter > 0) {
+                mode_counter = 0;
 
                 console.log('[enter] -> ', p_in, p_out, v_out, t_out);
                 stateMotor = 'enter';
@@ -195,32 +185,31 @@ function commMotor() {
         }
 
         if(turn_flag === 1) {
-            turnTarget(p_in, g_target);
+            p_in = turnTarget(p_in, g_target);
+            pack_cmd(p_in, () => {
+                setTimeout(commMotor, 50);
+            });
         }
-
-        setTimeout(commMotor, 50);
     }
     else if(stateMotor === 'toZero') {
-        Zero();
-        p_in = 0.0;
-        p_step = 0.0;
-        p_target = p_in;
-        pack_cmd();
-
-        //p_in = 0 + p_offset;
-
-        stateMotor = 'zeroing';
-        setTimeout(commMotor, 0);
+        Zero(() => {
+            p_in = 0.0;
+            g_target = p_in;
+            pack_cmd(p_in, () => {
+                stateMotor = 'zeroing';
+                setTimeout(commMotor, 0);
+            });
+        });
     }
     else if(stateMotor === 'zeroing') {
         if (motor_return_msg !== '') {
             unpack_reply();
-            exit_mode_counter++;
+            mode_counter++;
 
             motor_return_msg = '';
 
-            if (exit_mode_counter > 1) {
-                exit_mode_counter = 0;
+            if (mode_counter > 1) {
+                mode_counter = 0;
 
                 console.log('[enter] -> ', p_in, p_out, v_out, t_out);
                 stateMotor = 'enter';
@@ -238,18 +227,18 @@ function commMotor() {
     }
 }
 
-exports.getState = function () {
+exports.getState = () => {
     return stateMotor;
 }
 
-exports.setState = function (state) {
+exports.setState = (state) => {
     stateMotor = state;
     console.log('[setState] -> ', stateMotor);
 }
 
 
 let S = 1;
-function P() {
+let P = () => {
     while(S === 0) {
         console.log('.............waiting................................................');
     }
@@ -257,13 +246,12 @@ function P() {
     S -= 1;
 }
 
-function V() {
+let V = () => {
     S += 1;
 }
 
 let turn_flag = 0;
-function turnTarget(_in, _target) {
-    P();
+let turnTarget = (_in, _target) => {
     let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
@@ -301,73 +289,55 @@ function turnTarget(_in, _target) {
         if(_in <= _target) {
             _in = _target;
         }
-        p_in = _in;
-        pack_cmd();
+        return _in;
     }
     else if (-15 <= p_diff && p_diff < -5) {
         _in = _in - (2.1 * 0.0174533);
         if(_in <= _target) {
             _in = _target;
         }
-        p_in = _in;
-        pack_cmd();
+        return _in;
     }
     else if (-5 <= p_diff && p_diff < -0.5) {
         _in = _in - (1.1 * 0.0174533);
         if(_in <= _target) {
             _in = _target;
         }
-        p_in = _in;
-        pack_cmd();
+        return _in;
     }
     else if (-0.5 <= p_diff && p_diff < 0.5) {
-        p_step = 0.000;
         turn_flag = 0;
 
-        p_in = _in;
-        pack_cmd();
-
         console.log('<------------------------------------------->');
+
+        _in = _target;
+        return _in;
     }
     else if (0.5 <= p_diff && p_diff < 5) {
         _in = _in + (1.1 * 0.0174533);
         if(_in >= _target) {
             _in = _target;
         }
-        p_in = _in;
-        pack_cmd();
+        return _in;
     }
     else if (5 <= p_diff && p_diff < 15) {
         _in = _in + (2.1 * 0.0174533);
         if(_in >= _target) {
             _in = _target;
         }
-        p_in = _in;
-        pack_cmd();
+        return _in;
     }
     else if (15 <= p_diff) {
         _in = _in + (3.1 * 0.0174533);
         if(_in >= _target) {
             _in = _target;
         }
-        p_in = _in;
-        pack_cmd();
+        return _in;
     }
-    V();
-
-    // if(Math.abs(diff2) > 15) {
-    //     p_in = p_in + (2 * 0.0174533);
-    // }
-    // else {
-    //     p_in = p_in + (p_diff * 0.0174533);
-    // }
-
-    //p_in = p_in + (p_diff * 0.0174533);
-    //pack_cmd();
+    return _in;
 }
 
-let g_target = 0;
-exports.setTarget = function (angle) {
+exports.setTarget = (angle) => {
     // if(angle < 0) {
     //     angle += 360;
     // }
@@ -389,9 +359,9 @@ exports.setTarget = function (angle) {
     // this.setDelta(diff);
 }
 
-exports.setDelta = function (diff_angle) {
+exports.setDelta = (diff_angle) => {
     P();
-    p_target = p_out + (diff_angle * 0.0174533);
+    g_target = p_out + (diff_angle * 0.0174533);
     V();
 }
 
@@ -405,35 +375,6 @@ let constrain = (_in, _min, _max) => {
     else {
         return _in;
     }
-}
-
-let initAction = () => {
-    setTimeout(() => {
-        motor_control_message = 'zero';
-
-        setTimeout(() => {
-            if (tracker_heading !== 0) {
-                if (tracker_heading > 180) {
-                    motor_control_message = 'go' + (tracker_heading - 360);
-                }
-                else if (tracker_heading < 180) {
-                    motor_control_message = 'go' + tracker_heading * (-1);
-                }
-                setTimeout(() => {
-                    motor_control_message = 'zero';
-                }, 10000);
-            }
-
-
-            // setTimeout(() => {
-            //     motor_control_message = 'pan_down';
-
-            //     setTimeout(() => {
-            //         motor_control_message = 'stop';
-            //     }, 2000);
-            // }, 2000);
-        }, 1000);
-    }, 500);
 }
 
 let float_to_uint = (x, x_min, x_max, bits) => {
@@ -464,8 +405,8 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
     return parseFloat(pgg);
 }
 
-function pack_cmd() {
-    let p_des = constrain((p_in+p_offset), P_MIN, P_MAX);
+let pack_cmd = (_in, callback) => {
+    let p_des = constrain((_in+p_offset), P_MIN, P_MAX);
     let v_des = constrain(v_in, V_MIN, V_MAX);
     let kp = constrain(kp_in, KP_MIN, KP_MAX);
     let kd = constrain(kd_in, KD_MIN, KD_MAX);
@@ -490,6 +431,7 @@ function pack_cmd() {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(msg_buf, 'hex'), () => {
                 // console.log('can write =>', msg_buf);
+                callback();
             });
         }
     }
@@ -517,31 +459,34 @@ let unpack_reply = () => {
 }
 
 //--------------- CAN special message ---------------
-function EnterMotorMode() {
+let EnterMotorMode = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFC', 'hex'), () => {
                 console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFC');
+                callback();
             });
         }
     }
 }
 
-function ExitMotorMode() {
+let ExitMotorMode = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
                 console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD');
+                callback();
             });
         }
     }
 }
 
-function Zero() {
+let Zero = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFE', 'hex'), () => {
                 console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFE');
+                callback();
             });
         }
     }
