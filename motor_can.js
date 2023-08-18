@@ -376,7 +376,7 @@ exports.setTarget = function (angle) {
     turn_flag = 0;
     g_target = angle * 0.0174533;
 
-    turnTarget(p_in, g_target);
+    //turnTarget(p_in, g_target);
     turn_flag = 1;
 
     // let ori_p_in = p_out;
