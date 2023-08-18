@@ -369,7 +369,7 @@ function watchdogCtrl() {
                     stateCtrl = 'motor';
                     setTimeout(watchdogCtrl, 0);
                 }, 1000);
-            }, 1000);
+            }, 100);
         }
         else {
             setTimeout(watchdogCtrl, 500);
