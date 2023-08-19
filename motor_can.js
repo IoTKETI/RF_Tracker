@@ -110,7 +110,7 @@ let commMotor = () => {
     if(stateMotor === 'toExit') {
         ExitMotorMode(() => {
             stateMotor = 'exiting';
-            setTimeout(commMotor, 50);
+            setTimeout(commMotor, 10);
         });
     }
     else if(stateMotor === 'exiting') {
@@ -137,17 +137,17 @@ let commMotor = () => {
             stateMotor = 'toExit';
         }
 
-        setTimeout(commMotor, 250);
+        setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'exit') {
-        setTimeout(commMotor, 250);
+        setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'toEnter') {
         EnterMotorMode(() => {
             g_target = p_in;
             pack_cmd(p_in, () => {
                 stateMotor = 'entering';
-                setTimeout(commMotor, 0);
+                setTimeout(commMotor, 10);
             });
         });
     }
@@ -173,7 +173,7 @@ let commMotor = () => {
             stateMotor = 'toEnter';
         }
 
-        setTimeout(commMotor, 250);
+        setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'enter') {
         if (motor_return_msg !== '') {
@@ -200,7 +200,7 @@ let commMotor = () => {
             g_target = p_in;
             pack_cmd(p_in, () => {
                 stateMotor = 'zeroing';
-                setTimeout(commMotor, 0);
+                setTimeout(commMotor, 10);
             });
         });
     }
@@ -226,7 +226,7 @@ let commMotor = () => {
             stateMotor = 'toZero';
         }
 
-        setTimeout(commMotor, 250);
+        setTimeout(commMotor, 100);
     }
 }
 
@@ -254,7 +254,8 @@ let V = () => {
 }
 
 let turn_flag = 0;
-let turnTarget = (_in, _target) => {
+let turnTarget = (_in, _target, callback) => {
+    let result_in = _in;
     let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
@@ -288,56 +289,50 @@ let turnTarget = (_in, _target) => {
     }
 
     if (p_diff < -15) {
-        _in = _in - (3.1 * 0.0174533);
-        if(_in <= _target) {
-            _in = _target;
+        result_in = _in - (3.1 * 0.0174533);
+        if(result_in <= _target) {
+            result_in = _target;
         }
-        return _in;
     }
     else if (-15 <= p_diff && p_diff < -5) {
-        _in = _in - (2.1 * 0.0174533);
-        if(_in <= _target) {
-            _in = _target;
+        result_in = _in - (2.1 * 0.0174533);
+        if(result_in <= _target) {
+            result_in = _target;
         }
-        return _in;
     }
     else if (-5 <= p_diff && p_diff < -0.5) {
-        _in = _in - (1.1 * 0.0174533);
-        if(_in <= _target) {
-            _in = _target;
+        result_in = _in - (1.1 * 0.0174533);
+        if(result_in <= _target) {
+            result_in = _target;
         }
-        return _in;
     }
     else if (-0.5 <= p_diff && p_diff < 0.5) {
         turn_flag = 0;
 
         console.log('<------------------------------------------->');
 
-        _in = _target;
-        return _in;
+        result_in = _target;
     }
     else if (0.5 <= p_diff && p_diff < 5) {
-        _in = _in + (1.1 * 0.0174533);
-        if(_in >= _target) {
-            _in = _target;
+        result_in = _in + (1.1 * 0.0174533);
+        if(result_in >= _target) {
+            result_in = _target;
         }
-        return _in;
     }
     else if (5 <= p_diff && p_diff < 15) {
-        _in = _in + (2.1 * 0.0174533);
-        if(_in >= _target) {
-            _in = _target;
+        result_in = _in + (2.1 * 0.0174533);
+        if(result_in >= _target) {
+            result_in = _target;
         }
-        return _in;
     }
     else if (15 <= p_diff) {
-        _in = _in + (3.1 * 0.0174533);
-        if(_in >= _target) {
-            _in = _target;
+        result_in = _in + (3.1 * 0.0174533);
+        if(result_in >= _target) {
+            result_in = _target;
         }
-        return _in;
     }
-    return _in;
+
+    return result_in;
 }
 
 let enter_mode_counter = 0;
@@ -350,6 +345,10 @@ exports.setTarget = (angle) => {
 exports.setDelta = (diff_angle) => {
     g_target = p_in + (diff_angle * 0.0174533);
     turn_flag = 1;
+}
+
+exports.getAngle = () => {
+    return Math.round(((p_out * 180)/Math.PI) * 10)/10;
 }
 
 let constrain = (_in, _min, _max) => {

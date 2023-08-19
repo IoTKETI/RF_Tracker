@@ -14,7 +14,6 @@ let tracker_latitude = 37.4036621604629;
 let tracker_longitude = 127.16176249708046;
 let tracker_altitude = 0.0;
 let tracker_relative_altitude = 0.0;
-let tracker_heading = 0.0;
 
 let tracker_roll = 0.0;
 let tracker_pitch = 0.0;
@@ -169,15 +168,8 @@ function local_mqtt_connect(host) {
         else if (topic === sub_gps_attitude_topic) {
             tracker_att = JSON.parse(message.toString());
 
-            if(tracker_att.yaw < 0) {
-                tracker_att.yaw += (2 * Math.PI);
-            }
-
-            tracker_heading = ((tracker_att.yaw * 180)/Math.PI);
-
-            //console.log('yaw', tracker_heading);
-
-            //console.log('[attitude] -> ', tracker_att.roll, tracker_att.pitch, tracker_att.yaw);
+            tracker_yaw = ((tracker_att.yaw * 180)/Math.PI);
+            tracker_pitch = ((tracker_att.pitch * 180)/Math.PI);
 
             countBPM++;
         }
@@ -198,34 +190,6 @@ let constrain = (_in, _min, _max) => {
     else {
         return _in;
     }
-}
-
-let float_to_uint = (x, x_min, x_max, bits) => {
-    let span = x_max - x_min;
-    let offset = x_min;
-    let pgg = 0;
-    if (bits === 12) {
-        pgg = (x - offset) * 4095.0 / span;
-    }
-    else if (bits === 16) {
-        pgg = (x - offset) * 65535.0 / span;
-    }
-
-    return parseInt(pgg);
-}
-
-let uint_to_float = (x_int, x_min, x_max, bits) => {
-    let span = x_max - x_min;
-    let offset = x_min;
-    let pgg = 0;
-    if (bits === 12) {
-        pgg = parseFloat(x_int) * span / 4095.0 + offset;
-    }
-    else if (bits === 16) {
-        pgg = parseFloat(x_int) * span / 65535.0 + offset;
-    }
-
-    return parseFloat(pgg);
 }
 
 function calctargetAngleAngle(targetLatitude, targetLongitude) {
@@ -311,155 +275,106 @@ setInterval(() => {
     else {
         flagBPM = 0;
     }
-}, 5000)
+}, 3000)
 
-let initAction = () => {
-    if(motor_can.getState() === 'zero') {
-        setTimeout(() => {
-            motor_can.setTarget(-20);
-            setTimeout(() => {
-                motor_can.setTarget(20);
-                setTimeout(() => {
-                    motor_can.setDelta(-20);
-                    setTimeout(() => {
-                        motor_can.setTarget(0);
-                    }, 2500);
-                }, 5000);
-            }, 2500);
-        },1000);
-    }
-    else {
-        setTimeout(initAction, 500);
-    }
-}
-
-let initMotor = () => {
-    if(motor_can.getState() === 'exit') {
-        setTimeout(() => {
-            motor_can.setState('toEnter');
-            setTimeout(() => {
-                motor_can.setState('toZero');
-            },3000);
-        },3000);
-    }
-    else {
-        setTimeout(initMotor, 500);
-    }
-}
-
-
+local_mqtt_connect('localhost');
 
 const canPortNum = process.argv[2];
 const CAN_ID = process.argv[3];
+const TYPE = process.argv[4];
+
 motor_can.canPortOpening(canPortNum, CAN_ID);
 motor_can.loop();
 
 let offsetCtrl = 0;
-let angleCtrl = 0;
 let targetAngle = 0;
-let stateCtrl = 'toMotor'
-function watchdogCtrl() {
-    if(stateCtrl === 'toMotor') {
+
+let ctrlAngle = (angle) => {
+    targetAngle = (angle - offsetCtrl);
+
+    console.log('[targetAngle] -> ', targetAngle, (targetAngle * 0.0174533));
+
+    motor_can.setTarget(targetAngle);
+}
+
+let watchdogCtrl = () => {
+    if(stateCtrl === 'toReady') {
         if(motor_can.getState() === 'exit') {
-            setTimeout(() => {
-                motor_can.setState('toEnter');
-                setTimeout(() => {
-                    motor_can.setState('toZero');
-
-                    stateCtrl = 'motor';
-                    setTimeout(watchdogCtrl, 0);
-                }, 1000);
-            }, 100);
-        }
-        else {
-            setTimeout(watchdogCtrl, 500);
-        }
-    }
-    else if(stateCtrl === 'motor') {
-        setTimeout(watchdogCtrl, 300);
-    }
-    else if(stateCtrl === 'toReady') {
-        if(motor_can.getState() === 'enter') {
-            if(flagBPM) {
-                //offsetCtrl = tracker_heading;
-                offsetCtrl = 0;
-                console.log('[offseCtrl] -> ', offsetCtrl);
-                setTimeout(() => {
-                    angleCtrl = 0;
-                    targetAngle =(angleCtrl - offsetCtrl);
-
-                    console.log('[targetAngle] -> ', targetAngle, (targetAngle * 0.0174533));
-
-                    motor_can.setTarget(targetAngle);
-
-                    setTimeout(() => {
-                        stateCtrl = 'ready';
-                    }, 1000)
-                },1000);
+            motor_can.setState('toEnter');
+            if (motor_can.getState() === 'enter') {
+                motor_can.setState('toZero');
+                stateCtrl = 'toArrange';
+                setTimeout(watchdogCtrl, 1000);
             }
             else {
-                setTimeout(watchdogCtrl, 300);
+                setTimeout(watchdogCtrl, 1000);
             }
         }
         else {
-            setTimeout(watchdogCtrl, 300);
+            setTimeout(watchdogCtrl, 1000);
         }
     }
     else if(stateCtrl === 'ready') {
-        setTimeout(watchdogCtrl, 300);
+        if(TYPE === 'pan') {
+            console.log('[PanMotorAngle] -> ', motor_can.getAngle());
+        }
+        else if(TYPE === 'tilt') {
+            console.log('[TiltMotorAngle] -> ', motor_can.getAngle());
+        }
+
+        setTimeout(watchdogCtrl, 500);
+    }
+    else if(stateCtrl === 'toArrange') {
+        if(flagBPM) {
+            if(motor_can.getState() === 'enter') {
+                if (TYPE === 'pan') {
+                    offsetCtrl = tracker_yaw;
+                } else if (TYPE === 'tilt') {
+                    offsetCtrl = tracker_pitch;
+                } else {
+                    offsetCtrl = 0;
+                }
+                console.log('[offseCtrl] -> ', offsetCtrl);
+
+                ctrlAngle(0);
+
+                stateCtrl = 'ready';
+                setTimeout(watchdogCtrl, 1000);
+            }
+            else {
+                console.log('motor is not state of enter');
+                setTimeout(watchdogCtrl, 1000);
+            }
+        }
+        else {
+            console.log('unknown My Position');
+            setTimeout(watchdogCtrl, 1000);
+        }
     }
 }
+
+
+let stateCtrl = 'toReady'
+setTimeout(watchdogCtrl, 1000);
 
 function testAction() {
     if(stateCtrl === 'ready') {
-        angleCtrl = parseInt(Math.random() * 90);
-        targetAngle =(angleCtrl - offsetCtrl);
+        let t_angle = 0;
+        if(TYPE === 'pan') {
+            t_angle = parseInt(Math.random() * 360);
+        }
+        else if(TYPE === 'tilt') {
+            t_angle = parseInt(Math.random() * 90);
+        }
 
-        console.log('[targetAngle] -> ', targetAngle, (targetAngle * 0.0174533));
+        ctrlAngle(t_angle);
 
-        motor_can.setTarget(targetAngle);
+        let period = (1 + parseInt(Math.random() * 3)) * 1000;
+        setTimeout(testAction, period);
     }
-
-    let period = (1 + parseInt(Math.random() * 3)) * 1000;
-    setTimeout(testAction, period);
+    else {
+        setTimeout(testAction, 1000);
+    }
 }
 
 setTimeout(testAction, 10000);
-
-//initMotor();
-//initAction();
-
-//function enterMotorMode(callback) {
-//if(motor_can.getState() === 'exit') {
-//setTimeout(() => {
-//motor_can.setState('toEnter');
-//setTimeout(() => {
-//motor_can.setState('toZero');
-//callback();
-//}, 3000, callback);
-//}, 3000, callback);
-//}
-//else {
-//setTimeout(enterMotorMode, 500, callback);
-//}
-//}
-
-//setInterval(() => {
-//motor_can.setState('toExit');
-
-//enterMotorMode(() => {
-//console.log('zero');
-//});
-
-//initAction();
-//}, 60000);
-
-
-local_mqtt_connect('localhost');
-
-watchdogCtrl();
-
-setTimeout(() => {
-    stateCtrl = 'toReady';
-}, 15000);
-
