@@ -103,7 +103,7 @@ let canPortData = (data) => {
 let stateMotor = 'toExit';
 
 exports.loop = () => {
-    setTimeout(commMotor, 3000);
+    setTimeout(commMotor, 2000);
 }
 
 let commMotor = () => {
@@ -181,7 +181,7 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> ', g_target, p_in, p_out);
+            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, p_in, p_out);
         }
 
         if(turn_flag === 1) {
@@ -189,6 +189,9 @@ let commMotor = () => {
             pack_cmd(p_in, () => {
                 setTimeout(commMotor, 50);
             });
+        }
+        else {
+            setTimeout(commMotor, 100);
         }
     }
     else if(stateMotor === 'toZero') {
@@ -337,32 +340,16 @@ let turnTarget = (_in, _target) => {
     return _in;
 }
 
+let enter_mode_counter = 0;
 exports.setTarget = (angle) => {
-    // if(angle < 0) {
-    //     angle += 360;
-    // }
-    // angle %= 360;
-
-    turn_flag = 0;
     g_target = angle * 0.0174533;
-
-    //turnTarget(p_in, g_target);
+    enter_mode_counter = 0;
     turn_flag = 1;
-
-    // let ori_p_in = p_out;
-    // if(ori_p_in < 0) {
-    //     ori_p_in = ori_p_in + (2 * Math.PI);
-    // }
-    // let cur_angle = ((ori_p_in * 180)/Math.PI);
-    //
-    // let diff = (angle - cur_angle);
-    // this.setDelta(diff);
 }
 
 exports.setDelta = (diff_angle) => {
-    P();
-    g_target = p_out + (diff_angle * 0.0174533);
-    V();
+    g_target = p_in + (diff_angle * 0.0174533);
+    turn_flag = 1;
 }
 
 let constrain = (_in, _min, _max) => {
