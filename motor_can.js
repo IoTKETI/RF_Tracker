@@ -233,7 +233,7 @@ let commMotor = (_in, _target) => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 0, _in);
+                tidMotor = setTimeout(commMotor, 50, _in);
             });
         }
         else {
