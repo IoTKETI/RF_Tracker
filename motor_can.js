@@ -217,10 +217,15 @@ let commMotor = (_in, _target) => {
                 Math.round((p_out) * 1000)/1000,
                 Math.round((_in - p_out) * 100)/100);
 
-            _in = Math.round((p_out) * 1000)/1000;
+
         }
 
         if(turn_flag === 1) {
+
+            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.5) {
+                console.log('===================================================================')
+            }
+
             _in = turnTarget(_in, g_target);
             p_in = _in;
             pack_cmd(_in, () => {
