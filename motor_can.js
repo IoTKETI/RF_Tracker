@@ -211,10 +211,13 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, p_in, p_out, Math.round((_in - p_out) * 100)/100);
+            console.log('[enter] -> [', enter_mode_counter, '] ', g_target,
+                Math.round((p_in) * 1000)/1000,
+                Math.round((p_out) * 1000)/1000,
+                Math.round((_in - p_out) * 100)/100);
         }
 
-        if(turn_flag === 1 && (Math.round((_in - p_out) * 100)/100) < 0.15) {
+        if(turn_flag === 1) {
             _in = turnTarget(_in, g_target);
             p_in = _in;
             pack_cmd(_in, () => {
