@@ -352,7 +352,7 @@ let turnTarget = (_in, _target) => {
 
     let dir = _target - _in;
     if(dir >= 0) {
-        if(dir >= big_gap) {
+        if(dir >= 15) {
             result_in = _in + big_gap;
         }
         else {
@@ -365,7 +365,7 @@ let turnTarget = (_in, _target) => {
         }
     }
     else {
-        if(dir <= -big_gap) {
+        if(dir <= -15) {
             result_in = _in - big_gap;
         }
         else {
