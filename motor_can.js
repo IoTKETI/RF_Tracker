@@ -103,14 +103,14 @@ let canPortData = (data) => {
 let stateMotor = 'toExit';
 
 exports.loop = () => {
-    setTimeout(commMotor, 2000);
+    setTimeout(commMotor, 2000, p_in);
 }
 
-let commMotor = () => {
+let commMotor = (_in, _target) => {
     if(stateMotor === 'toExit') {
         ExitMotorMode(() => {
             stateMotor = 'exiting';
-            setTimeout(commMotor, 10);
+            setTimeout(commMotor, 10, _in);
         });
     }
     else if(stateMotor === 'exiting') {
@@ -120,34 +120,36 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            p_in = p_out;
+            _in = p_out;
+            p_in = _in;
 
             if (mode_counter > 4) {
                 mode_counter = 0;
 
-                console.log('[exit] -> ', p_in, p_out, v_out, t_out);
+                console.log('[exit] -> ', _in, p_out, v_out, t_out);
                 stateMotor = 'exit';
+                setTimeout(commMotor, 10, _in);
             }
             else {
-                console.log('[exiting] :: ', p_in, p_out, v_out, t_out);
+                console.log('[exiting] :: ', _in, p_out, v_out, t_out);
                 stateMotor = 'toExit';
+                setTimeout(commMotor, 100, _in);
             }
         }
         else {
             stateMotor = 'toExit';
+            setTimeout(commMotor, 100, _in);
         }
-
-        setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'exit') {
-        setTimeout(commMotor, 100);
+        setTimeout(commMotor, 100, _in);
     }
     else if(stateMotor === 'toEnter') {
         EnterMotorMode(() => {
-            g_target = p_in;
-            pack_cmd(p_in, () => {
+            g_target = _in;
+            pack_cmd(_in, () => {
                 stateMotor = 'entering';
-                setTimeout(commMotor, 10);
+                setTimeout(commMotor, 10, _in);
             });
         });
     }
@@ -161,19 +163,20 @@ let commMotor = () => {
             if (mode_counter > 0) {
                 mode_counter = 0;
 
-                console.log('[enter] -> ', p_in, p_out, v_out, t_out);
+                console.log('[enter] -> ', _in, p_out, v_out, t_out);
                 stateMotor = 'enter';
+                setTimeout(commMotor, 10, _in);
             }
             else {
-                console.log('[entering] :: ', p_in, p_out, v_out, t_out);
+                console.log('[entering] :: ', _in, p_out, v_out, t_out);
                 stateMotor = 'toEnter';
+                setTimeout(commMotor, 100, _in);
             }
         }
         else {
             stateMotor = 'toEnter';
+            setTimeout(commMotor, 100, _in);
         }
-
-        setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'enter') {
         if (motor_return_msg !== '') {
@@ -181,26 +184,28 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, p_in, p_out);
+            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, _in, p_out);
         }
 
         if(turn_flag === 1) {
-            p_in = turnTarget(p_in, g_target);
-            pack_cmd(p_in, () => {
-                setTimeout(commMotor, 50);
+            _in = turnTarget(_in, g_target);
+            p_in = _in;
+            pack_cmd(_in, () => {
+                setTimeout(commMotor, 50, _in);
             });
         }
         else {
-            setTimeout(commMotor, 100);
+            setTimeout(commMotor, 100, _in);
         }
     }
     else if(stateMotor === 'toZero') {
         Zero(() => {
-            p_in = 0.0;
-            g_target = p_in;
-            pack_cmd(p_in, () => {
+            _in = 0.0;
+            p_in = _in;
+            g_target = _in;
+            pack_cmd(_in, () => {
                 stateMotor = 'zeroing';
-                setTimeout(commMotor, 10);
+                setTimeout(commMotor, 10, _in);
             });
         });
     }
@@ -214,19 +219,20 @@ let commMotor = () => {
             if (mode_counter > 1) {
                 mode_counter = 0;
 
-                console.log('[enter] -> ', p_in, p_out, v_out, t_out);
+                console.log('[enter] -> ', _in, p_out, v_out, t_out);
                 stateMotor = 'enter';
+                setTimeout(commMotor, 10, _in);
             }
             else {
-                console.log('[zeroing] :: ', p_in, p_out, v_out, t_out);
+                console.log('[zeroing] :: ', _in, p_out, v_out, t_out);
                 stateMotor = 'toZero';
+                setTimeout(commMotor, 100, _in);
             }
         }
         else {
             stateMotor = 'toZero';
+            setTimeout(commMotor, 100, _in);
         }
-
-        setTimeout(commMotor, 100);
     }
 }
 
