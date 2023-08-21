@@ -334,7 +334,7 @@ let V = () => {
 
 let turn_flag = 0;
 const big_gap = 9 * 0.0174533;
-const small_gap = 0.9 * 0.00174533;
+const small_gap = 0.9 * 0.0174533;
 
 let turnTarget = (_in, _target) => {
     _in = Math.round((_in) * 1000)/1000;
