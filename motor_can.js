@@ -237,6 +237,8 @@ let commMotor = () => {
                 console.log('[pack_cmd]', turn_flag, p_in);
             });
 
+            p_in = turnTarget(p_in, g_target);
+
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
@@ -466,8 +468,6 @@ exports.setTarget = (angle) => {
     g_target = angle * 0.0174533;
     enter_mode_counter = 0;
     turn_flag = 1;
-
-    p_in = turnTarget(p_in, g_target);
 }
 
 exports.setDelta = (diff_angle) => {
