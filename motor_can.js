@@ -225,6 +225,7 @@ let commMotor = (_in, _target) => {
 
             if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.3) {
                 console.log('===================================================================')
+                _in = p_out;
             }
 
             _in = turnTarget(_in, g_target);
