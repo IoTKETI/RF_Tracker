@@ -123,8 +123,8 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            // _in = p_out;
-            // p_in = _in;
+            _in = p_out;
+            p_in = _in;
 
             if (mode_counter > 5) {
                 mode_counter = 0;
