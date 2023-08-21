@@ -397,7 +397,7 @@ function testAction() {
         ctrlAngle(t_angle);
 
         //let period = (1 + parseInt(Math.random() * 3)) * 1000;
-        let period = (6) * 1000;
+        let period = (10) * 1000;
         setTimeout(testAction, period);
     }
     else {
