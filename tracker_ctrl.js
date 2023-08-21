@@ -322,7 +322,7 @@ let watchdogCtrl = () => {
             console.log('[PanMotorAngle] -> ', motor_can.getAngle()+offsetCtrl);
         }
         else if(TYPE === 'tilt') {
-            console.log('[TiltMotorAngle] -> ', motor_can.getAngle()+offsetCtrl);
+            // console.log('[TiltMotorAngle] -> ', motor_can.getAngle()+offsetCtrl);
         }
 
         setTimeout(watchdogCtrl, 500);
