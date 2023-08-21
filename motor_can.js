@@ -106,14 +106,14 @@ exports.loop = () => {
     tidMotor = setTimeout(commMotor, 2000, p_in);
 }
 
-let commMotor = (_in, _target) => {
+let commMotor = () => {
     if(stateMotor === 'toExit') {
         ExitMotorMode(() => {
             stateMotor = 'exiting';
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 10, _in);
+            tidMotor = setTimeout(commMotor, 10);
         });
     }
     else if(stateMotor === 'exiting') {
@@ -123,26 +123,25 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            _in = p_out;
-            p_in = _in;
+            p_in = p_out;
 
             if (mode_counter > 5) {
                 mode_counter = 0;
 
-                console.log('[exit] -> ', _in, p_out, v_out, t_out);
+                console.log('[exit] -> ', p_in, p_out, v_out, t_out);
                 stateMotor = 'exit';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 10, _in);
+                tidMotor = setTimeout(commMotor, 10);
             }
             else {
-                console.log('[exiting] :: ', _in, p_out, v_out, t_out);
+                console.log('[exiting] :: ', p_in, p_out, v_out, t_out);
                 stateMotor = 'toExit';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 200, _in);
+                tidMotor = setTimeout(commMotor, 200);
             }
         }
         else {
@@ -150,24 +149,24 @@ let commMotor = (_in, _target) => {
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 100, _in);
+            tidMotor = setTimeout(commMotor, 100);
         }
     }
     else if(stateMotor === 'exit') {
         if(tidMotor !== null) {
             clearTimeout(tidMotor);
         }
-        tidMotor = setTimeout(commMotor, 100, _in);
+        tidMotor = setTimeout(commMotor, 100);
     }
     else if(stateMotor === 'toEnter') {
         EnterMotorMode(() => {
-            g_target = _in;
-            pack_cmd(_in, () => {
+            g_target = p_in;
+            pack_cmd(() => {
                 stateMotor = 'entering';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 10, _in);
+                tidMotor = setTimeout(commMotor, 10);
             });
         });
     }
@@ -181,20 +180,20 @@ let commMotor = (_in, _target) => {
             if (mode_counter > 0) {
                 mode_counter = 0;
 
-                console.log('[enter] -> ', _in, p_out, v_out, t_out);
+                console.log('[enter] -> ', p_in, p_out, v_out, t_out);
                 stateMotor = 'enter';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 10, _in);
+                tidMotor = setTimeout(commMotor, 10);
             }
             else {
-                console.log('[entering] :: ', _in, p_out, v_out, t_out);
+                console.log('[entering] :: ', p_in, p_out, v_out, t_out);
                 stateMotor = 'toEnter';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 100, _in);
+                tidMotor = setTimeout(commMotor, 100);
             }
         }
         else {
@@ -202,7 +201,7 @@ let commMotor = (_in, _target) => {
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 100, _in);
+            tidMotor = setTimeout(commMotor, 100);
         }
     }
     else if(stateMotor === 'enter') {
@@ -211,31 +210,31 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.2) {
+            if(Math.abs(Math.round((p_in - p_out) * 100)/100) > 0.2) {
                 console.log('[enter] -> [', enter_mode_counter, '] ',
                     Math.round((g_target) * 1000) / 1000,
-                    Math.round((_in) * 1000) / 1000,
+                    Math.round((p_in) * 1000) / 1000,
                     Math.round((p_out) * 1000) / 1000,
-                    Math.round((_in - p_out) * 100) / 100);
+                    Math.round((p_in - p_out) * 100) / 100);
             }
 
         }
 
         if(turn_flag === 1) {
 
-            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.3) {
+            if(Math.abs(Math.round((p_in - p_out) * 100)/100) > 0.3) {
                 console.log('===================================================================')
             }
 
-            _in = turnTarget(_in, g_target);
-            p_in = _in;
-            pack_cmd(_in, () => {
-                console.log('[pack_cmd]', _in);
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 1000, _in);
+            p_in = turnTarget(p_in, g_target);
+            pack_cmd(() => {
+                console.log('[pack_cmd]', p_in);
             });
+
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 1000);
         }
         else {
             // EnterMotorMode(() => {
@@ -248,12 +247,11 @@ let commMotor = (_in, _target) => {
             //     });
             // });
 
-            p_in = _in;
-            pack_cmd(_in, () => {
+            pack_cmd(() => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 500, _in);
+                tidMotor = setTimeout(commMotor, 500);
             });
             //
             // if(tidMotor !== null) {
@@ -272,7 +270,7 @@ let commMotor = (_in, _target) => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 10, _in);
+                tidMotor = setTimeout(commMotor, 10);
             });
         });
     }
@@ -286,20 +284,20 @@ let commMotor = (_in, _target) => {
             if (mode_counter > 1) {
                 mode_counter = 0;
 
-                console.log('[enter] -> ', _in, p_out, v_out, t_out);
+                console.log('[enter] -> ', p_in, p_out, v_out, t_out);
                 stateMotor = 'enter';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 10, _in);
+                tidMotor = setTimeout(commMotor, 10);
             }
             else {
-                console.log('[zeroing] :: ', _in, p_out, v_out, t_out);
+                console.log('[zeroing] :: ', p_in, p_out, v_out, t_out);
                 stateMotor = 'toZero';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 100, _in);
+                tidMotor = setTimeout(commMotor, 100);
             }
         }
         else {
@@ -307,7 +305,7 @@ let commMotor = (_in, _target) => {
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 100, _in);
+            tidMotor = setTimeout(commMotor, 100);
         }
     }
 }
@@ -516,8 +514,8 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
     return parseFloat(pgg);
 }
 
-let pack_cmd = (_in, callback) => {
-    let p_des = constrain((_in+p_offset), P_MIN, P_MAX);
+let pack_cmd = (callback) => {
+    let p_des = constrain((p_in+p_offset), P_MIN, P_MAX);
     let v_des = constrain(v_in, V_MIN, V_MAX);
     let kp = constrain(kp_in, KP_MIN, KP_MAX);
     let kd = constrain(kd_in, KD_MIN, KD_MAX);
@@ -542,10 +540,11 @@ let pack_cmd = (_in, callback) => {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(msg_buf, 'hex'), () => {
                 // console.log('can write =>', msg_buf);
-                callback();
             });
         }
     }
+
+    callback();
 }
 
 let unpack_reply = () => {
