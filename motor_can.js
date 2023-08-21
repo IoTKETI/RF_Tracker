@@ -142,7 +142,7 @@ let commMotor = (_in, _target) => {
         }
     }
     else if(stateMotor === 'exit') {
-        setTimeout(commMotor, 100, _in);
+        // setTimeout(commMotor, 100, _in);
     }
     else if(stateMotor === 'toEnter') {
         EnterMotorMode(() => {
@@ -194,9 +194,9 @@ let commMotor = (_in, _target) => {
                 setTimeout(commMotor, 50, _in);
             });
         }
-        else {
-            setTimeout(commMotor, 100, _in);
-        }
+        // else {
+        //     setTimeout(commMotor, 100, _in);
+        // }
     }
     else if(stateMotor === 'toZero') {
         Zero(() => {
