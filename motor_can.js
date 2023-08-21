@@ -262,10 +262,9 @@ let commMotor = () => {
     }
     else if(stateMotor === 'toZero') {
         Zero(() => {
-            _in = 0.0;
             p_in = 0.0;
-            g_target = _in;
-            pack_cmd(_in, () => {
+            g_target = p_in;
+            pack_cmd(() => {
                 stateMotor = 'zeroing';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
