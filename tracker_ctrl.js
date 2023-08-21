@@ -379,14 +379,19 @@ let watchdogCtrl = () => {
 let stateCtrl = 'toReady'
 setTimeout(watchdogCtrl, 1000);
 
+let t_angle = 0;
 function testAction() {
     if(stateCtrl === 'ready') {
-        let t_angle = 0;
+
         if(TYPE === 'pan') {
             t_angle = parseInt(Math.random() * 360);
         }
         else if(TYPE === 'tilt') {
-            t_angle = parseInt(Math.random() * 90);
+            //t_angle = parseInt(Math.random() * 90);
+            t_angle += 10;
+            if(t_angle >= 90) {
+                t_angle = 0;
+            }
         }
 
         ctrlAngle(t_angle);
