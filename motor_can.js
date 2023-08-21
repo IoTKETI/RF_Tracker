@@ -211,7 +211,7 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, _in - p_out);
+            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, Math.round((_in - p_out) * 100)/100);
         }
 
         if(turn_flag === 1) {
