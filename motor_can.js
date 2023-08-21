@@ -247,6 +247,14 @@ let commMotor = (_in, _target) => {
             //     });
             // });
 
+            p_in = _in;
+            pack_cmd(_in, () => {
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 1000, _in);
+            });
+
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
