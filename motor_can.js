@@ -120,8 +120,8 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            // _in = p_out;
-            // p_in = _in;
+            _in = p_out;
+            p_in = _in;
 
             if (mode_counter > 4) {
                 mode_counter = 0;
@@ -201,7 +201,7 @@ let commMotor = (_in, _target) => {
     else if(stateMotor === 'toZero') {
         Zero(() => {
             _in = 0.0;
-            p_in = _in;
+            p_in = 0.0;
             g_target = _in;
             pack_cmd(_in, () => {
                 stateMotor = 'zeroing';
