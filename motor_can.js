@@ -237,10 +237,13 @@ let commMotor = (_in, _target) => {
             });
         }
         else {
-            if(tidMotor !== null) {
-                clearTimeout(tidMotor);
-            }
-            tidMotor = setTimeout(commMotor, 100, _in);
+            p_in = _in;
+            pack_cmd(_in, () => {
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 50, _in);
+            });
         }
     }
     else if(stateMotor === 'toZero') {
@@ -318,7 +321,7 @@ let V = () => {
 
 let turn_flag = 0;
 let turnTarget = (_in, _target, callback) => {
-    _in = Math.round((p_out) * 1000)/1000;
+    _in = Math.round((_in) * 1000)/1000;
     _target = Math.round((_target) * 1000)/1000;
 
     let result_in = _in;
