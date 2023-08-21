@@ -242,7 +242,7 @@ let commMotor = () => {
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 500);
+            tidMotor = setTimeout(commMotor, 300);
         }
         else {
             // EnterMotorMode(() => {
@@ -341,7 +341,7 @@ let V = () => {
 }
 
 let turn_flag = 0;
-const big_gap = 9 * 0.0174533;
+const big_gap = 4.5 * 0.0174533;
 const small_gap = 0.9 * 0.0174533;
 
 let turnTarget = (_in, _target) => {
