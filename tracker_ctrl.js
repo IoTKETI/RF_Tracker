@@ -298,6 +298,8 @@ let ctrlAngle = (angle) => {
 }
 
 let watchdogCtrl = () => {
+    console.log(stateCtrl, 'lllllllllllllllllllllllllllllllllllllllllll')
+
     if(stateCtrl === 'toReady') {
         if(motor_can.getState() === 'exit') {
             motor_can.setState('toEnter');
