@@ -387,11 +387,11 @@ function testAction() {
             t_angle = parseInt(Math.random() * 360);
         }
         else if(TYPE === 'tilt') {
-            //t_angle = parseInt(Math.random() * 90);
-            t_angle += 10;
-            if(t_angle >= 90) {
-                t_angle = 0;
-            }
+            t_angle = parseInt(Math.random() * 90);
+            // t_angle += 10;
+            // if(t_angle >= 90) {
+            //     t_angle = 0;
+            // }
         }
 
         ctrlAngle(t_angle);
