@@ -211,22 +211,17 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, _in, p_out);
-
-            if(tidMotor !== null) {
-                clearTimeout(tidMotor);
-            }
-            tidMotor = setTimeout(commMotor, 50, p_in);
+            console.log('[enter] -> [', enter_mode_counter, '] ', g_target, _in - p_out);
         }
 
         if(turn_flag === 1) {
             _in = turnTarget(_in, g_target);
             p_in = _in;
             pack_cmd(_in, () => {
-                // if(tidMotor !== null) {
-                //     clearTimeout(tidMotor);
-                // }
-                // tidMotor = setTimeout(commMotor, 50, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 50, _in);
             });
         }
         else {
