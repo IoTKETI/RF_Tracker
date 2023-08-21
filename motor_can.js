@@ -352,6 +352,7 @@ let turnTarget = (_in, _target, callback) => {
             if(result_in >= _target) {
                 result_in = _target;
                 turn_flag = 0;
+                console.log('turnTarget --------------', turn_flag, result_in);
             }
         }
     }
@@ -364,6 +365,7 @@ let turnTarget = (_in, _target, callback) => {
             if(result_in <= _target) {
                 result_in = _target;
                 turn_flag = 0;
+                console.log('turnTarget --------------', turn_flag, result_in);
             }
         }
     }
