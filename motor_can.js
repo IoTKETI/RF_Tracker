@@ -211,18 +211,19 @@ let commMotor = (_in, _target) => {
 
             motor_return_msg = '';
 
-            console.log('[enter] -> [', enter_mode_counter, '] ',
-                Math.round((g_target) * 1000)/1000,
-                Math.round((_in) * 1000)/1000,
-                Math.round((p_out) * 1000)/1000,
-                Math.round((_in - p_out) * 100)/100);
-
+            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.2) {
+                console.log('[enter] -> [', enter_mode_counter, '] ',
+                    Math.round((g_target) * 1000) / 1000,
+                    Math.round((_in) * 1000) / 1000,
+                    Math.round((p_out) * 1000) / 1000,
+                    Math.round((_in - p_out) * 100) / 100);
+            }
 
         }
 
         if(turn_flag === 1) {
 
-            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.5) {
+            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.2) {
                 console.log('===================================================================')
             }
 
