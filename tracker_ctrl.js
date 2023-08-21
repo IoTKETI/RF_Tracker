@@ -298,19 +298,20 @@ let ctrlAngle = (angle) => {
 }
 
 let watchdogCtrl = () => {
-    console.log(stateCtrl, 'lllllllllllllllllllllllllllllllllllllllllll')
-
-    if(stateCtrl === 'toReady') {
+   if(stateCtrl === 'toReady') {
         if(motor_can.getState() === 'exit') {
             motor_can.setState('toEnter');
             if (motor_can.getState() === 'enter') {
                 stateCtrl = 'toArrange';
-                console.log(stateCtrl, 'lllllllllllllllllllllllllllllllllllllllllll')
                 setTimeout(watchdogCtrl, 1000);
             }
             else {
                 setTimeout(watchdogCtrl, 1000);
             }
+        }
+        else if(motor_can.getState() === 'enter') {
+            stateCtrl = 'toArrange';
+            setTimeout(watchdogCtrl, 1000);
         }
         else {
             setTimeout(watchdogCtrl, 1000);
