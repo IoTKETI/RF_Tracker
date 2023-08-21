@@ -142,7 +142,7 @@ let commMotor = (_in, _target) => {
         }
     }
     else if(stateMotor === 'exit') {
-        // setTimeout(commMotor, 100, _in);
+        setTimeout(commMotor, 100, _in);
     }
     else if(stateMotor === 'toEnter') {
         EnterMotorMode(() => {
@@ -346,6 +346,7 @@ exports.setTarget = (angle) => {
     g_target = angle * 0.0174533;
     enter_mode_counter = 0;
     turn_flag = 1;
+    setTimeout(commMotor, 0, _in);
 }
 
 exports.setDelta = (diff_angle) => {
