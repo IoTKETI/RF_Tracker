@@ -310,7 +310,8 @@ let V = () => {
 
 let turn_flag = 0;
 let turnTarget = (_in, _target, callback) => {
-    let result_in = _in;
+    let result_in = Math.round((_in) * 1000)/1000;
+    _target = Math.round((_target) * 1000)/1000;
     let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
