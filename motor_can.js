@@ -317,6 +317,9 @@ let V = () => {
 }
 
 let turn_flag = 0;
+const big_gap = 1.1 * 0.0174533;
+const small_gap = 0.5 * 0.00174533;
+
 let turnTarget = (_in, _target, callback) => {
     _in = Math.round((_in) * 1000)/1000;
     _target = Math.round((_target) * 1000)/1000;
@@ -325,11 +328,11 @@ let turnTarget = (_in, _target, callback) => {
 
     let dir = _target - _in;
     if(dir >= 0) {
-        if(dir >= (3 * 0.0174533)) {
-            result_in = _in + (3 * 0.0174533);
+        if(dir >= big_gap) {
+            result_in = _in + big_gap;
         }
         else {
-            result_in = _in + 0.0174533;
+            result_in = _in + small_gap;
             if(result_in >= _target) {
                 result_in = _target;
                 turn_flag = 0;
@@ -337,11 +340,11 @@ let turnTarget = (_in, _target, callback) => {
         }
     }
     else {
-        if(dir <= (-3 * 0.0174533)) {
-            result_in = _in - (3 * 0.0174533);
+        if(dir <= -big_gap) {
+            result_in = _in - big_gap;
         }
         else {
-            result_in = _in - 0.0174533;
+            result_in = _in - small_gap;
             if(result_in <= _target) {
                 result_in = _target;
                 turn_flag = 0;
