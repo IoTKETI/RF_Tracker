@@ -351,7 +351,8 @@ let watchdogCtrl = () => {
                if (TYPE === 'pan') {
                    offsetCtrl = tracker_yaw;
                } else if (TYPE === 'tilt') {
-                   offsetCtrl = tracker_pitch;
+                   //offsetCtrl = tracker_pitch;
+                   offsetCtrl = 0;
                } else {
                    offsetCtrl = 0;
                }
