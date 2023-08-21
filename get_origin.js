@@ -329,8 +329,11 @@ function parseMavFromDrone(mavPacket) {
                 _attitude_msg.yaw += (2 * Math.PI);
             }
 
-            let tracker_heading = ((_attitude_msg.yaw * 180)/Math.PI);
-            console.log('[heading] -> ', _attitude_msg.yaw, tracker_heading);
+            let tracker_yaw = Math.round(((_attitude_msg.yaw * 180)/Math.PI) * 10)/10;
+            console.log('[yaw] -> ', tracker_yaw);
+
+            let tracker_pitch = Math.round(((_attitude_msg.pitch * 180)/Math.PI) * 10)/10;
+            console.log('[pitch] -> ', tracker_pitch);
 
             attitude_msg = JSON.parse(JSON.stringify(_attitude_msg));
 
