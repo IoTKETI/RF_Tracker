@@ -216,7 +216,7 @@ let commMotor = (_in, _target) => {
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 50, _in);
+            tidMotor = setTimeout(commMotor, 50, p_in);
         }
 
         if(turn_flag === 1) {
