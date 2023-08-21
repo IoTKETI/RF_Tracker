@@ -222,6 +222,7 @@ let commMotor = (_in, _target) => {
         }
 
         if(turn_flag === 1) {
+
             if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.3) {
                 console.log('===================================================================')
             }
@@ -236,19 +237,10 @@ let commMotor = (_in, _target) => {
             });
         }
         else {
-            _in = turnTarget(_in, g_target);
-            p_in = _in;
-            pack_cmd(_in, () => {
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 150, _in);
-            });
-            //
-            // if(tidMotor !== null) {
-            //     clearTimeout(tidMotor);
-            // }
-            // tidMotor = setTimeout(commMotor, 150, _in);
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 150, _in);
         }
     }
     else if(stateMotor === 'toZero') {
