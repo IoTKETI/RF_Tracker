@@ -237,20 +237,20 @@ let commMotor = (_in, _target) => {
             });
         }
         else {
-            EnterMotorMode(() => {
-                g_target = _in;
-                pack_cmd(_in, () => {
-                    if(tidMotor !== null) {
-                        clearTimeout(tidMotor);
-                    }
-                    tidMotor = setTimeout(commMotor, 1000, _in);
-                });
-            });
+            // EnterMotorMode(() => {
+            //     g_target = _in;
+            //     pack_cmd(_in, () => {
+            //         if(tidMotor !== null) {
+            //             clearTimeout(tidMotor);
+            //         }
+            //         tidMotor = setTimeout(commMotor, 1000, _in);
+            //     });
+            // });
 
-            // if(tidMotor !== null) {
-            //     clearTimeout(tidMotor);
-            // }
-            // tidMotor = setTimeout(commMotor, 150, _in);
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 150, _in);
         }
     }
     else if(stateMotor === 'toZero') {
