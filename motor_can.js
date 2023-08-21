@@ -223,7 +223,7 @@ let commMotor = (_in, _target) => {
 
         if(turn_flag === 1) {
 
-            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.2) {
+            if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.3) {
                 console.log('===================================================================')
             }
 
