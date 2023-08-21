@@ -101,9 +101,9 @@ let canPortData = (data) => {
 //---------------------------------------------------
 
 let stateMotor = 'toExit';
-
+let tidMotor = null;
 exports.loop = () => {
-    setTimeout(commMotor, 2000, p_in);
+    tidMotor = setTimeout(commMotor, 2000, p_in);
 }
 
 let commMotor = (_in, _target) => {
@@ -191,11 +191,11 @@ let commMotor = (_in, _target) => {
             _in = turnTarget(_in, g_target);
             p_in = _in;
             pack_cmd(_in, () => {
-                setTimeout(commMotor, 50, _in);
+                tidMotor = setTimeout(commMotor, 50, _in);
             });
         }
         else {
-            setTimeout(commMotor, 100, _in);
+            tidMotor = setTimeout(commMotor, 100, _in);
         }
     }
     else if(stateMotor === 'toZero') {
@@ -346,7 +346,10 @@ exports.setTarget = (angle) => {
     g_target = angle * 0.0174533;
     enter_mode_counter = 0;
     turn_flag = 1;
-    setTimeout(commMotor, 0, _in);
+    if(tidMotor !== null) {
+        clearTimeout(tidMotor);
+    }
+    setTimeout(commMotor, 0, p_in);
 }
 
 exports.setDelta = (diff_angle) => {
