@@ -233,7 +233,7 @@ let commMotor = (_in, _target) => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 20, _in);
+                tidMotor = setTimeout(commMotor, 10, _in);
             });
         }
         else {
@@ -317,8 +317,8 @@ let V = () => {
 }
 
 let turn_flag = 0;
-const big_gap = 1.1 * 0.0174533;
-const small_gap = 0.5 * 0.00174533;
+const big_gap = 0.9 * 0.0174533;
+const small_gap = 0.4 * 0.00174533;
 
 let turnTarget = (_in, _target, callback) => {
     _in = Math.round((_in) * 1000)/1000;
