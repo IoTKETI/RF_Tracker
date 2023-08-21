@@ -213,9 +213,11 @@ let commMotor = (_in, _target) => {
 
             console.log('[enter] -> [', enter_mode_counter, '] ',
                 Math.round((g_target) * 1000)/1000,
-                Math.round((p_in) * 1000)/1000,
+                Math.round((_in) * 1000)/1000,
                 Math.round((p_out) * 1000)/1000,
                 Math.round((_in - p_out) * 100)/100);
+
+            _in = Math.round((p_out) * 1000)/1000;
         }
 
         if(turn_flag === 1) {
