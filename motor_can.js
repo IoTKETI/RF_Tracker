@@ -222,7 +222,6 @@ let commMotor = (_in, _target) => {
         }
 
         if(turn_flag === 1) {
-
             if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.3) {
                 console.log('===================================================================')
             }
@@ -237,22 +236,19 @@ let commMotor = (_in, _target) => {
             });
         }
         else {
-            // if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.3) {
-            //     _in = turnTarget(p_out, g_target);
-            //     p_in = _in;
-            //     pack_cmd(_in, () => {
-            //         if(tidMotor !== null) {
-            //             clearTimeout(tidMotor);
-            //         }
-            //         tidMotor = setTimeout(commMotor, 150, _in);
-            //     });
-            //     console.log('===================================================================')
+            _in = turnTarget(_in, g_target);
+            p_in = _in;
+            pack_cmd(_in, () => {
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 150, _in);
+            });
+            //
+            // if(tidMotor !== null) {
+            //     clearTimeout(tidMotor);
             // }
-
-            if(tidMotor !== null) {
-                clearTimeout(tidMotor);
-            }
-            tidMotor = setTimeout(commMotor, 150, _in);
+            // tidMotor = setTimeout(commMotor, 150, _in);
         }
     }
     else if(stateMotor === 'toZero') {
@@ -507,8 +503,7 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
 }
 
 let pack_cmd = (_in, callback) => {
-    // let p_des = constrain((_in+p_offset), P_MIN, P_MAX);
-    let p_des = constrain((_in), P_MIN, P_MAX);
+    let p_des = constrain((_in+p_offset), P_MIN, P_MAX);
     let v_des = constrain(v_in, V_MIN, V_MAX);
     let kp = constrain(kp_in, KP_MIN, KP_MAX);
     let kd = constrain(kd_in, KD_MIN, KD_MAX);
