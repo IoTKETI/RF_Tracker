@@ -225,7 +225,6 @@ let commMotor = (_in, _target) => {
 
             if(Math.abs(Math.round((_in - p_out) * 100)/100) > 0.3) {
                 console.log('===================================================================')
-                _in = p_out;
             }
 
             _in = turnTarget(_in, g_target);
@@ -234,17 +233,14 @@ let commMotor = (_in, _target) => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 50, _in);
+                tidMotor = setTimeout(commMotor, 100, _in);
             });
         }
         else {
-            p_in = _in;
-            pack_cmd(_in, () => {
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 50, _in);
-            });
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 100, _in);
         }
     }
     else if(stateMotor === 'toZero') {
