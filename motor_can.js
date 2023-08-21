@@ -228,7 +228,7 @@ let commMotor = () => {
 
             p_in = turnTarget(p_in, g_target);
             pack_cmd(() => {
-                console.log('[pack_cmd]', p_in);
+                console.log('[pack_cmd]', turn_flag, p_in);
             });
 
             if(tidMotor !== null) {
