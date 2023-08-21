@@ -218,8 +218,13 @@ let commMotor = () => {
                     Math.round((p_in - p_out) * 100) / 100);
             }
 
-
-
+            if(turn_flag === 0) {
+                console.log('[enter] -> ',
+                    Math.round((g_target) * 1000) / 1000,
+                    Math.round((p_in) * 1000) / 1000,
+                    Math.round((p_out) * 1000) / 1000,
+                    Math.round((p_in - p_out) * 100) / 100);
+            }
         }
 
         if(turn_flag === 1) {
