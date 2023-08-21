@@ -324,6 +324,7 @@ let watchdogCtrl = () => {
         setTimeout(watchdogCtrl, 500);
     }
     else if(stateCtrl === 'toArrange') {
+        console.log('lllllllllllllllllllllllllllllllllllllllllll')
         if(flagBPM) {
             if(motor_can.getState() === 'enter') {
                 if (TYPE === 'pan') {
