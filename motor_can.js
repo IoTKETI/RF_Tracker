@@ -318,6 +318,41 @@ let V = () => {
 
 let turn_flag = 0;
 let turnTarget = (_in, _target, callback) => {
+    _in = Math.round((_in) * 1000)/1000;
+    _target = Math.round((_target) * 1000)/1000;
+
+    let result_in = _in;
+
+    let dir = _target - _in;
+    if(dir >= 0) {
+        if(dir >= (3 * 0.0174533)) {
+            result_in = _in + (3 * 0.0174533);
+        }
+        else {
+            result_in = _in + 0.0174533;
+            if(result_in >= _target) {
+                result_in = _target;
+                turn_flag = 0;
+            }
+        }
+    }
+    else {
+        if(dir <= (-3 * 0.0174533)) {
+            result_in = _in - (3 * 0.0174533);
+        }
+        else {
+            result_in = _in - 0.0174533;
+            if(result_in <= _target) {
+                result_in = _target;
+                turn_flag = 0;
+            }
+        }
+    }
+
+    return result_in;
+}
+
+let turnTarget_old = (_in, _target, callback) => {
     let result_in = Math.round((_in) * 1000)/1000;
     _target = Math.round((_target) * 1000)/1000;
     let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
