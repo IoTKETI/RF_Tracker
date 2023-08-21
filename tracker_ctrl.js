@@ -302,7 +302,6 @@ let watchdogCtrl = () => {
         if(motor_can.getState() === 'exit') {
             motor_can.setState('toEnter');
             if (motor_can.getState() === 'enter') {
-                motor_can.setState('toZero');
                 stateCtrl = 'toArrange';
                 setTimeout(watchdogCtrl, 1000);
             }
