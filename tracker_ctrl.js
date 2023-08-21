@@ -398,4 +398,4 @@ function testAction() {
     }
 }
 
-//setTimeout(testAction, 10000);
+setTimeout(testAction, 10000);
