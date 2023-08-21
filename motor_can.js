@@ -110,7 +110,10 @@ let commMotor = (_in, _target) => {
     if(stateMotor === 'toExit') {
         ExitMotorMode(() => {
             stateMotor = 'exiting';
-            setTimeout(commMotor, 10, _in);
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 10, _in);
         });
     }
     else if(stateMotor === 'exiting') {
@@ -123,33 +126,48 @@ let commMotor = (_in, _target) => {
             // _in = p_out;
             // p_in = _in;
 
-            if (mode_counter > 4) {
+            if (mode_counter > 5) {
                 mode_counter = 0;
 
                 console.log('[exit] -> ', _in, p_out, v_out, t_out);
                 stateMotor = 'exit';
-                setTimeout(commMotor, 10, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 10, _in);
             }
             else {
                 console.log('[exiting] :: ', _in, p_out, v_out, t_out);
                 stateMotor = 'toExit';
-                setTimeout(commMotor, 100, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 100, _in);
             }
         }
         else {
             stateMotor = 'toExit';
-            setTimeout(commMotor, 100, _in);
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 100, _in);
         }
     }
     else if(stateMotor === 'exit') {
-        setTimeout(commMotor, 100, _in);
+        if(tidMotor !== null) {
+            clearTimeout(tidMotor);
+        }
+        tidMotor = setTimeout(commMotor, 100, _in);
     }
     else if(stateMotor === 'toEnter') {
         EnterMotorMode(() => {
             g_target = _in;
             pack_cmd(_in, () => {
                 stateMotor = 'entering';
-                setTimeout(commMotor, 10, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 10, _in);
             });
         });
     }
@@ -165,17 +183,26 @@ let commMotor = (_in, _target) => {
 
                 console.log('[enter] -> ', _in, p_out, v_out, t_out);
                 stateMotor = 'enter';
-                setTimeout(commMotor, 10, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 10, _in);
             }
             else {
                 console.log('[entering] :: ', _in, p_out, v_out, t_out);
                 stateMotor = 'toEnter';
-                setTimeout(commMotor, 100, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 100, _in);
             }
         }
         else {
             stateMotor = 'toEnter';
-            setTimeout(commMotor, 100, _in);
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 100, _in);
         }
     }
     else if(stateMotor === 'enter') {
@@ -191,10 +218,16 @@ let commMotor = (_in, _target) => {
             _in = turnTarget(_in, g_target);
             p_in = _in;
             pack_cmd(_in, () => {
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
                 tidMotor = setTimeout(commMotor, 50, _in);
             });
         }
         else {
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
             tidMotor = setTimeout(commMotor, 100, _in);
         }
     }
@@ -205,7 +238,10 @@ let commMotor = (_in, _target) => {
             g_target = _in;
             pack_cmd(_in, () => {
                 stateMotor = 'zeroing';
-                setTimeout(commMotor, 10, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 10, _in);
             });
         });
     }
@@ -221,17 +257,26 @@ let commMotor = (_in, _target) => {
 
                 console.log('[enter] -> ', _in, p_out, v_out, t_out);
                 stateMotor = 'enter';
-                setTimeout(commMotor, 10, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 10, _in);
             }
             else {
                 console.log('[zeroing] :: ', _in, p_out, v_out, t_out);
                 stateMotor = 'toZero';
-                setTimeout(commMotor, 100, _in);
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 100, _in);
             }
         }
         else {
             stateMotor = 'toZero';
-            setTimeout(commMotor, 100, _in);
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 100, _in);
         }
     }
 }
@@ -349,7 +394,7 @@ exports.setTarget = (angle) => {
     if(tidMotor !== null) {
         clearTimeout(tidMotor);
     }
-    setTimeout(commMotor, 0, p_in);
+    tidMotor = setTimeout(commMotor, 0, p_in);
 }
 
 exports.setDelta = (diff_angle) => {
