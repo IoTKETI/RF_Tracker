@@ -218,6 +218,8 @@ let commMotor = () => {
                     Math.round((p_in - p_out) * 100) / 100);
             }
 
+
+
         }
 
         if(turn_flag === 1) {
@@ -234,7 +236,7 @@ let commMotor = () => {
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 1000);
+            tidMotor = setTimeout(commMotor, 500);
         }
         else {
             // EnterMotorMode(() => {
