@@ -23,7 +23,7 @@ let p_in = 0.000;
 let v_in = -5.000;
 let kp_in = 20.000;
 let kd_in = 1.000;
-let t_in = -1.000;
+let t_in = -10.000;
 
 let p_out = 0.000;
 let v_out = 0.000;
