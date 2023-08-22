@@ -298,7 +298,7 @@ let ctrlAngle = (angle) => {
 }
 
 let watchdogCtrl = () => {
-   if(stateCtrl === 'toReady') {
+    if(stateCtrl === 'toReady') {
         if(motor_can.getState() === 'exit') {
             motor_can.setState('toEnter');
             if (motor_can.getState() === 'enter') {
@@ -345,33 +345,33 @@ let watchdogCtrl = () => {
             setTimeout(watchdogCtrl, 1000);
         }
     }
-   else if(stateCtrl === 'arranging') {
-       if(flagBPM) {
-           if(motor_can.getState() === 'enter') {
-               if (TYPE === 'pan') {
+    else if(stateCtrl === 'arranging') {
+        if(flagBPM) {
+            if(motor_can.getState() === 'enter') {
+                if (TYPE === 'pan') {
                    offsetCtrl = tracker_yaw;
-               } else if (TYPE === 'tilt') {
+                } else if (TYPE === 'tilt') {
                    offsetCtrl = tracker_pitch;
-               } else {
+                } else {
                    offsetCtrl = 0;
-               }
-               console.log('[offseCtrl] -> ', offsetCtrl);
+                }
+                console.log('[offseCtrl] -> ', offsetCtrl);
 
-               ctrlAngle(0);
+                ctrlAngle(0);
 
-               stateCtrl = 'ready';
-               setTimeout(watchdogCtrl, 1000);
-           }
-           else {
-               console.log('motor is not state of enter');
-               setTimeout(watchdogCtrl, 1000);
-           }
-       }
-       else {
-           console.log('unknown My Position');
-           setTimeout(watchdogCtrl, 1000);
-       }
-   }
+                stateCtrl = 'ready';
+                setTimeout(watchdogCtrl, 1000);
+            }
+            else {
+                console.log('motor is not state of enter');
+                setTimeout(watchdogCtrl, 1000);
+            }
+        }
+        else {
+            console.log('unknown My Position');
+            setTimeout(watchdogCtrl, 1000);
+        }
+    }
 }
 
 

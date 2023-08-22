@@ -20,7 +20,7 @@ const T_MAX = 18.000;
 const p_offset = 0.24;
 
 let p_in = 0.000;
-let v_in = -50.000;
+let v_in = 0.000;
 let kp_in = 20.000;
 let kd_in = 1.000;
 let t_in = 0.000;
@@ -341,7 +341,7 @@ let V = () => {
 }
 
 let turn_flag = 0;
-const big_gap = 0.9 * 0.0174533;
+const big_gap = 3.6 * 0.0174533;
 const small_gap = 0.9 * 0.0174533;
 
 let turnTarget = () => {
@@ -352,7 +352,7 @@ let turnTarget = () => {
 
     let dir = _target - _in;
     if(dir >= 0) {
-        if(dir >= 15) {
+        if(dir >= (15 * 0.0174533)) {
             result_in = _in + big_gap;
         }
         else {
@@ -365,7 +365,7 @@ let turnTarget = () => {
         }
     }
     else {
-        if(dir <= -15) {
+        if(dir <= -(15 * 0.0174533)) {
             result_in = _in - big_gap;
         }
         else {
@@ -378,7 +378,8 @@ let turnTarget = () => {
         }
     }
 
-    return Math.round((result_in) * 1000)/1000;
+    //return Math.round((result_in) * 1000)/1000;
+    return result_in;
 }
 
 let turnTarget_old = (_in, _target, callback) => {
