@@ -20,7 +20,7 @@ const T_MAX = 18.000;
 const p_offset = 0.315;
 
 let p_in = 0.000;
-let v_in = 0.000;
+let v_in = -5.000;
 let kp_in = 20.000;
 let kd_in = 1.000;
 let t_in = 0.000;
