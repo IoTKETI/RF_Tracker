@@ -299,7 +299,7 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            if (mode_counter > 1) {
+            if (mode_counter > 0) {
                 mode_counter = 0;
 
                 console.log('[enter] -> ', p_in, p_out, v_out, t_out);
