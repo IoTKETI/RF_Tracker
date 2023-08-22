@@ -17,10 +17,10 @@ const T_MIN = -18.000;
 const T_MAX = 18.000;
 // -------------------
 
-const p_offset = 0.24;
+const p_offset = 0.48;
 
 let p_in = 0.000;
-let v_in = -50.000;
+let v_in = -49.000;
 let kp_in = 20.000;
 let kd_in = 1.000;
 let t_in = 0.000;
@@ -244,16 +244,15 @@ let commMotor = () => {
                 console.log('===================================================================')
             }
 
-            p_in = turnTarget();
             pack_cmd(() => {
                 console.log('[pack_cmd]', turn_flag, p_in);
 
-                // p_in = turnTarget();
+                p_in = turnTarget();
 
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 30);
+                tidMotor = setTimeout(commMotor, 50);
             });
         }
         else {
