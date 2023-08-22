@@ -17,7 +17,7 @@ const T_MIN = -18.000;
 const T_MAX = 18.000;
 // -------------------
 
-const p_offset = 0.0;
+const p_offset = 0.24;
 
 let p_in = 0.000;
 let v_in = 0.000;
@@ -177,7 +177,7 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            if (mode_counter > 5) {
+            if (mode_counter > 0) {
                 mode_counter = 0;
 
                 console.log('[enter] -> ', p_in, p_out, v_out, t_out);
@@ -193,7 +193,7 @@ let commMotor = () => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 500);
+                tidMotor = setTimeout(commMotor, 100);
             }
         }
         else {
@@ -255,13 +255,13 @@ let commMotor = () => {
             //     });
             // });
 
-            // pack_cmd(() => {
-            //     if(tidMotor !== null) {
-            //         clearTimeout(tidMotor);
-            //     }
-            //     tidMotor = setTimeout(commMotor, 500);
-            // });
-            //
+            pack_cmd(() => {
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 500);
+            });
+
             // if(tidMotor !== null) {
             //     clearTimeout(tidMotor);
             // }
