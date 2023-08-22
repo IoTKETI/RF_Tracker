@@ -492,32 +492,52 @@ let constrain = (_in, _min, _max) => {
 }
 
 let float_to_uint = (x, x_min, x_max, bits) => {
+    /// Converts a float to an unsigned int, given range and number of bits ///
     let span = x_max - x_min;
-    let offset = x_min;
-    let pgg = 0;
-    if (bits === 12) {
-        pgg = (x - offset) * 4095.0 / span;
+    if(x < x_min) {
+        x = x_min;
     }
-    else if (bits === 16) {
-        pgg = (x - offset) * 65535.0 / span;
+    else if(x > x_max) {
+        x = x_max;
     }
 
-    return parseInt(pgg);
+    return parseInt(((x- x_min)*(((1<<bits)/span))));
 }
 
 let uint_to_float = (x_int, x_min, x_max, bits) => {
+    /// converts unsigned int to float, given range and number of bits ///
     let span = x_max - x_min;
-    let offset = x_min;
-    let pgg = 0;
-    if (bits === 12) {
-        pgg = parseFloat(x_int) * span / 4095.0 + offset;
-    }
-    else if (bits === 16) {
-        pgg = parseFloat(x_int) * span / 65535.0 + offset;
-    }
 
-    return parseFloat(pgg);
+    return (x_int)*span/(((1<<bits)-1)) + x_min;
 }
+
+// let float_to_uint = (x, x_min, x_max, bits) => {
+//     let span = x_max - x_min;
+//     let offset = x_min;
+//     let pgg = 0;
+//     if (bits === 12) {
+//         pgg = (x - offset) * 4095.0 / span;
+//     }
+//     else if (bits === 16) {
+//         pgg = (x - offset) * 65535.0 / span;
+//     }
+//
+//     return parseInt(pgg);
+// }
+
+// let uint_to_float = (x_int, x_min, x_max, bits) => {
+//     let span = x_max - x_min;
+//     let offset = x_min;
+//     let pgg = 0;
+//     if (bits === 12) {
+//         pgg = parseFloat(x_int) * span / 4095.0 + offset;
+//     }
+//     else if (bits === 16) {
+//         pgg = parseFloat(x_int) * span / 65535.0 + offset;
+//     }
+//
+//     return parseFloat(pgg);
+// }
 
 let pack_cmd = async (callback) => {
     let p_des = constrain((p_in+p_offset), P_MIN, P_MAX);
