@@ -252,7 +252,7 @@ let commMotor = () => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
-                tidMotor = setTimeout(commMotor, 60);
+                tidMotor = setTimeout(commMotor, 30);
             });
         }
         else {
