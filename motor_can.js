@@ -17,7 +17,7 @@ const T_MIN = -18.000;
 const T_MAX = 18.000;
 // -------------------
 
-const p_offset = 0.24;
+let p_offset = 0.24;
 
 let p_in = 0.000;
 let v_in = 0.000;
@@ -124,11 +124,12 @@ let commMotor = () => {
             motor_return_msg = '';
 
             p_in = p_out;
+            p_offset = p_out - p_in;
 
             if (mode_counter > 5) {
                 mode_counter = 0;
 
-                console.log('[exit] -> ', p_in, p_out, v_out, t_out);
+                console.log('[exit] -> ', p_in, p_out, p_offset);
                 stateMotor = 'exit';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
@@ -136,7 +137,7 @@ let commMotor = () => {
                 tidMotor = setTimeout(commMotor, 10);
             }
             else {
-                console.log('[exiting] :: ', p_in, p_out, v_out, t_out);
+                console.log('[exiting] :: ', p_in, p_out, p_offset);
                 stateMotor = 'toExit';
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
