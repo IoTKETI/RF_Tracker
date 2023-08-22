@@ -235,18 +235,14 @@ let commMotor = () => {
 
             pack_cmd(() => {
                 console.log('[pack_cmd]', turn_flag, p_in);
+
+                p_in = turnTarget();
+
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 50);
             });
-
-            p_in = turnTarget(p_in, g_target);
-
-            pack_cmd(() => {
-                console.log('[pack_cmd]', turn_flag, p_in);
-            });
-
-            if(tidMotor !== null) {
-                clearTimeout(tidMotor);
-            }
-            tidMotor = setTimeout(commMotor, 50);
         }
         else {
             // EnterMotorMode(() => {
@@ -345,12 +341,12 @@ let V = () => {
 }
 
 let turn_flag = 0;
-const big_gap = 4.5 * 0.0174533;
+const big_gap = 3.6 * 0.0174533;
 const small_gap = 0.9 * 0.0174533;
 
-let turnTarget = (_in, _target) => {
-    _in = Math.round((_in) * 1000)/1000;
-    _target = Math.round((_target) * 1000)/1000;
+let turnTarget = () => {
+    let _in = Math.round((p_in) * 1000)/1000;
+    let _target = Math.round((g_target) * 1000)/1000;
 
     let result_in = _in;
 
@@ -382,7 +378,7 @@ let turnTarget = (_in, _target) => {
         }
     }
 
-    return result_in;
+    return Math.round((result_in) * 1000)/1000;
 }
 
 let turnTarget_old = (_in, _target, callback) => {
@@ -469,13 +465,13 @@ let turnTarget_old = (_in, _target, callback) => {
 
 let enter_mode_counter = 0;
 exports.setTarget = (angle) => {
-    g_target = angle * 0.0174533;
+    g_target = Math.round((angle * 0.0174533) * 1000) / 1000;
     enter_mode_counter = 0;
     turn_flag = 1;
 }
 
 exports.setDelta = (diff_angle) => {
-    g_target = p_in + (diff_angle * 0.0174533);
+    g_target = p_in + Math.round((diff_angle * 0.0174533) * 1000) / 1000;
     turn_flag = 1;
 }
 
@@ -523,7 +519,7 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
     return parseFloat(pgg);
 }
 
-let pack_cmd = (callback) => {
+let pack_cmd = async (callback) => {
     let p_des = constrain((p_in+p_offset), P_MIN, P_MAX);
     let v_des = constrain(v_in, V_MIN, V_MAX);
     let kp = constrain(kp_in, KP_MIN, KP_MAX);
@@ -547,8 +543,9 @@ let pack_cmd = (callback) => {
 
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write(Buffer.from(msg_buf, 'hex'), () => {
+            await canPort.write(Buffer.from(msg_buf, 'hex'), () => {
                 // console.log('can write =>', msg_buf);
+
             });
         }
     }
