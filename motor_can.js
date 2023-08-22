@@ -160,14 +160,25 @@ let commMotor = () => {
     }
     else if(stateMotor === 'toEnter') {
         EnterMotorMode(() => {
-            g_target = p_in;
-            pack_cmd(() => {
-                stateMotor = 'entering';
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 10);
+            Zero(() => {
+                p_in = 0.0;
+                g_target = p_in;
+                pack_cmd(() => {
+                    stateMotor = 'zeroing';
+                    if(tidMotor !== null) {
+                        clearTimeout(tidMotor);
+                    }
+                    tidMotor = setTimeout(commMotor, 10);
+                });
             });
+            // g_target = p_in;
+            // pack_cmd(() => {
+            //     stateMotor = 'entering';
+            //     if(tidMotor !== null) {
+            //         clearTimeout(tidMotor);
+            //     }
+            //     tidMotor = setTimeout(commMotor, 10);
+            // });
         });
     }
     else if(stateMotor === 'entering') {
