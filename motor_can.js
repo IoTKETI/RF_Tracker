@@ -244,10 +244,11 @@ let commMotor = () => {
                 console.log('===================================================================')
             }
 
+            p_in = turnTarget();
             pack_cmd(() => {
                 console.log('[pack_cmd]', turn_flag, p_in);
 
-                p_in = turnTarget();
+                // p_in = turnTarget();
 
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
