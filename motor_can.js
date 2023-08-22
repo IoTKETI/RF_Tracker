@@ -177,7 +177,7 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            if (mode_counter > 0) {
+            if (mode_counter > 1) {
                 mode_counter = 0;
 
                 console.log('[enter] -> ', p_in, p_out, v_out, t_out);
@@ -255,12 +255,12 @@ let commMotor = () => {
             //     });
             // });
 
-            pack_cmd(() => {
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 500);
-            });
+            // pack_cmd(() => {
+            //     if(tidMotor !== null) {
+            //         clearTimeout(tidMotor);
+            //     }
+            //     tidMotor = setTimeout(commMotor, 500);
+            // });
             //
             // if(tidMotor !== null) {
             //     clearTimeout(tidMotor);
