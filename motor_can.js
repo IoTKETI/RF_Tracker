@@ -249,11 +249,13 @@ let commMotor = () => {
 
                 p_in = turnTarget();
 
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 50);
+
             });
+
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 50);
         }
         else {
             // EnterMotorMode(() => {
