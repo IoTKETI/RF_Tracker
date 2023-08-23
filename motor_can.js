@@ -551,7 +551,7 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
 //     return parseFloat(pgg);
 // }
 
-let pack_cmd = async (callback) => {
+let pack_cmd = (callback) => {
     let p_des = constrain((p_in+p_offset), P_MIN, P_MAX);
     let v_des = constrain(v_in, V_MIN, V_MAX);
     let kp = constrain(kp_in, KP_MIN, KP_MAX);
@@ -575,14 +575,15 @@ let pack_cmd = async (callback) => {
 
     if (canPort !== null) {
         if (canPort.isOpen) {
-            await canPort.write(Buffer.from(msg_buf, 'hex'), () => {
+            canPort.write(Buffer.from(msg_buf, 'hex'), () => {
                 // console.log('can write =>', msg_buf);
+                callback();
 
             });
         }
     }
 
-    callback();
+
 }
 
 let unpack_reply = () => {
