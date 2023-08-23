@@ -352,7 +352,7 @@ let V = () => {
 }
 
 let turn_flag = 0;
-const big_gap = 0.9 * 0.0174533;
+const big_gap = 5.4 * 0.0174533;
 const small_gap = 0.9 * 0.0174533;
 
 let turnTarget = () => {
