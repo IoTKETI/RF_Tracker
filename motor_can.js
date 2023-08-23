@@ -22,7 +22,7 @@ const p_offset = 0.48;
 let p_in = 0.000;
 let v_in = -49.000;
 let kp_in = 20.000;
-let kd_in = 1.000;
+let kd_in = 0.000;
 let t_in = 0.000;
 
 let p_out = 0.000;
