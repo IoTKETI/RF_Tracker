@@ -255,7 +255,7 @@ let commMotor = () => {
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
-            tidMotor = setTimeout(commMotor, 50);
+            tidMotor = setTimeout(commMotor, 20);
         }
         else {
             // EnterMotorMode(() => {
