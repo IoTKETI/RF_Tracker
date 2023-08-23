@@ -352,8 +352,8 @@ let V = () => {
 }
 
 let turn_flag = 0;
-const big_gap = 1.8 * 0.0174533;
-const small_gap = 0.9 * 0.0174533;
+const big_gap = 0.5 * 0.0174533;
+const small_gap = 0.5 * 0.0174533;
 
 let turnTarget = () => {
     let _in = Math.round((p_in) * 1000)/1000;
