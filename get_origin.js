@@ -36,8 +36,8 @@ pre_attitude_msg = JSON.parse(JSON.stringify(attitude_msg));
 
 
 let local_mqtt_client = null;
-let pub_gps_position_topic = '/GPS/position';
-let pub_gps_attitude_topic = '/GPS/attitude';
+let pub_gps_position_topic = '/GPS/Tracker/position';
+let pub_gps_attitude_topic = '/GPS/Tracker/attitude';
 
 mavPortOpening();
 

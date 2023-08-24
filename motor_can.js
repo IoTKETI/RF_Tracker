@@ -171,63 +171,47 @@ let commMotor = () => {
                     tidMotor = setTimeout(commMotor, 10);
                 });
             });
-            // g_target = p_in;
-            // pack_cmd(() => {
-            //     stateMotor = 'entering';
-            //     if(tidMotor !== null) {
-            //         clearTimeout(tidMotor);
-            //     }
-            //     tidMotor = setTimeout(commMotor, 10);
-            // });
         });
     }
-    else if(stateMotor === 'entering') {
-        if (motor_return_msg !== '') {
-            unpack_reply();
-            mode_counter++;
-
-            motor_return_msg = '';
-
-            if (mode_counter > 0) {
-                mode_counter = 0;
-
-                console.log('[enter] -> ', p_in, p_out, v_out, t_out);
-                stateMotor = 'enter';
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 10);
-            }
-            else {
-                console.log('[entering] :: ', p_in, p_out, v_out, t_out);
-                stateMotor = 'toEnter';
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 100);
-            }
-        }
-        else {
-            stateMotor = 'toEnter';
-            if(tidMotor !== null) {
-                clearTimeout(tidMotor);
-            }
-            tidMotor = setTimeout(commMotor, 100);
-        }
-    }
+    // else if(stateMotor === 'entering') {
+    //     if (motor_return_msg !== '') {
+    //         unpack_reply();
+    //         mode_counter++;
+    //
+    //         motor_return_msg = '';
+    //
+    //         if (mode_counter > 0) {
+    //             mode_counter = 0;
+    //
+    //             console.log('[enter] -> ', p_in, p_out, v_out, t_out);
+    //             stateMotor = 'enter';
+    //             if(tidMotor !== null) {
+    //                 clearTimeout(tidMotor);
+    //             }
+    //             tidMotor = setTimeout(commMotor, 10);
+    //         }
+    //         else {
+    //             console.log('[entering] :: ', p_in, p_out, v_out, t_out);
+    //             stateMotor = 'toEnter';
+    //             if(tidMotor !== null) {
+    //                 clearTimeout(tidMotor);
+    //             }
+    //             tidMotor = setTimeout(commMotor, 100);
+    //         }
+    //     }
+    //     else {
+    //         stateMotor = 'toEnter';
+    //         if(tidMotor !== null) {
+    //             clearTimeout(tidMotor);
+    //         }
+    //         tidMotor = setTimeout(commMotor, 100);
+    //     }
+    // }
     else if(stateMotor === 'enter') {
         if (motor_return_msg !== '') {
             unpack_reply();
 
             motor_return_msg = '';
-
-            if(Math.abs(Math.round((p_in - p_out) * 100)/100) > 0.2) {
-                console.log('[enter] -> [', enter_mode_counter, '] ',
-                    Math.round((g_target) * 1000) / 1000,
-                    Math.round((p_in) * 1000) / 1000,
-                    Math.round((p_out) * 1000) / 1000,
-                    Math.round((p_in - p_out) * 100) / 100);
-            }
 
             if(turn_flag === 0) {
                 console.log('[enter] -> ',
@@ -239,13 +223,8 @@ let commMotor = () => {
         }
 
         if(turn_flag === 1) {
-
-            if(Math.abs(Math.round((p_in - p_out) * 100)/100) > 0.3) {
-                console.log('===================================================================')
-            }
-
             pack_cmd(() => {
-                console.log('[pack_cmd]', turn_flag, p_in);
+                console.log('[pack_cmd]', turn_flag, g_target, p_in);
 
                 p_in = turnTarget();
 
@@ -256,27 +235,12 @@ let commMotor = () => {
             });
         }
         else {
-            // EnterMotorMode(() => {
-            //     g_target = _in;
-            //     pack_cmd(_in, () => {
-            //         if(tidMotor !== null) {
-            //             clearTimeout(tidMotor);
-            //         }
-            //         tidMotor = setTimeout(commMotor, 1000, _in);
-            //     });
-            // });
-
             pack_cmd(() => {
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
                 }
                 tidMotor = setTimeout(commMotor, 500);
             });
-
-            // if(tidMotor !== null) {
-            //     clearTimeout(tidMotor);
-            // }
-            // tidMotor = setTimeout(commMotor, 150, _in);
         }
     }
     else if(stateMotor === 'toZero') {
@@ -337,23 +301,11 @@ exports.setState = (state) => {
     console.log('[setState] -> ', stateMotor);
 }
 
-
-let S = 1;
-let P = () => {
-    while(S === 0) {
-        console.log('.............waiting................................................');
-    }
-
-    S -= 1;
-}
-
-let V = () => {
-    S += 1;
-}
-
 let turn_flag = 0;
-const big_gap = 0.5 * 0.0174533;
-const small_gap = 0.2 * 0.0174533;
+const DEG = 0.0174533;
+const th_gap = 20 * DEG;
+const big_gap = 0.5 * DEG;
+const small_gap = 0.2 * DEG;
 
 let turnTarget = () => {
     let _in = Math.round((p_in) * 1000)/1000;
@@ -363,7 +315,7 @@ let turnTarget = () => {
 
     let dir = _target - _in;
     if(dir >= 0) {
-        if(dir >= (15 * 0.0174533)) {
+        if(dir >= th_gap) {
             result_in = _in + big_gap;
         }
         else {
@@ -376,7 +328,7 @@ let turnTarget = () => {
         }
     }
     else {
-        if(dir <= -(15 * 0.0174533)) {
+        if(dir <= -th_gap) {
             result_in = _in - big_gap;
         }
         else {
@@ -389,101 +341,18 @@ let turnTarget = () => {
         }
     }
 
-    //return Math.round((result_in) * 1000)/1000;
-    return result_in;
-}
-
-let turnTarget_old = (_in, _target, callback) => {
-    let result_in = Math.round((_in) * 1000)/1000;
-    _target = Math.round((_target) * 1000)/1000;
-    let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
-    if(target_angle <= 0) {
-        target_angle += 360;
-    }
-    target_angle %= 360;
-
-    let cur_angle = Math.round(((_in * 180)/Math.PI) * 10)/10;
-    if(cur_angle <= 0) {
-        cur_angle += 360;
-    }
-    cur_angle %= 360;
-
-    target_angle += 360;
-    cur_angle += 360;
-
-    let p_diff = 0;
-    let diff1 = (target_angle - cur_angle);
-    let diff2 = 0;
-    if(diff1 > 0) {
-        diff2 = diff1 - 360;
-    }
-    else {
-        diff2 = diff1 + 360;
-    }
-
-    if(Math.abs(diff1) >= Math.abs(diff2)) {
-        p_diff = diff2;
-    }
-    else {
-        p_diff = diff1;
-    }
-
-    if (p_diff < -15) {
-        result_in = _in - (3.1 * 0.0174533);
-        if(result_in <= _target) {
-            result_in = _target;
-        }
-    }
-    else if (-15 <= p_diff && p_diff < -5) {
-        result_in = _in - (2.1 * 0.0174533);
-        if(result_in <= _target) {
-            result_in = _target;
-        }
-    }
-    else if (-5 <= p_diff && p_diff < -0.5) {
-        result_in = _in - (1.1 * 0.0174533);
-        if(result_in <= _target) {
-            result_in = _target;
-        }
-    }
-    else if (-0.5 <= p_diff && p_diff < 0.5) {
-        turn_flag = 0;
-
-        console.log('<------------------------------------------->');
-
-        result_in = _target;
-    }
-    else if (0.5 <= p_diff && p_diff < 5) {
-        result_in = _in + (1.1 * 0.0174533);
-        if(result_in >= _target) {
-            result_in = _target;
-        }
-    }
-    else if (5 <= p_diff && p_diff < 15) {
-        result_in = _in + (2.1 * 0.0174533);
-        if(result_in >= _target) {
-            result_in = _target;
-        }
-    }
-    else if (15 <= p_diff) {
-        result_in = _in + (3.1 * 0.0174533);
-        if(result_in >= _target) {
-            result_in = _target;
-        }
-    }
-
     return result_in;
 }
 
 let enter_mode_counter = 0;
 exports.setTarget = (angle) => {
-    g_target = Math.round((angle * 0.0174533) * 1000) / 1000;
+    g_target = Math.round((angle * DEG) * 1000) / 1000;
     enter_mode_counter = 0;
     turn_flag = 1;
 }
 
 exports.setDelta = (diff_angle) => {
-    g_target = p_in + Math.round((diff_angle * 0.0174533) * 1000) / 1000;
+    g_target = p_in + Math.round((diff_angle * DEG) * 1000) / 1000;
     turn_flag = 1;
 }
 

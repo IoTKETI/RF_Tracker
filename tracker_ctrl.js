@@ -24,12 +24,14 @@ let target_longitude = '';
 let target_altitude = '';
 let target_relative_altitude = '';
 
-let sub_drone_data_topic = '/Ant_Tracker/target_drone/gpi';
-let sub_motor_control_topic = '/Ant_Tracker/Control';
-let sub_motor_altitude_topic = '/Ant_Tracker/Altitude';
+let sub_target_data_topic = '/Target/Tracker/gpi';
 
-let sub_gps_attitude_topic = '/GPS/attitude';
-let sub_gps_position_topic = '/GPS/position';
+let sub_tracker_altitude_topic = '/Panel/Tracker/altitude';
+let sub_tracker_control_topic = '/Panel/Tracker/control';
+let pub_tracker_data_topic = '/Tracker/Panel/data'
+
+let sub_gps_attitude_topic = '/GPS/Tracker/attitude';
+let sub_gps_position_topic = '/GPS/Tracker/position';
 
 
 let pub_motor_position_topic = '/Ant_Tracker/Motor_Pan';
@@ -55,9 +57,9 @@ function local_mqtt_connect(host) {
     local_mqtt_client = mqtt.connect(connectOptions);
 
     local_mqtt_client.on('connect', function () {
-        if (sub_drone_data_topic !== '') {
-            local_mqtt_client.subscribe(sub_drone_data_topic, () => {
-                console.log('[local_mqtt] sub_drone_data_topic is subscribed -> ', sub_drone_data_topic);
+        if (sub_target_data_topic !== '') {
+            local_mqtt_client.subscribe(sub_target_data_topic, () => {
+                console.log('[local_mqtt] sub_target_data_topic is subscribed -> ', sub_target_data_topic);
             });
         }
 
@@ -73,29 +75,29 @@ function local_mqtt_connect(host) {
             });
         }
 
-        if (sub_motor_control_topic !== '') {
-            local_mqtt_client.subscribe(sub_motor_control_topic, () => {
-                console.log('[local_mqtt] sub_motor_control_topic is subscribed -> ', sub_motor_control_topic);
+        if (sub_tracker_control_topic !== '') {
+            local_mqtt_client.subscribe(sub_tracker_control_topic, () => {
+                console.log('[local_mqtt] sub_tracker_control_topic is subscribed -> ', sub_tracker_control_topic);
             });
         }
-        if (sub_motor_altitude_topic !== '') {
-            local_mqtt_client.subscribe(sub_motor_altitude_topic, () => {
-                console.log('[local_mqtt] sub_motor_altitude_topic is subscribed -> ', sub_motor_altitude_topic);
+        if (sub_tracker_altitude_topic !== '') {
+            local_mqtt_client.subscribe(sub_tracker_altitude_topic, () => {
+                console.log('[local_mqtt] sub_tracker_altitude_topic is subscribed -> ', sub_tracker_altitude_topic);
             });
         }
     });
 
     local_mqtt_client.on('message', function (topic, message) {
-        if (topic === sub_motor_control_topic) { // 모터 제어 메세지 수신
+        if (topic === sub_tracker_control_topic) { // 모터 제어 메세지 수신
             motor_control_message = message.toString();
         }
-        else if (topic === sub_motor_altitude_topic) {
+        else if (topic === sub_tracker_altitude_topic) {
             motor_altitude_message = message.toString();
             if (typeof (parseInt(motor_altitude_message)) === 'number') {
                 tracker_relative_altitude = motor_altitude_message;
             }
         }
-        else if (topic === sub_drone_data_topic) { // 드론데이터 수신
+        else if (topic === sub_target_data_topic) { // 드론데이터 수신
             target_gpi = JSON.parse(message.toString());
 
             target_latitude = target_gpi.lat / 10000000;
@@ -106,8 +108,6 @@ function local_mqtt_connect(host) {
         }
         else if (topic === sub_gps_position_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
-
-            //console.log('[position] -> ', tracker_gpi.lat, tracker_gpi.lon, tracker_gpi.relative_alt, tracker_gpi.alt, tracker_gpi.hdg);
 
             countBPM++;
 
@@ -288,11 +288,11 @@ motor_can.loop();
 
 let offsetCtrl = 0;
 let targetAngle = 0;
-
+const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
     targetAngle = (angle - offsetCtrl);
 
-    console.log('[targetAngle] -> ', targetAngle, (targetAngle * 0.0174533));
+    console.log('[targetAngle] -> ', targetAngle, (targetAngle * DEG));
 
     motor_can.setTarget(targetAngle);
 }
@@ -360,7 +360,7 @@ let watchdogCtrl = () => {
                 ctrlAngle(0);
 
                 stateCtrl = 'ready';
-                setTimeout(watchdogCtrl, 1000);
+                setTimeout(watchdogCtrl, 5000);
             }
             else {
                 console.log('motor is not state of enter');
