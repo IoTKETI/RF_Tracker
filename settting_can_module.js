@@ -122,15 +122,26 @@ let setTheBaudrateCAN = (callback) => {
     }
 }
 
-let setMask = (callback) => {
+let setMask0 = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write("AT+M=[1][0][00000001]\r\n", () => {
+            canPort.write("AT+M=[0][0][000007FC]\r\n", () => {
                 callback();
             });
         }
     }
 }
+
+let setMask1 = (callback) => {
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write("AT+M=[1][0][000007FC]\r\n", () => {
+                callback();
+            });
+        }
+    }
+}
+
 
 setTimeout(() => {
     switchConfigMode(() => {
@@ -147,13 +158,13 @@ setTimeout(() => {
             });
 
             setTimeout(() => {
-                setMask(() => {
-                    console.log('AT+M=[1][0][00000001]');
+                setMask0(() => {
+                    console.log('AT+M=[0][0][000007FC]');
                 });
 
                 setTimeout(() => {
-                    switchConfigMode(() => {
-                        console.log('+++');
+                    setMask1(() => {
+                        console.log('AT+M=[1][0][000007FC]');
                     });
                 }, 5000);
             }, 5000);
