@@ -360,6 +360,11 @@ exports.getAngle = () => {
     return Math.round(((p_out * 180)/Math.PI) * 10)/10;
 }
 
+exports.setStop = () => {
+    g_target = p_in;
+    turn_flag = 1;
+}
+
 let constrain = (_in, _min, _max) => {
     if (_in < _min) {
         return _min;
@@ -391,34 +396,6 @@ let uint_to_float = (x_int, x_min, x_max, bits) => {
 
     return (x_int)*span/(((1<<bits)-1)) + x_min;
 }
-
-// let float_to_uint = (x, x_min, x_max, bits) => {
-//     let span = x_max - x_min;
-//     let offset = x_min;
-//     let pgg = 0;
-//     if (bits === 12) {
-//         pgg = (x - offset) * 4095.0 / span;
-//     }
-//     else if (bits === 16) {
-//         pgg = (x - offset) * 65535.0 / span;
-//     }
-//
-//     return parseInt(pgg);
-// }
-
-// let uint_to_float = (x_int, x_min, x_max, bits) => {
-//     let span = x_max - x_min;
-//     let offset = x_min;
-//     let pgg = 0;
-//     if (bits === 12) {
-//         pgg = parseFloat(x_int) * span / 4095.0 + offset;
-//     }
-//     else if (bits === 16) {
-//         pgg = parseFloat(x_int) * span / 65535.0 + offset;
-//     }
-//
-//     return parseFloat(pgg);
-// }
 
 let pack_cmd = async (callback) => {
     let p_des = constrain((p_in+p_offset), P_MIN, P_MAX);
