@@ -109,7 +109,7 @@ exports.loop = () => {
 let commMotor = () => {
     if(stateMotor === 'toExit') {
         ExitMotorMode(() => {
-            stateMotor = 'exiting';
+            stateMotor = 'toExit';
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
@@ -468,7 +468,7 @@ let EnterMotorMode = (callback) => {
 let ExitMotorMode = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFDFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFFD', 'hex'), () => {
+            canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
                 console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD');
                 callback();
             });
