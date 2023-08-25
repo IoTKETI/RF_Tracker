@@ -125,7 +125,7 @@ let setTheBaudrateCAN = (callback) => {
 let setMask = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write("AT+M=[0][0][00000001]\r\n", () => {
+            canPort.write("AT+M=[1][0][00000001]\r\n", () => {
                 callback();
             });
         }
@@ -148,7 +148,7 @@ setTimeout(() => {
 
             setTimeout(() => {
                 setMask(() => {
-                    console.log('AT+M=[0][0][00000001]');
+                    console.log('AT+M=[1][0][00000001]');
                 })
             }, 5000);
         }, 5000);
