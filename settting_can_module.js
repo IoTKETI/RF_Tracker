@@ -92,10 +92,20 @@ let canPortData = (data) => {
 
 this.canPortOpening('/dev/ttyAMA1',canBaudRate);
 
+let switchConfigMode = (callback) => {
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write("+++", () => {
+                callback();
+            });
+        }
+    }
+}
+
 let setTheBaudrateUART = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write("AT+S=4\n\r", () => {
+            canPort.write("AT+S=4", () => {
                 callback();
             });
         }
@@ -103,7 +113,13 @@ let setTheBaudrateUART = (callback) => {
 }
 
 setTimeout(() => {
-    setTheBaudrateUART(() => {
-        console.log('AT+S=4');
-    })
-}, 5000);
+    switchConfigMode(() => {
+        console.log('+++');
+    });
+    setTimeout(() => {
+        setTheBaudrateUART(() => {
+            console.log('AT+S=4');
+        })
+    }, 3000);
+}, 3000);
+
