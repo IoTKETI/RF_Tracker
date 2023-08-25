@@ -1,48 +1,9 @@
 const {SerialPort} = require('serialport');
 
-// ---------- set values ----------
-let CAN_ID = '00000002';
-let MOTOR_CAN_ID = CAN_ID + '0000';
 
-// Value limits ------
-const P_MIN = -12.500;
-const P_MAX = 12.500;
-const V_MIN = -50.000;
-const V_MAX = 50.000;
-const KP_MIN = 0.000;
-const KP_MAX = 500.000;
-const KD_MIN = 0.000;
-const KD_MAX = 5.000;
-const T_MIN = -18.000;
-const T_MAX = 18.000;
-// -------------------
-
-const p_offset = 0.00;
-
-let p_in = 0.000;
-let v_in = 0.000;
-let kp_in = 2.000;
-let kd_in = 1.000;
-let t_in = 0.000;
-
-let p_out = 0.000;
-let v_out = 0.000;
-let t_out = 0.000;
-
-let g_target = 0.0;
-
-let mode_counter = 0;
-
-let canBaudRate = '115200';
-let canPort = null;
-
-let motor_return_msg = '';
 
 //------------- Can communication -------------
-exports.canPortOpening = (canPortNum, ID) => {
-    CAN_ID = ID;
-    MOTOR_CAN_ID = ID + '0000';
-
+let canPortOpening = (canPortNum, canBaudRate) => {
     if (canPort == null) {
         canPort = new SerialPort({
             path: canPortNum,
@@ -82,15 +43,12 @@ let canPortError = (error) => {
     setTimeout(this.canPortOpening, 2000);
 }
 
-let _msg = '';
-
 let canPortData = (data) => {
     console.log(data.toString());
 }
 
 //---------------------------------------------------
 
-this.canPortOpening('/dev/ttyAMA1',canBaudRate);
 
 let switchConfigMode = (callback) => {
     if (canPort !== null) {
@@ -125,7 +83,7 @@ let setTheBaudrateCAN = (callback) => {
 let setMask0 = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write("AT+M=[0][0][000007FC]\r\n", () => {
+            canPort.write("AT+M=[0][0][000007FF]\r\n", () => {
                 callback();
             });
         }
@@ -135,12 +93,14 @@ let setMask0 = (callback) => {
 let setMask1 = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write("AT+M=[1][0][000007FC]\r\n", () => {
+            canPort.write("AT+M=[1][0][000007FF]\r\n", () => {
                 callback();
             });
         }
     }
 }
+
+canPortOpening('/dev/ttyAMA1', '115200');
 
 
 setTimeout(() => {
@@ -159,12 +119,12 @@ setTimeout(() => {
 
             setTimeout(() => {
                 setMask0(() => {
-                    console.log('AT+M=[0][0][000007FC]');
+                    console.log('AT+M=[0][0][000007FF]');
                 });
 
                 setTimeout(() => {
                     setMask1(() => {
-                        console.log('AT+M=[1][0][000007FC]');
+                        console.log('AT+M=[1][0][000007FF]');
                     });
                 }, 5000);
             }, 5000);
