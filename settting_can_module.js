@@ -100,35 +100,46 @@ let setMask1 = (callback) => {
     }
 }
 
-canPortOpening('/dev/ttyAMA1', '115200');
+// 처음에 baudrate 115200으로 세팅
 
+const first = process.argv[2];
+if(first === 'baudrate_uart') {
+    canPortOpening('/dev/ttyAMA1', '9600');
 
-setTimeout(() => {
-    switchConfigMode(() => {
-        console.log('+++');
-    });
     setTimeout(() => {
-        // setTheBaudrateUART(() => {
-        //     console.log('AT+S=4');
-        // });
+        switchConfigMode(() => {
+            console.log('+++');
+        });
+        setTimeout(() => {
+            setTheBaudrateUART(() => {
+                console.log('AT+S=4');
+            });
+        }, 3000);
+    }, 3000);
+}
+else if(first === 'baudrate_can') {
+    canPortOpening('/dev/ttyAMA1', '115200');
 
+    setTimeout(() => {
+        switchConfigMode(() => {
+            console.log('+++');
+        });
         setTimeout(() => {
             setTheBaudrateCAN(() => {
                 console.log('AT+C=18');
             });
-
             setTimeout(() => {
                 setMask0(() => {
                     console.log('AT+M=[0][0][000007FF]');
                 });
-
                 setTimeout(() => {
                     setMask1(() => {
                         console.log('AT+M=[1][0][000007FF]');
                     });
-                }, 5000);
-            }, 5000);
-        }, 5000);
-    }, 5000);
-}, 3000);
+                }, 3000);
+            }, 3000);
+        }, 3000);
+    }, 3000);
+}
+
 
