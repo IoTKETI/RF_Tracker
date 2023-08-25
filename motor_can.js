@@ -377,6 +377,7 @@ let constrain = (_in, _min, _max) => {
     }
 }
 
+
 let float_to_uint = (x, x_min, x_max, bits) => {
     /// Converts a float to an unsigned int, given range and number of bits ///
     let span = x_max - x_min;
