@@ -109,7 +109,7 @@ exports.loop = () => {
 let commMotor = () => {
     if(stateMotor === 'toExit') {
         ExitMotorMode(() => {
-            stateMotor = 'toExit';
+            stateMotor = 'exiting';
             if(tidMotor !== null) {
                 clearTimeout(tidMotor);
             }
