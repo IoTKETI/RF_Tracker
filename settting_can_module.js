@@ -101,3 +101,19 @@ let canPortData = (data) => {
 //---------------------------------------------------
 
 this.canPortOpening('/dev/ttyAMA1',canBaudRate);
+
+let setTheBaudrateUART = (callback) => {
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write("AT+S=4\n", () => {
+                callback();
+            });
+        }
+    }
+}
+
+setTimeout(() => {
+    setTheBaudrateUART(() => {
+        console.log('AT+S=4');
+    })
+}, 5000);
