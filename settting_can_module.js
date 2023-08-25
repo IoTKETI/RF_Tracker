@@ -33,7 +33,7 @@ let g_target = 0.0;
 
 let mode_counter = 0;
 
-let canBaudRate = '9600';
+let canBaudRate = '115200';
 let canPort = null;
 
 let motor_return_msg = '';
@@ -95,7 +95,7 @@ this.canPortOpening('/dev/ttyAMA1',canBaudRate);
 let switchConfigMode = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
-            canPort.write("+++\r\n", () => {
+            canPort.write("+++", () => {
                 callback();
             });
         }
