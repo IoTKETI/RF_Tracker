@@ -5,7 +5,7 @@ const motor_can = require('./motor_can');
 let local_mqtt_client = null;
 
 let target_gpi = {};
-let motor_control_message = '';
+let tracker_control_message = '';
 let motor_altitude_message = '';
 let tracker_gpi = '';
 let tracker_att = '';
@@ -88,25 +88,7 @@ function local_mqtt_connect(host) {
     });
 
     local_mqtt_client.on('message', function (topic, message) {
-        if (topic === sub_tracker_control_topic) { // 모터 제어 메세지 수신
-            motor_control_message = message.toString();
-        }
-        else if (topic === sub_tracker_altitude_topic) {
-            motor_altitude_message = message.toString();
-            if (typeof (parseInt(motor_altitude_message)) === 'number') {
-                tracker_relative_altitude = motor_altitude_message;
-            }
-        }
-        else if (topic === sub_target_data_topic) { // 드론데이터 수신
-            target_gpi = JSON.parse(message.toString());
-
-            target_latitude = target_gpi.lat / 10000000;
-            target_longitude = target_gpi.lon / 10000000;
-            target_altitude = target_gpi.alt / 1000;
-            target_relative_altitude = target_gpi.relative_alt / 1000;
-            //console.log('target_gpi: ', JSON.stringify(target_gpi));
-        }
-        else if (topic === sub_gps_position_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
+        if (topic === sub_gps_position_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
             countBPM++;
@@ -173,6 +155,24 @@ function local_mqtt_connect(host) {
 
             countBPM++;
         }
+        else if (topic === sub_tracker_control_topic) { // 모터 제어 메세지 수신
+            tracker_control_message = message.toString();
+        }
+        else if (topic === sub_tracker_altitude_topic) {
+            motor_altitude_message = message.toString();
+            if (typeof (parseInt(motor_altitude_message)) === 'number') {
+                tracker_relative_altitude = motor_altitude_message;
+            }
+        }
+        else if (topic === sub_target_data_topic) { // 드론데이터 수신
+            target_gpi = JSON.parse(message.toString());
+
+            target_latitude = target_gpi.lat / 10000000;
+            target_longitude = target_gpi.lon / 10000000;
+            target_altitude = target_gpi.alt / 1000;
+            target_relative_altitude = target_gpi.relative_alt / 1000;
+            //console.log('target_gpi: ', JSON.stringify(target_gpi));
+        }
     });
 
     local_mqtt_client.on('error', function (err) {
@@ -216,11 +216,11 @@ function calctargetAngleAngle(targetLatitude, targetLongitude) {
     // turn_angle = turn_angle - tracker_heading;
     // if (run_flag === 'reset') {
     //     run_flag = 'go';
-    //     motor_control_message = 'run';
+    //     tracker_control_message = 'run';
     // }
     // else if (run_flag === 'go') {
     //     if (parseInt(Math.abs(cur_angle)) === 360) {
-    //         motor_control_message = 'zero';
+    //         tracker_control_message = 'zero';
     //         cur_angle = 0;
     //         run_flag = 'reset';
     //     }
@@ -355,12 +355,12 @@ let watchdogCtrl = () => {
                 } else {
                    offsetCtrl = 0;
                 }
-                console.log('[offseCtrl] -> ', offsetCtrl);
+                console.log('[arranging offseCtrl] -> ', offsetCtrl);
 
                 ctrlAngle(0);
 
                 stateCtrl = 'ready';
-                setTimeout(watchdogCtrl, 5000);
+                setTimeout(watchdogCtrl, 1000);
             }
             else {
                 console.log('motor is not state of enter');
@@ -378,6 +378,27 @@ let watchdogCtrl = () => {
 let stateCtrl = 'toReady'
 setTimeout(watchdogCtrl, 1000);
 
+let tracker_handler = (_msg) => {
+    if(_msg === 'test') {
+        if(tidTest !== null) {
+            clearTimeout(tidTest);
+            tidTest = null;
+        }
+        else {
+            testAction();
+        }
+    }
+    else if(_msg === 'init') {
+        if(tidTest !== null) {
+            clearTimeout(tidTest);
+            tidTest = null;
+        }
+
+        stateCtrl = 'toReady';
+    }
+}
+
+let tidTest = null;
 let t_angle = 0;
 function testAction() {
     if(stateCtrl === 'ready') {
@@ -387,21 +408,17 @@ function testAction() {
         }
         else if(TYPE === 'tilt') {
             t_angle = parseInt(Math.random() * 90);
-            // t_angle += 10;
-            // if(t_angle >= 90) {
-            //     t_angle = 0;
-            // }
         }
 
         ctrlAngle(t_angle);
 
         let period = (1 + parseInt(Math.random() * 3)) * 1000;
         //let period = (10) * 1000;
-        setTimeout(testAction, period);
+        tidTest = setTimeout(testAction, period);
     }
     else {
-        setTimeout(testAction, 1000);
+        tidTest = setTimeout(testAction, 1000);
     }
 }
 
-setTimeout(testAction, 10000);
+
