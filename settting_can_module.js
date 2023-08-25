@@ -144,12 +144,18 @@ setTimeout(() => {
         setTimeout(() => {
             setTheBaudrateCAN(() => {
                 console.log('AT+C=18');
-            })
+            });
 
             setTimeout(() => {
                 setMask(() => {
                     console.log('AT+M=[1][0][00000001]');
-                })
+                });
+
+                setTimeout(() => {
+                    switchConfigMode(() => {
+                        console.log('+++');
+                    });
+                }, 5000);
             }, 5000);
         }, 5000);
     }, 5000);
