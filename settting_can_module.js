@@ -120,6 +120,6 @@ setTimeout(() => {
         setTheBaudrateUART(() => {
             console.log('AT+S=4');
         })
-    }, 3000);
+    }, 0);
 }, 3000);
 
