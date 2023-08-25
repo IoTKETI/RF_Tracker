@@ -137,9 +137,9 @@ setTimeout(() => {
         console.log('+++');
     });
     setTimeout(() => {
-        setTheBaudrateUART(() => {
-            console.log('AT+S=4');
-        });
+        // setTheBaudrateUART(() => {
+        //     console.log('AT+S=4');
+        // });
 
         setTimeout(() => {
             setTheBaudrateCAN(() => {
