@@ -378,6 +378,8 @@ let watchdogCtrl = () => {
 let stateCtrl = 'toReady'
 setTimeout(watchdogCtrl, 1000);
 
+let tidControlTracker = null;
+
 let tracker_handler = (_msg) => {
     if(_msg === 'test') {
         if(tidTest !== null) {
@@ -395,6 +397,24 @@ let tracker_handler = (_msg) => {
         }
 
         stateCtrl = 'toReady';
+    }
+    else if(_msg === 'tilt_up') {
+        if(tidControlTracker !== null) {
+            clearInterval(tidControlTracker);
+            tidControlTracker = null;
+        }
+
+        tidControlTracker = setInterval(() => {
+            motor_can.setDelta(1);
+        }, 100);
+    }
+    else if(_msg === 'stop') {
+        if(tidControlTracker !== null) {
+            clearInterval(tidControlTracker);
+            tidControlTracker = null;
+        }
+
+        motor_can.setStop();
     }
 }
 
