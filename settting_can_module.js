@@ -112,6 +112,16 @@ let setTheBaudrateUART = (callback) => {
     }
 }
 
+let setTheBaudrateCAN = (callback) => {
+    if (canPort !== null) {
+        if (canPort.isOpen) {
+            canPort.write("AT+C=18\r\n", () => {
+                callback();
+            });
+        }
+    }
+}
+
 setTimeout(() => {
     switchConfigMode(() => {
         console.log('+++');
@@ -119,7 +129,13 @@ setTimeout(() => {
     setTimeout(() => {
         setTheBaudrateUART(() => {
             console.log('AT+S=4');
-        })
+        });
+
+        setTimeout(() => {
+            setTheBaudrateCAN(() => {
+                console.log('AT+C=18');
+            })
+        }, 5000);
     }, 5000);
 }, 3000);
 
