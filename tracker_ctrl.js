@@ -390,6 +390,8 @@ let tracker_handler = (_msg) => {
         if(tidTest !== null) {
             clearTimeout(tidTest);
             tidTest = null;
+
+            motor_can.setStop();
         }
         else {
             testAction();
@@ -404,14 +406,28 @@ let tracker_handler = (_msg) => {
         stateCtrl = 'arranging';
     }
     else if(_msg === 'tilt_up') {
-        if(tidControlTracker !== null) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
-        }
+        if(TYPE === 'tilt') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
 
-        tidControlTracker = setInterval(() => {
-            motor_can.setDelta(1);
-        }, 100);
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(1);
+            }, 100);
+        }
+    }
+    else if(_msg === 'tilt_down') {
+        if(TYPE === 'tilt') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
+
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(-1);
+            }, 100);
+        }
     }
     else if(_msg === 'stop') {
         if(tidControlTracker !== null) {
