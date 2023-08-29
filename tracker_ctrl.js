@@ -383,6 +383,7 @@ setTimeout(watchdogCtrl, 1000);
 let tidControlTracker = null;
 
 let tracker_handler = (_msg) => {
+    console.log('received message from panel');
     if(_msg === 'test') {
         if(tidTest !== null) {
             clearTimeout(tidTest);
