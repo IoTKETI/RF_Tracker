@@ -187,7 +187,7 @@ function mqtt_connect(serverip) {
         else if (topic === sub_motor_control_topic) {
             if (local_mqtt_client !== null) {
                 local_mqtt_client.publish(pub_motor_control_topic, message.toString(), () => {
-                    console.log('send motor control message: ', sub_motor_control_topic, message.toString());
+                    console.log('send motor control message: ', pub_motor_control_topic, message.toString());
                 });
             }
         }
