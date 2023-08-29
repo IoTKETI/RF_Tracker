@@ -359,10 +359,12 @@ let watchdogCtrl = () => {
                 }
                 console.log('[arranging offseCtrl] -> ', offsetCtrl);
 
-                ctrlAngle(0);
+                setTimeout(() => {
+                    ctrlAngle(0);
 
-                stateCtrl = 'ready';
-                setTimeout(watchdogCtrl, 1000);
+                    stateCtrl = 'ready';
+                    setTimeout(watchdogCtrl, 1000);
+                }, 1000);
             }
             else {
                 console.log('motor is not state of enter');
