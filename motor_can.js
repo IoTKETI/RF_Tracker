@@ -86,7 +86,7 @@ let _msg = '';
 
 let canPortData = (data) => {
     _msg += data.toString('hex').toLowerCase();
-
+    console.log(_msg);
     if (_msg.length >= 24) {
         if (_msg.substring(0, 10) === ('00' + CAN_ID)) {
             motor_return_msg = _msg.substring(0, 24);
