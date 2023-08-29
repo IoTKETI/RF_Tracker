@@ -8,7 +8,7 @@ let local_mqtt_client = null;
 let pub_target_gpi_topic = '/Ant_Tracker/target_drone/gpi';  // Send mavlink(#33, GLOBAL_POSITION_INT) to Motors
 let sub_pan_motor_position_topic = '/Ant_Tracker/Motor_Pan';
 let sub_tilt_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
-let pub_motor_control_topic = '/Ant_Tracker/Control';
+let pub_motor_control_topic = '/Panel/Tracker/control';
 let pub_motor_altitude_topic = '/Ant_Tracker/Altitude';
 
 let mqtt_client = null;
