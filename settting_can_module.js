@@ -115,8 +115,11 @@ if(type === 'uart') {
             setTheBaudrateUART(() => {
                 console.log('AT+S=4');
             });
-        }, 3000);
-    }, 3000);
+            setTimeout(() => {
+                console.log('DONE.');
+            }, 3000);
+        }, 2000);
+    }, 1000);
 }
 else if(type === 'can') {
     canPortOpening(port_name, '115200');
@@ -137,10 +140,13 @@ else if(type === 'can') {
                     setMask1(() => {
                         console.log('AT+M=[1][0][000007FF]');
                     });
-                }, 3000);
-            }, 3000);
-        }, 3000);
-    }, 3000);
+                    setTimeout(() => {
+                        console.log('DONE.');
+                    }, 3000);
+                }, 2000);
+            }, 2000);
+        }, 2000);
+    }, 1000);
 }
 
 
