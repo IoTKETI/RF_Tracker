@@ -181,17 +181,6 @@ function local_mqtt_connect(host) {
     });
 }
 
-let constrain = (_in, _min, _max) => {
-    if (_in < _min) {
-        return _min;
-    }
-    else if (_in > _max) {
-        return _max;
-    }
-    else {
-        return _in;
-    }
-}
 
 function calctargetAngleAngle(targetLatitude, targetLongitude) {
     //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
@@ -333,7 +322,16 @@ let watchdogCtrl = () => {
             if(motor_can.getState() === 'enter') {
                 motor_can.setState('toZero');
 
-                stateCtrl = 'arranging';
+                if (TYPE === 'pan') {
+                    offsetCtrl = tracker_yaw;
+                } else if (TYPE === 'tilt') {
+                    offsetCtrl = tracker_pitch;
+                } else {
+                    offsetCtrl = 0;
+                }
+                console.log('[arranging offseCtrl] -> ', offsetCtrl);
+
+                stateCtrl = 'ready';
                 setTimeout(watchdogCtrl, 100);
             }
             else {
@@ -349,12 +347,14 @@ let watchdogCtrl = () => {
     else if(stateCtrl === 'arranging') {
         if(flagBPM) {
             if(motor_can.getState() === 'enter') {
+                motor_can.setState('toZero');
+
                 if (TYPE === 'pan') {
-                   offsetCtrl = tracker_yaw;
+                    offsetCtrl = tracker_yaw;
                 } else if (TYPE === 'tilt') {
-                   offsetCtrl = tracker_pitch;
+                    offsetCtrl = tracker_pitch;
                 } else {
-                   offsetCtrl = 0;
+                    offsetCtrl = 0;
                 }
                 console.log('[arranging offseCtrl] -> ', offsetCtrl);
 
@@ -391,13 +391,13 @@ let tracker_handler = (_msg) => {
             testAction();
         }
     }
-    else if(_msg === 'init') {
+    else if(_msg === 'arrange') {
         if(tidTest !== null) {
             clearTimeout(tidTest);
             tidTest = null;
         }
 
-        stateCtrl = 'toReady';
+        stateCtrl = 'arrangeing';
     }
     else if(_msg === 'tilt_up') {
         if(tidControlTracker !== null) {
