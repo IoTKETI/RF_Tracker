@@ -22,7 +22,7 @@ try {
 
     drone_info.id = "Dione";
     drone_info.approval_gcs = "MUV";
-    drone_info.host = "121.137.228.240";
+    drone_info.host = "gcs.iotocean.org";
     drone_info.drone = "Drone1";
     drone_info.gcs = "KETI_GCS";
     drone_info.type = "ardupilot";
