@@ -1,6 +1,6 @@
 const {SerialPort} = require('serialport');
 
-
+let canPort = null;
 
 //------------- Can communication -------------
 let canPortOpening = (canPortNum, canBaudRate) => {
