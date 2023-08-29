@@ -309,10 +309,11 @@ let watchdogCtrl = () => {
     }
     else if(stateCtrl === 'ready') {
         if(TYPE === 'pan') {
-            console.log('[PanMotorAngle] -> ', motor_can.getAngle()+offsetCtrl);
+
+            console.log('[PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
         }
         else if(TYPE === 'tilt') {
-            // console.log('[TiltMotorAngle] -> ', motor_can.getAngle()+offsetCtrl);
+            console.log('[TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
         }
 
         setTimeout(watchdogCtrl, 500);
