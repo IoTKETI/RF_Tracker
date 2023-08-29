@@ -383,7 +383,7 @@ setTimeout(watchdogCtrl, 1000);
 let tidControlTracker = null;
 
 let tracker_handler = (_msg) => {
-    console.log('received message from panel');
+    console.log('received message from panel', _msg);
     if(_msg === 'test') {
         if(tidTest !== null) {
             clearTimeout(tidTest);
@@ -399,7 +399,7 @@ let tracker_handler = (_msg) => {
             tidTest = null;
         }
 
-        stateCtrl = 'arrangeing';
+        stateCtrl = 'arranging';
     }
     else if(_msg === 'tilt_up') {
         if(tidControlTracker !== null) {
