@@ -157,9 +157,7 @@ function local_mqtt_connect(host) {
         }
         else if (topic === sub_tracker_control_topic) { // 모터 제어 메세지 수신
             tracker_control_message = message.toString();
-            if (tracker_control_message === 'test') {
-                testAction();
-            }
+            tracker_handler(tracker_control_message);
         }
         else if (topic === sub_tracker_altitude_topic) {
             motor_altitude_message = message.toString();
