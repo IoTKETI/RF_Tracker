@@ -102,9 +102,10 @@ let setMask1 = (callback) => {
 
 // 처음에 baudrate 115200으로 세팅
 
-const first = process.argv[2];
-if(first === 'uart') {
-    canPortOpening('/dev/ttyAMA1', '9600');
+const port_name = process.argv[2];
+const type = process.argv[3];
+if(type === 'uart') {
+    canPortOpening(port_name, '9600');
 
     setTimeout(() => {
         switchConfigMode(() => {
@@ -117,8 +118,8 @@ if(first === 'uart') {
         }, 3000);
     }, 3000);
 }
-else if(first === 'can') {
-    canPortOpening('/dev/ttyAMA1', '115200');
+else if(type === 'can') {
+    canPortOpening(port_name, '115200');
 
     setTimeout(() => {
         switchConfigMode(() => {
