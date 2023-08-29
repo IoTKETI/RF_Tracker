@@ -3,18 +3,18 @@ const {nanoid} = require("nanoid");
 const fs = require('fs');
 
 let local_mqtt_client = null;
-let pub_target_gpi_topic = '/Ant_Tracker/target_drone/gpi';  // Send mavlink(#33, GLOBAL_POSITION_INT) to Motors
+let pub_target_gpi_topic = '/Target/Tracker/gpi';  // Send mavlink(#33, GLOBAL_POSITION_INT) to Motors
 let sub_pan_motor_position_topic = '/Ant_Tracker/Motor_Pan';
 let sub_tilt_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
 let pub_motor_control_topic = '/Panel/Tracker/control';
-let pub_motor_altitude_topic = '/Ant_Tracker/Altitude';
+let pub_motor_altitude_topic = '/Panel/Tracker/altitude';
 
 let gcs_mqtt_client = null;
 let sub_target_gpi_topic = '/TELE_HUB/drone/gpi';  // Recieve mavlink(#33, GLOBAL_POSITION_INT) from GCS
 let pub_pan_motor_position_topic = '/Ant_Tracker/Motor_Pan';
 let pub_tilt_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
 let sub_motor_control_topic = '/Panel/Tracker/control';
-let sub_motor_altitude_topic = '/Ant_Tracker/Altitude';
+let sub_motor_altitude_topic = '/Panel/Tracker/altitude';
 
 let drone_info = {};
 
