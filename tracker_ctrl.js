@@ -92,60 +92,6 @@ function local_mqtt_connect(host) {
             tracker_gpi = JSON.parse(message.toString());
 
             countBPM++;
-
-            ////if (tracker_gpi.lat > 0 && tracker_gpi.lon > 0) {
-            ////tracker_latitude = tracker_gpi.lat / 10000000;
-            ////tracker_longitude = tracker_gpi.lon / 10000000;
-            ////}
-            ////tracker_altitude = tracker_gpi.alt / 1000;
-            ////tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
-            //tracker_heading = tracker_gpi.hdg;
-
-            //let tracker_heading_int = Math.round(tracker_heading);
-            //if (tracker_heading_int >= 180) {
-            //tracker_heading = tracker_heading_int - 360;
-            //}
-            //else {
-            //tracker_heading = tracker_heading_int;
-            //}
-            //console.log('tracker_gpi: ', JSON.stringify(tracker_gpi), '\ntracker_heading_int -', tracker_heading_int, '\ntracker_heading -', tracker_heading);
-
-            //if (run_flag === 'go') {
-            //target_angle = calctargetAngleAngle(target_latitude, target_longitude);
-            ////console.log('tracker_heading, target_angle', tracker_heading, target_angle);
-
-            //if (Math.abs(target_angle - tracker_heading) > 15) {
-            //p_step = 0.015;
-            //}
-            //else if (Math.abs(target_angle - tracker_heading) > 10) {
-            //p_step = 0.008;
-            //}
-            //else if (Math.abs(target_angle - tracker_heading) > 5) {
-            //p_step = 0.004;
-            //}
-            //else {
-            //p_step = 0.001;
-            //}
-
-            //if (tracker_heading !== target_angle) {
-            //cw = target_angle - tracker_heading;
-            //if (cw < 0) {
-            //cw = cw + 360;
-            //}
-            //ccw = 360 - cw;
-
-            //if (cw < ccw) {
-            //p_in = p_in + p_step;
-            //}
-            //else if (cw > ccw) {
-            //p_in = p_in - p_step;
-            //}
-            //else {
-            //p_in = p_in;
-            //}
-            //}
-            //p_step = 0.02;
-            //}
         }
         else if (topic === sub_gps_attitude_topic) {
             tracker_att = JSON.parse(message.toString());
@@ -173,6 +119,19 @@ function local_mqtt_connect(host) {
             target_altitude = target_gpi.alt / 1000;
             target_relative_altitude = target_gpi.relative_alt / 1000;
             //console.log('target_gpi: ', JSON.stringify(target_gpi));
+
+            if(flagTracking === 'yes') {
+                if(TYPE === 'tilt') {
+                    let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
+
+                    motor_can.setTarget(t_angle);
+                }
+                else if(TYPE === 'pan') {
+                    let t_angle = calcTargetPanAngle(target_latitude, target_longitude);
+
+                    motor_can.setTarget(t_angle);
+                }
+            }
         }
     });
 
@@ -181,12 +140,7 @@ function local_mqtt_connect(host) {
     });
 }
 
-
-function calctargetAngleAngle(targetLatitude, targetLongitude) {
-    //console.log('[pan] tracker_latitude, tracker_longitude, tracker_relative_altitude: ', tracker_latitude,
-    // tracker_longitude, tracker_relative_altitude); console.log('[pan] targetLatitude, targetLongitude: ',
-    // targetLatitude, targetLongitude);
-
+function calcTargetPanAngle(targetLatitude, targetLongitude) {
     let target_latitude_rad = targetLatitude * Math.PI / 180;
     let target_longitude_rad = targetLongitude * Math.PI / 180;
 
@@ -199,61 +153,18 @@ function calctargetAngleAngle(targetLatitude, targetLongitude) {
 
     angle = (angle + p_offset) * 180 / Math.PI;
     return Math.round(angle);
-
-    // let turn_target = Math.round((angle + p_offset) * 50) / 50;  // 0.5단위 반올림
-    // turn_angle = (turn_target * 180 / Math.PI + 360) % 360; // azimuth angle (convert to degree)
-
-    // turn_angle = turn_angle - tracker_heading;
-    // if (run_flag === 'reset') {
-    //     run_flag = 'go';
-    //     tracker_control_message = 'run';
-    // }
-    // else if (run_flag === 'go') {
-    //     if (parseInt(Math.abs(cur_angle)) === 360) {
-    //         tracker_control_message = 'zero';
-    //         cur_angle = 0;
-    //         run_flag = 'reset';
-    //     }
-
-    //     if (turn_angle < 0) {
-    //         temp_angle = turn_angle + 360;
-    //     }
-    //     else {
-    //         temp_angle = turn_angle;
-    //     }
-
-    //     if (temp_angle - cur_angle < 0) {
-    //         cw = 360 - cur_angle + temp_angle;
-    //         ccw = (360 - cw) * (-1);
-    //     }
-    //     else {
-    //         if (temp_angle - cur_angle >= 360) {
-    //             cw = temp_angle - cur_angle - 360;
-    //             ccw = (360 - cw) * (-1);
-    //         }
-    //         else {
-    //             cw = temp_angle - cur_angle;
-    //             ccw = (360 - cw) * (-1);
-    //         }
-    //     }
-
-    //     if (Math.abs(cw) <= Math.abs(ccw)) {
-    //         p_target = (cur_angle + cw) * 0.0174533 + p_offset;
-    //     }
-    //     else {
-    //         p_target = (cur_angle + ccw) * 0.0174533 + p_offset;
-    //     }
-    //     cur_angle = (p_target - p_offset) * 180 / Math.PI;
-
-    //     // console.log('-------------------------------');
-    //     // console.log('turnAngle: ', turnAngle);
-    //     // console.log('cur_angle: ', cur_angle);
-    //     // console.log('temp_angle: ', temp_angle);
-    //     // console.log('cw, ccw: ', cw, ccw);
-    //     // console.log('p_target: ', p_target);
-    //     // console.log('-------------------------------');
-    // }
 }
+
+function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
+    let dist = getDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude)
+    let x = dist;
+    let y = targetAltitude - tracker_relative_altitude;
+
+    let angle = Math.atan2(y, x);
+
+    return Math.round(angle * 180 / Math.PI);
+}
+
 
 let countBPM = 0;
 let flagBPM = 0;
@@ -310,10 +221,10 @@ let watchdogCtrl = () => {
     else if(stateCtrl === 'ready') {
         if(TYPE === 'pan') {
 
-            console.log('[PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
+            console.log('[ready][PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
         }
         else if(TYPE === 'tilt') {
-            console.log('[TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
+            console.log('[ready][TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
         }
 
         setTimeout(watchdogCtrl, 500);
@@ -383,6 +294,7 @@ let stateCtrl = 'toReady'
 setTimeout(watchdogCtrl, 1000);
 
 let tidControlTracker = null;
+let flagTracking = 'no';
 
 let tracker_handler = (_msg) => {
     console.log('received message from panel', _msg);
@@ -460,6 +372,19 @@ let tracker_handler = (_msg) => {
         }
 
         motor_can.setStop();
+    }
+    else if(_msg === 'run') {
+        if(tidControlTracker !== null) {
+            clearInterval(tidControlTracker);
+            tidControlTracker = null;
+        }
+
+        if(flagTracking === 'no') {
+            flagTracking = 'yes';
+        }
+        else {
+            flagTracking = 'no';
+        }
     }
 }
 
