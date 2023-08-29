@@ -429,6 +429,30 @@ let tracker_handler = (_msg) => {
             }, 100);
         }
     }
+    else if(_msg === 'pan_up') {
+        if(TYPE === 'pan') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
+
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(1);
+            }, 100);
+        }
+    }
+    else if(_msg === 'pan_down') {
+        if(TYPE === 'pan') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
+
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(-1);
+            }, 100);
+        }
+    }
     else if(_msg === 'stop') {
         if(tidControlTracker !== null) {
             clearInterval(tidControlTracker);
