@@ -470,7 +470,7 @@ let ExitMotorMode = (callback) => {
     if (canPort !== null) {
         if (canPort.isOpen) {
             canPort.write(Buffer.from(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD', 'hex'), () => {
-                console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD');
+                //console.log(MOTOR_CAN_ID + 'FFFFFFFFFFFFFFFD');
                 callback();
             });
         }
