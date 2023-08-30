@@ -130,7 +130,8 @@ function tr_mqtt_connect(host) {
             target_longitude = target_gpi.lon / 10000000;
             target_altitude = target_gpi.alt / 1000;
             target_relative_altitude = target_gpi.relative_alt / 1000;
-            //console.log('target_gpi: ', JSON.stringify(target_gpi));
+
+            console.log('target_gpi: ', JSON.stringify(target_gpi));
 
             if(flagTracking === 'yes') {
                 if(TYPE === 'tilt') {
