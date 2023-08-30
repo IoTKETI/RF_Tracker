@@ -131,7 +131,7 @@ function tr_mqtt_connect(host) {
             target_altitude = target_gpi.alt / 1000;
             target_relative_altitude = target_gpi.relative_alt / 1000;
 
-            console.log('target_gpi: ', JSON.stringify(target_gpi));
+            //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
             if(flagTracking === 'yes') {
                 if(TYPE === 'tilt') {
@@ -164,13 +164,28 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
     let x = Math.cos(tracker_latitude_rad) * Math.sin(target_latitude_rad) - Math.sin(tracker_latitude_rad) * Math.cos(target_latitude_rad) * Math.cos(target_longitude_rad - tracker_longitude_rad);
     let angle = Math.atan2(y, x); // azimuth angle (radians)
 
-    angle = (angle + p_offset) * 180 / Math.PI;
-    return Math.round(angle);
+    return Math.round(angle * 180 / Math.PI);
+}
+
+
+function getDistance(lat1, lon1, lat2, lon2) {
+    var radLat1 = Math.PI * lat1 / 180;
+    var radLat2 = Math.PI * lat2 / 180;
+    var theta = lon1 - lon2;
+    var radTheta = Math.PI * theta / 180;
+    var dist = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta);
+    if (dist > 1)
+        dist = 1;
+
+    dist = Math.acos(dist);
+    dist = dist * 180 / Math.PI;
+    dist = dist * 60 * 1.1515 * 1.609344 * 1000;
+
+    return dist;
 }
 
 function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
-    let dist = getDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude)
-    let x = dist;
+    let x = getDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude);
     let y = targetAltitude - tracker_relative_altitude;
 
     let angle = Math.atan2(y, x);
