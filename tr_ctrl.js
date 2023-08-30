@@ -140,11 +140,10 @@ function tr_mqtt_connect(host) {
 
                     //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
-
                     if (TYPE === 'tilt') {
                         let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
 
-                        console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
+                        //console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
 
                         motor_can.setTarget(t_angle);
                     }
@@ -164,15 +163,36 @@ function tr_mqtt_connect(host) {
 }
 
 function calcTargetPanAngle(targetLatitude, targetLongitude) {
-    let target_latitude_rad = targetLatitude * Math.PI / 180;
-    let target_longitude_rad = targetLongitude * Math.PI / 180;
+    // let target_latitude_rad = targetLatitude * Math.PI / 180;
+    // let target_longitude_rad = targetLongitude * Math.PI / 180;
+    //
+    // let tracker_latitude_rad = tracker_latitude * Math.PI / 180;
+    // let tracker_longitude_rad = tracker_longitude * Math.PI / 180;
+    //
+    // let y = Math.sin(target_longitude_rad - tracker_longitude_rad) * Math.cos(target_latitude_rad);
+    // let x = Math.cos(tracker_latitude_rad) * Math.sin(target_latitude_rad) - Math.sin(tracker_latitude_rad) * Math.cos(target_latitude_rad) * Math.cos(target_longitude_rad - tracker_longitude_rad);
+    // let angle = Math.atan2(y, x); // azimuth angle (radians)
 
-    let tracker_latitude_rad = tracker_latitude * Math.PI / 180;
-    let tracker_longitude_rad = tracker_longitude * Math.PI / 180;
+    let cur_lat = tracker_latitude;
+    let cur_lon = tracker_longitude;
+    let cur_alt = tracker_altitude;
 
-    let y = Math.sin(target_longitude_rad - tracker_longitude_rad) * Math.cos(target_latitude_rad);
-    let x = Math.cos(tracker_latitude_rad) * Math.sin(target_latitude_rad) - Math.sin(tracker_latitude_rad) * Math.cos(target_latitude_rad) * Math.cos(target_longitude_rad - tracker_longitude_rad);
-    let angle = Math.atan2(y, x); // azimuth angle (radians)
+    let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
+
+    let tar_lat = targetLatitude;
+    let tar_lon = targetLongitude;
+    let tar_alt = targetAltitude;
+
+    let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
+
+    let x = result2.x - result1.x;
+    let y = result2.y - result1.y;
+
+    console.log(cur_lat, cur_lon, cur_alt);
+    console.log(tar_lat, tar_lon, tar_alt);
+    console.log('x: ', x, '     y: ', y);
+
+    let angle = Math.atan2(y, x);
 
     return Math.round(angle * 180 / Math.PI);
 }
@@ -339,7 +359,7 @@ let watchdogCtrl = () => {
     else if(stateCtrl === 'ready') {
         if(TYPE === 'pan') {
 
-            console.log('[ready][PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
+            //console.log('[ready][PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
         }
         else if(TYPE === 'tilt') {
             //console.log('[ready][TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
