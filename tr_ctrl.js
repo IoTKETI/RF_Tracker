@@ -129,7 +129,7 @@ function tr_mqtt_connect(host) {
         }
         else if (_topic === _dr_data_topic) { // 드론데이터 수신
             if (flagTracking === 'yes') {
-                let arr_msg = message.toString().split(':');
+                let arr_msg = message.toString().split(';');
                 if (arr_msg[0] === 'gpi') {
                     target_gpi = JSON.parse(arr_msg[1]);
 

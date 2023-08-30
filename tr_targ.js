@@ -185,14 +185,14 @@ let tr_message_handler = (topic, message) => {
     if (tr_mqtt_client !== null) {
         let result = parseMavFromDrone(message.toString('hex'));
 
-        if(result === mavlink.MAVLINK_MSG_ID_HEARTBEAT) {
-            tr_mqtt_client.publish(topic, 'hb:'+JSON.stringify(heartbeat), () => {
-                console.log('Send MAVLINK_MSG_ID_HEARTBEAT ' + topic);
+        if (result === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
+            tr_mqtt_client.publish(topic, 'gpi;' + JSON.stringify(global_position_int), () => {
+                console.log('Send MAVLINK_MSG_ID_GLOBAL_POSITION_INT ' + topic);
             });
         }
-        else if(result === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
-            tr_mqtt_client.publish(topic, 'gpi:' + JSON.stringify(global_position_int), () => {
-                console.log('Send MAVLINK_MSG_ID_GLOBAL_POSITION_INT ' + topic);
+        else if (result === mavlink.MAVLINK_MSG_ID_HEARTBEAT) {
+            tr_mqtt_client.publish(topic, 'hb;' + JSON.stringify(heartbeat), () => {
+                console.log('Send MAVLINK_MSG_ID_HEARTBEAT ' + topic);
             });
         }
     }
