@@ -223,7 +223,7 @@ let commMotor = () => {
 
         if(turn_flag === 1) {
             pack_cmd(() => {
-                console.log('[pack_cmd]', turn_flag, g_target, p_in);
+                //console.log('[pack_cmd]', turn_flag, g_target, p_in);
 
                 p_in = turnTarget();
 

@@ -105,6 +105,8 @@ function tr_mqtt_connect(host) {
 
             tracker_altitude = tracker_gpi.alt / 1000;
 
+            console.log(tracker_altitude);
+
             countBPM++;
         }
         else if (topic === gps_alt_topic) {
