@@ -225,7 +225,7 @@ let commMotor = () => {
             pack_cmd(() => {
                 //console.log('[pack_cmd]', turn_flag, g_target, p_in);
 
-                p_in = turnTarget_old();
+                p_in = turnTarget();
 
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
