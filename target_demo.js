@@ -12,20 +12,12 @@ let pub_motor_control_topic = '/Panel/Tracker/control';
 let pub_motor_altitude_topic = '/Panel/Tracker/altitude';
 
 let mqtt_client = null;
-let rf_lte_pub_drone_topic = '/RF/TELE_HUB/drone';
-let rf_lte_sub_gcs_topic = '/RF/TELE/gcs';
-let rf_lte_sub_rc_topic = '/RF/RC'; // 드론에 RF 통신으로 전달하기 위한 토픽
 let sub_motor_control_topic = '/Panel/Tracker/control';
 let sub_motor_altitude_topic = '/Panel/Tracker/altitude';
 let pub_pan_motor_position_topic = '/Ant_Tracker/Motor_Pan';
 let pub_tilt_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
 
-let rf_mqtt_client = null;
-let rf_sub_drone_topic = '/RF/TELE_HUB/drone';  // Recieve mavlink from GCS
-let rf_pub_gcs_topic = '/RF/TELE/gcs';
-let rf_pub_rc_topic = '/RF/RC'; // 드론에 RF 통신으로 전달하기 위한 토픽
-
-let my_sortie_name = 'unknown';
+let sub_sitl_drone_topic = '/Mobius/KETI_GCS/Drone_Data/KETI_Simul_1';
 
 let drone_info = {};
 
@@ -51,13 +43,7 @@ function init() {
 
     local_mqtt_connect('localhost');
 
-    mqtt_connect(drone_info.host);
-
-    let host_arr = drone_info.gcs_ip.split('.');
-    host_arr[3] = drone_info.system_id.toString();
-    let drone_ip = host_arr.join('.');
-
-    rf_mqtt_connect(drone_ip);
+    mqtt_connect("gcs.iotocean.org");
 }
 
 function local_mqtt_connect(serverip) {
@@ -135,16 +121,6 @@ function mqtt_connect(serverip) {
     mqtt_client.on('connect', () => {
         console.log('mqtt_client is connected to GCS ( ' + serverip + ' )');
 
-        if (rf_lte_sub_gcs_topic !== '') {
-            mqtt_client.subscribe(rf_lte_sub_gcs_topic, () => {
-                console.log('[mqtt_client] rf_lte_sub_gcs_topic is subscribed -> ', rf_lte_sub_gcs_topic);
-            });
-        }
-        if (rf_lte_sub_rc_topic !== '') {
-            mqtt_client.subscribe(rf_lte_sub_rc_topic, () => {
-                console.log('[mqtt_client] rf_lte_sub_rc_topic is subscribed -> ', rf_lte_sub_rc_topic);
-            });
-        }
         if (sub_motor_control_topic !== '') {
             mqtt_client.subscribe(sub_motor_control_topic, () => {
                 console.log('[mqtt_client] sub_motor_control_topic is subscribed -> ', sub_motor_control_topic);
@@ -155,22 +131,16 @@ function mqtt_connect(serverip) {
                 console.log('[mqtt_client] sub_motor_altitude_topic is subscribed -> ', sub_motor_altitude_topic);
             });
         }
+        if (sub_sitl_drone_topic !== '') {
+            mqtt_client.subscribe(sub_sitl_drone_topic + '/#', () => {
+                console.log('[mqtt_client] sub_sitl_drone_topic is subscribed -> ', sub_sitl_drone_topic + '/#');
+            });
+        }
     });
 
     mqtt_client.on('message', (topic, message) => {
-        if (topic === rf_lte_sub_gcs_topic) {
-            if (rf_mqtt_client !== null) {
-                rf_mqtt_client.publish(rf_pub_gcs_topic, message, () => {
-                    console.log('Send target drone command(' + message.toString('hex') + ') to ' + rf_pub_gcs_topic);
-                });
-            }
-        }
-        else if (topic === rf_lte_sub_rc_topic) {
-            if (rf_mqtt_client !== null) {
-                rf_mqtt_client.publish(rf_pub_rc_topic, message, () => {
-                    console.log('Send RC(' + message.toString('hex') + ') to ' + rf_pub_rc_topic);
-                });
-            }
+        if (topic.includes(sub_sitl_drone_topic)) {
+            setTimeout(parseMavFromDrone, 0, message.toString('hex'));
         }
         else if (topic === sub_motor_control_topic) {
             if (local_mqtt_client !== null) {
@@ -193,50 +163,6 @@ function mqtt_connect(serverip) {
     });
 }
 
-function rf_mqtt_connect(serverip) {
-    let connectOptions = {
-        host: serverip,
-        port: 1883,
-        protocol: "mqtt",
-        keepalive: 10,
-        clientId: 'rf_target_drone_rf_lte_' + nanoid(15),
-        protocolId: "MQTT",
-        protocolVersion: 4,
-        clean: true,
-        reconnectPeriod: 2 * 1000,
-        connectTimeout: 30 * 1000,
-        queueQoSZero: false,
-        rejectUnauthorized: false
-    }
-
-    rf_mqtt_client = mqtt.connect(connectOptions);
-
-    rf_mqtt_client.on('connect', () => {
-        console.log('rf_mqtt_client is connected to GCS ( ' + serverip + ' )');
-
-        rf_mqtt_client.subscribe(rf_sub_drone_topic, () => {
-            console.log('[rf_mqtt_client] rf_sub_drone_topic is subscribed -> ', rf_sub_drone_topic);
-        });
-    });
-
-    rf_mqtt_client.on('message', (topic, message) => {
-        if (topic === rf_sub_drone_topic) {
-            // console.log('fromDrone: ' + message.toString('hex'))
-            setTimeout(parseMavFromDrone, 0, message.toString('hex'));
-
-            if (mqtt_client !== null) {
-                mqtt_client.publish(rf_sub_drone_topic, message);
-            }
-        }
-    });
-
-    rf_mqtt_client.on('error', (err) => {
-        console.log('[rf_mqtt_client] error - ' + err.message);
-    });
-}
-
-let flag_base_mode = 0;
-let heartbeat = {};
 let global_position_int = {};
 
 function parseMavFromDrone(mavPacket) {
@@ -256,42 +182,7 @@ function parseMavFromDrone(mavPacket) {
             base_offset = 12;
         }
 
-        if (msg_id === mavlink.MAVLINK_MSG_ID_HEARTBEAT) { // #00 : HEARTBEAT
-            let custom_mode = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
-            base_offset += 8;
-            let type = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
-            base_offset += 2;
-            let autopilot = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
-            base_offset += 2;
-            let base_mode = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
-            base_offset += 2;
-            let system_status = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
-            base_offset += 2;
-            let mavlink_version = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
-
-            heartbeat.type = Buffer.from(type, 'hex').readUInt8(0);
-            if (heartbeat.type !== mavlink.MAV_TYPE_ADSB) {
-                heartbeat.autopilot = Buffer.from(autopilot, 'hex').readUInt8(0);
-                heartbeat.base_mode = Buffer.from(base_mode, 'hex').readUInt8(0);
-                heartbeat.custom_mode = Buffer.from(custom_mode, 'hex').readUInt32LE(0);
-                heartbeat.system_status = Buffer.from(system_status, 'hex').readUInt8(0);
-                heartbeat.mavlink_version = Buffer.from(mavlink_version, 'hex').readUInt8(0);
-
-                let armStatus = (heartbeat.base_mode & 0x80) === 0x80;
-
-                if (armStatus) {
-                    flag_base_mode++;
-                    if (flag_base_mode === 3) {
-                        my_sortie_name = 'arm';
-                    }
-                }
-                else {
-                    flag_base_mode = 0;
-                    my_sortie_name = 'disarm';
-                }
-            }
-        }
-        else if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) { // #33
+        if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) { // #33
             let time_boot_ms = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
             base_offset += 8;
             let lat = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
@@ -319,18 +210,13 @@ function parseMavFromDrone(mavPacket) {
             global_position_int.vy = Buffer.from(vy, 'hex').readInt16LE(0);
             global_position_int.vz = Buffer.from(vz, 'hex').readInt16LE(0);
             global_position_int.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
+            console.log(global_position_int);
 
             if (local_mqtt_client !== null) {
                 local_mqtt_client.publish(pub_target_gpi_topic, JSON.stringify(global_position_int), () => {
                     // console.log('publish to GCS - ', pub_target_gpi_topic, JSON.stringify(global_position_int));
                 });
             }
-        }
-
-        if (mqtt_client !== null) {
-            mqtt_client.publish(rf_lte_pub_drone_topic, Buffer.from(mavPacket, 'hex'), () => {
-                // console.log('publish to GCS - ', '/gcs/TELE_HUB/drone/rf', mavPacket);
-            });
         }
     }
     catch (e) {
