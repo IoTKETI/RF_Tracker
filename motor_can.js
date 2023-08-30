@@ -305,6 +305,7 @@ const DEG = 0.0174533;
 const th_gap = 20 * DEG;
 const big_gap = 0.5 * DEG;
 const small_gap = 0.2 * DEG;
+const dir_gap = 180 * DEG;
 
 let turnTarget = () => {
     let _in = Math.round((p_in) * 1000)/1000;
@@ -313,6 +314,11 @@ let turnTarget = () => {
     let result_in = _in;
 
     let dir = _target - _in;
+
+    if(Math.abs(dir) > dir_gap) {
+        dir = dir - (dir_gap * 2);
+    }
+
     if(dir >= 0) {
         if(dir >= th_gap) {
             result_in = _in + big_gap;
