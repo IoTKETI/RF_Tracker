@@ -103,6 +103,8 @@ function tr_mqtt_connect(host) {
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
+            tracker_altitude = tracker_gpi.alt / 1000;
+
             countBPM++;
         }
         else if (topic === gps_alt_topic) {
@@ -135,7 +137,7 @@ function tr_mqtt_connect(host) {
 
             if(flagTracking === 'yes') {
                 if(TYPE === 'tilt') {
-                    let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
+                    let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
 
                     console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
 
@@ -188,7 +190,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
 
 function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
     let x = getDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude);
-    let y = targetAltitude - tracker_relative_altitude;
+    let y = targetAltitude - tracker_altitude;
 
     let angle = Math.atan2(y, x);
 
