@@ -225,7 +225,7 @@ let commMotor = () => {
             pack_cmd(() => {
                 //console.log('[pack_cmd]', turn_flag, g_target, p_in);
 
-                p_in = turnTarget();
+                p_in = turnTarget_old();
 
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
@@ -343,9 +343,11 @@ let turnTarget = () => {
     return result_in;
 }
 
-let turnTarget_old = (_in, _target, callback) => {
-    let result_in = Math.round((_in) * 1000)/1000;
-    _target = Math.round((_target) * 1000)/1000;
+let turnTarget_old = () => {
+    let _in = Math.round((p_in) * 1000)/1000;
+    let _target = Math.round((_target) * 1000)/1000;
+    let result_in = _in;
+
     let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
     if(target_angle <= 0) {
         target_angle += 360;
