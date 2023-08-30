@@ -2,7 +2,11 @@ const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
 const motor_can = require('./motor_can');
 
-let local_mqtt_client = null;
+const canPortNum = process.argv[2];
+const CAN_ID = process.argv[3];
+const TYPE = process.argv[4];
+
+let tr_mqtt_client = null;
 
 let target_gpi = {};
 let tracker_control_message = '';
@@ -24,21 +28,25 @@ let target_longitude = '';
 let target_altitude = '';
 let target_relative_altitude = '';
 
-let sub_target_data_topic = '/Target/Tracker/gpi';
+let GcsName = 'KETI_GCS';
+let DroneName = 'KETI_Simul_1';
 
-let sub_tracker_altitude_topic = '/Panel/Tracker/altitude';
-let sub_tracker_control_topic = '/Panel/Tracker/control';
-let pub_tracker_data_topic = '/Tracker/Panel/data'
+let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
-let sub_gps_attitude_topic = '/GPS/Tracker/attitude';
-let sub_gps_position_topic = '/GPS/Tracker/position';
+let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/Panel';
+let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/Panel';
+
+let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + TYPE;
+
+let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
+let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 
 
 let pub_motor_position_topic = '/Ant_Tracker/Motor_Pan';
 
 
 //------------- local mqtt connect ------------------
-function local_mqtt_connect(host) {
+function tr_mqtt_connect(host) {
     let connectOptions = {
         host: host,
         port: 1883,
@@ -54,46 +62,50 @@ function local_mqtt_connect(host) {
         rejectUnauthorized: false
     }
 
-    local_mqtt_client = mqtt.connect(connectOptions);
+    tr_mqtt_client = mqtt.connect(connectOptions);
 
-    local_mqtt_client.on('connect', function () {
-        if (sub_target_data_topic !== '') {
-            local_mqtt_client.subscribe(sub_target_data_topic, () => {
-                console.log('[local_mqtt] sub_target_data_topic is subscribed -> ', sub_target_data_topic);
+    tr_mqtt_client.on('connect', function () {
+        if (dr_data_topic !== '') {
+            tr_mqtt_client.subscribe(dr_data_topic, () => {
+                console.log('[local_mqtt] sub_target_data_topic is subscribed -> ', dr_data_topic);
             });
         }
 
-        if (sub_gps_attitude_topic !== '') {
-            local_mqtt_client.subscribe(sub_gps_attitude_topic, () => {
-                console.log('[local_mqtt] sub_gps_attitude_topic is subscribed -> ', sub_gps_attitude_topic);
+        if (gps_alt_topic !== '') {
+            tr_mqtt_client.subscribe(gps_alt_topic, () => {
+                console.log('[local_mqtt] sub_gps_attitude_topic is subscribed -> ', gps_alt_topic);
             });
         }
 
-        if (sub_gps_position_topic !== '') {
-            local_mqtt_client.subscribe(sub_gps_position_topic, () => {
-                console.log('[local_mqtt] sub_gps_position_topic is subscribed -> ', sub_gps_position_topic);
+        if (gps_pos_topic !== '') {
+            tr_mqtt_client.subscribe(gps_pos_topic, () => {
+                console.log('[local_mqtt] sub_gps_position_topic is subscribed -> ', gps_pos_topic);
             });
         }
 
-        if (sub_tracker_control_topic !== '') {
-            local_mqtt_client.subscribe(sub_tracker_control_topic, () => {
-                console.log('[local_mqtt] sub_tracker_control_topic is subscribed -> ', sub_tracker_control_topic);
+        if (pn_ctrl_topic !== '') {
+            tr_mqtt_client.subscribe(pn_ctrl_topic, () => {
+                console.log('[local_mqtt] sub_tracker_control_topic is subscribed -> ', pn_ctrl_topic);
             });
         }
-        if (sub_tracker_altitude_topic !== '') {
-            local_mqtt_client.subscribe(sub_tracker_altitude_topic, () => {
-                console.log('[local_mqtt] sub_tracker_altitude_topic is subscribed -> ', sub_tracker_altitude_topic);
+        if (pn_alt_topic !== '') {
+            tr_mqtt_client.subscribe(pn_alt_topic, () => {
+                console.log('[local_mqtt] sub_tracker_altitude_topic is subscribed -> ', pn_alt_topic);
             });
         }
     });
 
-    local_mqtt_client.on('message', function (topic, message) {
-        if (topic === sub_gps_position_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
+    tr_mqtt_client.on('message', function (topic, message) {
+        let _dr_data_topic = dr_data_topic.replace('/#', '');
+        let arr_topic = topic.split('/');
+        let _topic = arr_topic.splice(0, arr_topic.length-1).join('/');
+
+        if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
             countBPM++;
         }
-        else if (topic === sub_gps_attitude_topic) {
+        else if (topic === gps_alt_topic) {
             tracker_att = JSON.parse(message.toString());
 
             tracker_yaw = ((tracker_att.yaw * 180)/Math.PI);
@@ -101,17 +113,17 @@ function local_mqtt_connect(host) {
 
             countBPM++;
         }
-        else if (topic === sub_tracker_control_topic) { // 모터 제어 메세지 수신
+        else if (topic === pn_ctrl_topic) { // 모터 제어 메세지 수신
             tracker_control_message = message.toString();
             tracker_handler(tracker_control_message);
         }
-        else if (topic === sub_tracker_altitude_topic) {
+        else if (topic === pn_alt_topic) {
             motor_altitude_message = message.toString();
             if (typeof (parseInt(motor_altitude_message)) === 'number') {
                 tracker_relative_altitude = motor_altitude_message;
             }
         }
-        else if (topic === sub_target_data_topic) { // 드론데이터 수신
+        else if (_topic === _dr_data_topic) { // 드론데이터 수신
             target_gpi = JSON.parse(message.toString());
 
             target_latitude = target_gpi.lat / 10000000;
@@ -135,7 +147,7 @@ function local_mqtt_connect(host) {
         }
     });
 
-    local_mqtt_client.on('error', function (err) {
+    tr_mqtt_client.on('error', function (err) {
         console.log('[local_mqtt] error ' + err.message);
     });
 }
@@ -178,11 +190,7 @@ setInterval(() => {
     }
 }, 3000)
 
-local_mqtt_connect('localhost');
-
-const canPortNum = process.argv[2];
-const CAN_ID = process.argv[3];
-const TYPE = process.argv[4];
+tr_mqtt_connect('localhost');
 
 motor_can.canPortOpening(canPortNum, CAN_ID);
 motor_can.loop();

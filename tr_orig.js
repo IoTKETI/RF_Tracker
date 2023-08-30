@@ -34,14 +34,15 @@ pre_globalpositionint_msg = JSON.parse(JSON.stringify(globalpositionint_msg));
 attitude_msg.yaw = 0.0;
 pre_attitude_msg = JSON.parse(JSON.stringify(attitude_msg));
 
+let GcsName = 'KETI_GCS'
 
-let local_mqtt_client = null;
-let pub_gps_position_topic = '/GPS/Tracker/position';
-let pub_gps_attitude_topic = '/GPS/Tracker/attitude';
+let tr_mqtt_client = null;
+let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
+let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 
 mavPortOpening();
 
-local_mqtt_connect('localhost');
+tr_mqtt_connect('localhost');
 
 function mavPortOpening() {
     if (mavPort === null) {
@@ -188,8 +189,8 @@ function mavPortData(data) {
     }
 }
 
-function local_mqtt_connect(serverip) {
-    if (local_mqtt_client === null) {
+function tr_mqtt_connect(serverip) {
+    if (tr_mqtt_client === null) {
         let connectOptions = {
             host: serverip,
             port: 1883,
@@ -205,13 +206,13 @@ function local_mqtt_connect(serverip) {
             rejectUnauthorized: false
         }
 
-        local_mqtt_client = mqtt.connect(connectOptions);
+        tr_mqtt_client = mqtt.connect(connectOptions);
 
-        local_mqtt_client.on('connect', () => {
+        tr_mqtt_client.on('connect', () => {
             console.log('local_mqtt_client is connected ' + serverip);
         });
 
-        local_mqtt_client.on('error', (err) => {
+        tr_mqtt_client.on('error', (err) => {
             console.log('[local_mqtt_client error] ' + err.message);
         });
     }
@@ -287,9 +288,9 @@ function parseMavFromDrone(mavPacket) {
                 position_refresh_flag = 1;
             }
 
-            if (local_mqtt_client !== null) {
-                local_mqtt_client.publish(pub_gps_position_topic, JSON.stringify(globalpositionint_msg), () => {
-                    console.log('publish globalpositionint_msg to local mqtt(' + pub_gps_position_topic + ') : ', JSON.stringify(globalpositionint_msg));
+            if (tr_mqtt_client !== null) {
+                tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(globalpositionint_msg), () => {
+                    console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(globalpositionint_msg));
                 });
             }
         }
@@ -337,9 +338,9 @@ function parseMavFromDrone(mavPacket) {
 
             attitude_msg = JSON.parse(JSON.stringify(_attitude_msg));
 
-            if (local_mqtt_client !== null) {
-                local_mqtt_client.publish(pub_gps_attitude_topic, JSON.stringify(attitude_msg), () => {
-                    console.log('publish attitude_msg to local mqtt('+pub_gps_attitude_topic+') : ', JSON.stringify(attitude_msg));
+            if (tr_mqtt_client !== null) {
+                tr_mqtt_client.publish(gps_alt_topic, JSON.stringify(attitude_msg), () => {
+                    console.log('publish attitude_msg to local mqtt('+gps_alt_topic+') : ', JSON.stringify(attitude_msg));
                 });
             }
         }
@@ -352,9 +353,9 @@ function parseMavFromDrone(mavPacket) {
 let sendPosition = () => {
     if(position_refresh_flag) {
         position_refresh_flag = 0;
-        if (local_mqtt_client !== null) {
-            local_mqtt_client.publish(pub_gps_position_topic, JSON.stringify(globalpositionint_msg), () => {
-                console.log('publish globalpositionint_msg to local mqtt(' + pub_gps_position_topic + ') : ', JSON.stringify(globalpositionint_msg));
+        if (tr_mqtt_client !== null) {
+            tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(globalpositionint_msg), () => {
+                console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(globalpositionint_msg));
             });
         }
     }
@@ -370,9 +371,9 @@ let sendPosition = () => {
 let sendAttitude = () => {
     if(attitude_refresh_flag) {
         attitude_refresh_flag = 0;
-        if (local_mqtt_client !== null) {
-            local_mqtt_client.publish(pub_gps_attitude_topic, JSON.stringify(attitude_msg), () => {
-                console.log('publish attitude_msg to local mqtt('+pub_gps_attitude_topic+') : ', JSON.stringify(attitude_msg));
+        if (tr_mqtt_client !== null) {
+            tr_mqtt_client.publish(gps_alt_topic, JSON.stringify(attitude_msg), () => {
+                console.log('publish attitude_msg to local mqtt('+gps_alt_topic+') : ', JSON.stringify(attitude_msg));
             });
         }
     }
