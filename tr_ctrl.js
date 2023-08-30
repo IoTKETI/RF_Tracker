@@ -128,27 +128,31 @@ function tr_mqtt_connect(host) {
             }
         }
         else if (_topic === _dr_data_topic) { // 드론데이터 수신
-            target_gpi = JSON.parse(message.toString());
+            if (flagTracking === 'yes') {
+                let arr_msg = message.toString().split(':');
+                if (arr_msg[0] === 'gpi') {
+                    target_gpi = JSON.parse(arr_msg[1]);
 
-            target_latitude = target_gpi.lat / 10000000;
-            target_longitude = target_gpi.lon / 10000000;
-            target_altitude = target_gpi.alt / 1000;
-            target_relative_altitude = target_gpi.relative_alt / 1000;
+                    target_latitude = target_gpi.lat / 10000000;
+                    target_longitude = target_gpi.lon / 10000000;
+                    target_altitude = target_gpi.alt / 1000;
+                    target_relative_altitude = target_gpi.relative_alt / 1000;
 
-            //console.log('target_gpi: ', JSON.stringify(target_gpi));
+                    //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
-            if(flagTracking === 'yes') {
-                if(TYPE === 'tilt') {
-                    let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
 
-                    console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
+                    if (TYPE === 'tilt') {
+                        let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
 
-                    motor_can.setTarget(t_angle);
-                }
-                else if(TYPE === 'pan') {
-                    let t_angle = calcTargetPanAngle(target_latitude, target_longitude);
+                        console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
 
-                    motor_can.setTarget(t_angle);
+                        motor_can.setTarget(t_angle);
+                    }
+                    else if (TYPE === 'pan') {
+                        let t_angle = calcTargetPanAngle(target_latitude, target_longitude);
+
+                        motor_can.setTarget(t_angle);
+                    }
                 }
             }
         }

@@ -186,12 +186,12 @@ let tr_message_handler = (topic, message) => {
         let result = parseMavFromDrone(message.toString('hex'));
 
         if(result === mavlink.MAVLINK_MSG_ID_HEARTBEAT) {
-            tr_mqtt_client.publish(topic, JSON.stringify(heartbeat), () => {
+            tr_mqtt_client.publish(topic, 'hb:'+JSON.stringify(heartbeat), () => {
                 console.log('Send MAVLINK_MSG_ID_HEARTBEAT ' + topic);
             });
         }
         else if(result === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
-            tr_mqtt_client.publish(topic, JSON.stringify(global_position_int), () => {
+            tr_mqtt_client.publish(topic, 'gpi:' + JSON.stringify(global_position_int), () => {
                 console.log('Send MAVLINK_MSG_ID_GLOBAL_POSITION_INT ' + topic);
             });
         }
