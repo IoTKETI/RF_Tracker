@@ -175,21 +175,19 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
 
     let cur_lat = tracker_latitude;
     let cur_lon = tracker_longitude;
-    let cur_alt = tracker_altitude;
 
     let result1 = dfs_xy_conv('toXY', cur_lat, cur_lon);
 
     let tar_lat = targetLatitude;
     let tar_lon = targetLongitude;
-    let tar_alt = targetAltitude;
 
     let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
     let x = result2.x - result1.x;
     let y = result2.y - result1.y;
 
-    console.log(cur_lat, cur_lon, cur_alt);
-    console.log(tar_lat, tar_lon, tar_alt);
+    console.log(cur_lat, cur_lon);
+    console.log(tar_lat, tar_lon);
     console.log('x: ', x, '     y: ', y);
 
     let angle = Math.atan2(y, x);
