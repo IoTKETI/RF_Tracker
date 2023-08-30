@@ -194,6 +194,8 @@ function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
     let x = getDistance(tracker_latitude, tracker_longitude, targetLatitude, targetLongitude);
     let y = targetAltitude - tracker_altitude;
 
+    console.log('x: ', x, '     y: ', y);
+
     let angle = Math.atan2(y, x);
 
     return Math.round(angle * 180 / Math.PI);
@@ -254,7 +256,7 @@ let watchdogCtrl = () => {
             console.log('[ready][PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
         }
         else if(TYPE === 'tilt') {
-            console.log('[ready][TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
+            //console.log('[ready][TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
         }
 
         setTimeout(watchdogCtrl, 500);
