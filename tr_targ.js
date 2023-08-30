@@ -57,7 +57,7 @@ function init() {
         drone_info.id = "Dione";
         drone_info.approval_gcs = "MUV";
         drone_info.host = "121.137.228.240";
-        drone_info.drone = "Drone1";
+        drone_info.drone = "KETI_Simul_1";
         drone_info.gcs = "KETI_GCS";
         drone_info.type = "ardupilot";
         drone_info.system_id = 1;
@@ -65,6 +65,16 @@ function init() {
 
         fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
     }
+
+    GcsName = drone_info.gcs;
+    DroneName = drone_info.drone;
+
+    pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/Panel';
+    pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/Panel';
+
+    dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
+
+    tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/#';
 
     tr_mqtt_connect('localhost');
 
