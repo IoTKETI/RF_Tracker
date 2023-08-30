@@ -225,7 +225,7 @@ let commMotor = () => {
             pack_cmd(() => {
                 //console.log('[pack_cmd]', turn_flag, g_target, p_in);
 
-                p_in = turnTarget();
+                p_in = turnTarget_old();
 
                 if(tidMotor !== null) {
                     clearTimeout(tidMotor);
@@ -337,6 +337,88 @@ let turnTarget = () => {
                 turn_flag = 0;
                 console.log('turnTarget --------------', turn_flag, result_in);
             }
+        }
+    }
+
+    return result_in;
+}
+
+let turnTarget_old = (_in, _target, callback) => {
+    let result_in = Math.round((_in) * 1000)/1000;
+    _target = Math.round((_target) * 1000)/1000;
+    let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
+    if(target_angle <= 0) {
+        target_angle += 360;
+    }
+    target_angle %= 360;
+
+    let cur_angle = Math.round(((_in * 180)/Math.PI) * 10)/10;
+    if(cur_angle <= 0) {
+        cur_angle += 360;
+    }
+    cur_angle %= 360;
+
+    target_angle += 360;
+    cur_angle += 360;
+
+    let p_diff = 0;
+    let diff1 = (target_angle - cur_angle);
+    let diff2 = 0;
+    if(diff1 > 0) {
+        diff2 = diff1 - 360;
+    }
+    else {
+        diff2 = diff1 + 360;
+    }
+
+    if(Math.abs(diff1) >= Math.abs(diff2)) {
+        p_diff = diff2;
+    }
+    else {
+        p_diff = diff1;
+    }
+
+    if (p_diff < -th_gap) {
+        result_in = _in - big_gap;
+        if(result_in <= _target) {
+            result_in = _target;
+        }
+    }
+    else if (-th_gap <= p_diff && p_diff < -5) {
+        result_in = _in - small_gap;
+        if(result_in <= _target) {
+            result_in = _target;
+        }
+    }
+    else if (-5 <= p_diff && p_diff < -0.5) {
+        result_in = _in - small_gap;
+        if(result_in <= _target) {
+            result_in = _target;
+        }
+    }
+    else if (-0.5 <= p_diff && p_diff < 0.5) {
+        turn_flag = 0;
+
+        console.log('<------------------------------------------->');
+
+        result_in = _target;
+    }
+    else if (0.5 <= p_diff && p_diff < 5) {
+        result_in = _in + small_gap;
+        if(result_in >= _target) {
+            result_in = _target;
+        }
+    }
+    else if (5 <= p_diff && p_diff < th_gap) {
+        result_in = _in + small_gap;
+        if(result_in >= _target) {
+            result_in = _target;
+        }
+    }
+    else if (th_gap <= p_diff) {
+        result_in = _in + big_gap;
+        if(result_in >= _target) {
+            result_in = _target;
         }
     }
 
