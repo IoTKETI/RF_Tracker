@@ -330,16 +330,29 @@ function parseMavFromDrone(mavPacket) {
             base_offset += 4;
             let hdg = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
 
-            global_position_int.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
-            global_position_int.lat = Buffer.from(lat, 'hex').readInt32LE(0);
-            global_position_int.lon = Buffer.from(lon, 'hex').readInt32LE(0);
-            global_position_int.alt = Buffer.from(alt, 'hex').readInt32LE(0);
-            global_position_int.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
-            global_position_int.vx = Buffer.from(vx, 'hex').readInt16LE(0);
-            global_position_int.vy = Buffer.from(vy, 'hex').readInt16LE(0);
-            global_position_int.vz = Buffer.from(vz, 'hex').readInt16LE(0);
-            global_position_int.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
+            let _globalpositionint_msg = {};
 
+            _globalpositionint_msg.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
+            _globalpositionint_msg.lat = Buffer.from(lat, 'hex').readInt32LE(0);
+            _globalpositionint_msg.lon = Buffer.from(lon, 'hex').readInt32LE(0);
+            _globalpositionint_msg.alt = Buffer.from(alt, 'hex').readInt32LE(0);
+            _globalpositionint_msg.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
+            _globalpositionint_msg.vx = Buffer.from(vx, 'hex').readInt16LE(0);
+            _globalpositionint_msg.vy = Buffer.from(vy, 'hex').readInt16LE(0);
+            _globalpositionint_msg.vz = Buffer.from(vz, 'hex').readInt16LE(0);
+            _globalpositionint_msg.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
+
+            let _lat = _globalpositionint_msg.lat / 10000000;
+            let _lon = _globalpositionint_msg.lon / 10000000
+            if((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132) )) {
+                global_position_int = JSON.parse(JSON.stringify(_globalpositionint_msg));
+            }
+            else {
+                _globalpositionint_msg.lat = global_position_int.lat;
+                _globalpositionint_msg.lon = global_position_int.lon;
+
+                global_position_int = JSON.parse(JSON.stringify(_globalpositionint_msg));
+            }
             return mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT;
         }
 

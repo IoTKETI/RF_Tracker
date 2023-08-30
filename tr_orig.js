@@ -268,7 +268,6 @@ function parseMavFromDrone(mavPacket) {
             _globalpositionint_msg.vz = Buffer.from(vz, 'hex').readInt16LE(0);
             _globalpositionint_msg.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
-
             let _lat = _globalpositionint_msg.lat / 10000000;
             let _lon = _globalpositionint_msg.lon / 10000000
             if((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132) )) {
