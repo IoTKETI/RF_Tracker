@@ -7,8 +7,8 @@ const mavlink = require('./mavlibrary/mavlink.js');
 let GcsName = 'KETI_GCS';
 let DroneName = 'KETI_Simul_1';
 
-let pn_ctrl_topic = '/Mobius/GcsName/Ctrl_Data/Panel';
-let pn_alt_topic = '/Mobius/GcsName/Alt_Data/Panel';
+let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/Panel';
+let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/Panel';
 
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
@@ -68,13 +68,13 @@ function init() {
 
     tr_mqtt_connect('localhost');
 
-    dr_mqtt_connect(drone_info.host);
-
     let host_arr = drone_info.gcs_ip.split('.');
     host_arr[3] = drone_info.system_id.toString();
     let drone_ip = host_arr.join('.');
 
-    mobius_mqtt_connect(drone_ip);
+    dr_mqtt_connect(drone_ip);
+
+    mobius_mqtt_connect(drone_info.host);
 }
 
 function tr_mqtt_connect(serverip) {
