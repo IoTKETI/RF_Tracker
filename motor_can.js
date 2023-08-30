@@ -345,7 +345,7 @@ let turnTarget = () => {
 
 let turnTarget_old = () => {
     let _in = Math.round((p_in) * 1000)/1000;
-    let _target = Math.round((_target) * 1000)/1000;
+    let _target = Math.round((g_target) * 1000)/1000;
     let result_in = _in;
 
     let target_angle = Math.round(((_target * 180)/Math.PI) * 10)/10;
