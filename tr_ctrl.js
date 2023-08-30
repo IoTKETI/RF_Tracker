@@ -137,6 +137,8 @@ function tr_mqtt_connect(host) {
                 if(TYPE === 'tilt') {
                     let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
 
+                    console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
+
                     motor_can.setTarget(t_angle);
                 }
                 else if(TYPE === 'pan') {
