@@ -175,9 +175,14 @@ let tr_message_handler = (topic, message) => {
     if (tr_mqtt_client !== null) {
         let result = parseMavFromDrone(message.toString('hex'));
 
-        if(result) {
-            tr_mqtt_client.publish(topic, message, () => {
-                console.log('Send target drone data(' + message.toString('hex') + ') to ' + topic);
+        if(result === mavlink.MAVLINK_MSG_ID_HEARTBEAT) {
+            tr_mqtt_client.publish(topic, JSON.stringify(heartbeat), () => {
+                console.log('Send MAVLINK_MSG_ID_HEARTBEAT ' + topic);
+            });
+        }
+        else if(result === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
+            tr_mqtt_client.publish(topic, JSON.stringify(global_position_int), () => {
+                console.log('Send MAVLINK_MSG_ID_GLOBAL_POSITION_INT ' + topic);
             });
         }
     }
@@ -294,7 +299,7 @@ function parseMavFromDrone(mavPacket) {
                 }
             }
 
-            return 1;
+            return mavlink.MAVLINK_MSG_ID_HEARTBEAT;
         }
         else if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) { // #33
             let time_boot_ms = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
@@ -325,10 +330,10 @@ function parseMavFromDrone(mavPacket) {
             global_position_int.vz = Buffer.from(vz, 'hex').readInt16LE(0);
             global_position_int.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
-            return 1;
+            return mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT;
         }
 
-        return 0;
+        return -1;
     }
     catch (e) {
         console.log('[parseMavFromDrone Error]', e);
