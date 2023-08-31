@@ -222,31 +222,16 @@ let commMotor = () => {
         }
 
         if(turn_flag === 1) {
-            if(p_in => (2*Math.PI) || p_in <= -(2*Math.PI)) {
-                Zero(() => {
-                    p_in = 0.0;
-                    pack_cmd(() => {
-                        p_in = turnTarget();
+            pack_cmd(() => {
+                //console.log('[pack_cmd]', turn_flag, g_target, p_in);
 
-                        if(tidMotor !== null) {
-                            clearTimeout(tidMotor);
-                        }
-                        tidMotor = setTimeout(commMotor, 20);
-                    });
-                });
-            }
-            else {
-                pack_cmd(() => {
-                    //console.log('[pack_cmd]', turn_flag, g_target, p_in);
+                p_in = turnTarget();
 
-                    p_in = turnTarget();
-
-                    if (tidMotor !== null) {
-                        clearTimeout(tidMotor);
-                    }
-                    tidMotor = setTimeout(commMotor, 20);
-                });
-            }
+                if(tidMotor !== null) {
+                    clearTimeout(tidMotor);
+                }
+                tidMotor = setTimeout(commMotor, 20);
+            });
         }
         else {
             pack_cmd(() => {
@@ -362,20 +347,21 @@ let turnTarget = () => {
 
 let enter_mode_counter = 0;
 exports.setTarget = (angle) => {
-    g_target = Math.round((angle * DEG) * 1000) / 1000;
-    let _in = Math.round((p_in) * 1000)/1000;
-    // let n_turn = parseInt(_in / (2*Math.PI));
-    let _target = Math.round((g_target) * 1000)/1000;
+    Zero(() => {
+        p_in = 0.0;
+        g_target = Math.round((angle * DEG) * 1000) / 1000;
+        let _in = Math.round((p_in) * 1000)/1000;
+        let _target = Math.round((g_target) * 1000)/1000;
 
-    let dir = _target - _in;
+        let dir = _target - _in;
 
-    if(Math.abs(dir) > dir_gap) {
-        // g_target = g_target - (dir_gap * 2) + ((2*Math.PI) * n_turn);
-        g_target = g_target - (dir_gap * 2);
-    }
+        if(Math.abs(dir) > dir_gap) {
+            g_target = g_target - (dir_gap * 2);
+        }
 
-    enter_mode_counter = 0;
-    turn_flag = 1;
+        enter_mode_counter = 0;
+        turn_flag = 1;
+    });
 }
 
 exports.setDelta = (diff_angle) => {

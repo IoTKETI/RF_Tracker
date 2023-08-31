@@ -142,12 +142,14 @@ function tr_mqtt_connect(host) {
 
                         //console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
 
-                        motor_can.setTarget(t_angle);
+                        //motor_can.setTarget(t_angle);
+                        ctrlAngle(t_angle);
                     }
                     else if (TYPE === 'pan') {
                         let t_angle = calcTargetPanAngle(target_latitude, target_longitude);
 
-                        motor_can.setTarget(t_angle);
+                        //motor_can.setTarget(t_angle);
+                        ctrlAngle(t_angle)
                     }
                 }
             }
@@ -188,8 +190,9 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
     console.log('x: ', x, '     y: ', y);
 
     let angle = Math.atan2(y, x);
+    angle = -Math.round(angle * 180 / Math.PI) + 90;
 
-    return Math.round(angle * 180 / Math.PI);
+    return angle;
 }
 
 
@@ -324,6 +327,14 @@ let offsetCtrl = 0;
 let targetAngle = 0;
 const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
+    if (TYPE === 'pan') {
+        offsetCtrl = tracker_yaw;
+    } else if (TYPE === 'tilt') {
+        offsetCtrl = tracker_pitch;
+    } else {
+        offsetCtrl = 0;
+    }
+
     targetAngle = (angle - offsetCtrl);
 
     console.log('[targetAngle] -> ', targetAngle, (targetAngle * DEG));
@@ -384,15 +395,6 @@ let watchdogCtrl = () => {
             if(motor_can.getState() === 'enter') {
                 motor_can.setState('toZero');
 
-                if (TYPE === 'pan') {
-                    offsetCtrl = tracker_yaw;
-                } else if (TYPE === 'tilt') {
-                    offsetCtrl = tracker_pitch;
-                } else {
-                    offsetCtrl = 0;
-                }
-                console.log('[arranging offseCtrl] -> ', offsetCtrl);
-
                 stateCtrl = 'ready';
                 setTimeout(watchdogCtrl, 100);
             }
@@ -409,16 +411,16 @@ let watchdogCtrl = () => {
     else if(stateCtrl === 'arranging') {
         if(flagBPM) {
             if(motor_can.getState() === 'enter') {
-                motor_can.setState('toZero');
-
-                if (TYPE === 'pan') {
-                    offsetCtrl = tracker_yaw;
-                } else if (TYPE === 'tilt') {
-                    offsetCtrl = tracker_pitch;
-                } else {
-                    offsetCtrl = 0;
-                }
-                console.log('[arranging offseCtrl] -> ', offsetCtrl);
+                // motor_can.setState('toZero');
+                //
+                // if (TYPE === 'pan') {
+                //     offsetCtrl = tracker_yaw;
+                // } else if (TYPE === 'tilt') {
+                //     offsetCtrl = tracker_pitch;
+                // } else {
+                //     offsetCtrl = 0;
+                // }
+                // console.log('[arranging offseCtrl] -> ', offsetCtrl);
 
                 setTimeout(() => {
                     ctrlAngle(0);
