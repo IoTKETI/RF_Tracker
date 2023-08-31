@@ -315,10 +315,6 @@ let turnTarget = () => {
 
     let dir = _target - _in;
 
-    if(Math.abs(dir) > dir_gap) {
-        dir = dir - (dir_gap * 2);
-    }
-
     if(dir >= 0) {
         if(dir >= th_gap) {
             result_in = _in + big_gap;
@@ -352,6 +348,16 @@ let turnTarget = () => {
 let enter_mode_counter = 0;
 exports.setTarget = (angle) => {
     g_target = Math.round((angle * DEG) * 1000) / 1000;
+
+    let _in = Math.round((p_in) * 1000)/1000;
+    let _target = Math.round((g_target) * 1000)/1000;
+
+    let dir = _target - _in;
+
+    if(Math.abs(dir) > dir_gap) {
+        g_target = g_target - (dir_gap * 2);
+    }
+
     enter_mode_counter = 0;
     turn_flag = 1;
 }
