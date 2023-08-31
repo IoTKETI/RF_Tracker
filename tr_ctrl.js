@@ -42,9 +42,6 @@ let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 
 
-let pub_motor_position_topic = '/Ant_Tracker/Motor_Pan';
-
-
 //------------- local mqtt connect ------------------
 function tr_mqtt_connect(host) {
     let connectOptions = {
@@ -334,6 +331,8 @@ let ctrlAngle = (angle) => {
     motor_can.setTarget(targetAngle);
 }
 
+let tr_heartbeat = {};
+let count_tr_heartbeat = 0;
 let watchdogCtrl = () => {
     if(stateCtrl === 'toReady') {
         if(motor_can.getState() === 'exit') {
@@ -355,12 +354,24 @@ let watchdogCtrl = () => {
         }
     }
     else if(stateCtrl === 'ready') {
-        if(TYPE === 'pan') {
+        // if(TYPE === 'pan') {
+        //
+        //     //console.log('[ready][PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
+        // }
+        // else if(TYPE === 'tilt') {
+        //     //console.log('[ready][TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
+        // }
 
-            //console.log('[ready][PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
-        }
-        else if(TYPE === 'tilt') {
-            //console.log('[ready][TiltMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
+        tr_heartbeat.type = TYPE;
+        tr_heartbeat.angle = Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10;
+        tr_heartbeat.flag_tracking = flagTracking;
+        tr_heartbeat.state = stateCtrl;
+        count_tr_heartbeat++;
+        if(count_tr_heartbeat >= 2) {
+            count_tr_heartbeat = 0;
+            if (tr_mqtt_client !== null) {
+                tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat));
+            }
         }
 
         setTimeout(watchdogCtrl, 500);
@@ -440,8 +451,10 @@ let tracker_handler = (_msg) => {
             tidTest = null;
 
             motor_can.setStop();
+            flagTracking = 'no';
         }
         else {
+            flagTracking = 'test';
             testAction();
         }
     }
@@ -510,9 +523,12 @@ let tracker_handler = (_msg) => {
         motor_can.setStop();
     }
     else if(_msg === 'run') {
-        if(tidControlTracker !== null) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
+        if(tidTest !== null) {
+            clearTimeout(tidTest);
+            tidTest = null;
+
+            motor_can.setStop();
+            flagTracking = 'no';
         }
 
         if(flagTracking === 'no') {
