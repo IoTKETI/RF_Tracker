@@ -46,6 +46,10 @@ let my_sortie_name = 'unknown';
 
 let drone_info = {};
 
+let DroneData = {};
+let t_id = null;
+let disconnected = true;
+
 init();
 
 function init() {
@@ -132,7 +136,7 @@ function tr_mqtt_connect(serverip) {
     });
 
     tr_mqtt_client.on('error', (err) => {
-        console.log('[local_mqtt_client] error - ' + err.message);
+        console.log('[tr_mqtt_client] error - ' + err.message);
     });
 }
 
@@ -171,6 +175,29 @@ function dr_mqtt_connect(serverip) {
 
 
         if (_topic === _dr_data_topic) {
+            if (t_id) {
+                clearTimeout(t_id);
+                disconnected = false;
+            }
+
+            t_id = setTimeout(() => {
+                disconnected = true;
+                t_id = null;
+                DroneData = {};
+            }, 200);
+
+            let droneData = message.toString('hex');
+            let sequence;
+
+            if (droneData.substring(0, 2) === 'fe') {
+                sequence = parseInt(droneData.substring(4, 6), 16);
+                DroneData[sequence] = droneData;
+            }
+            else {
+                sequence = parseInt(droneData.substring(8, 10), 16);
+                DroneData[sequence] = droneData;
+            }
+            console.log('[RF]', sequence);
             tr_message_handler(topic, message);
         }
     });
@@ -181,8 +208,7 @@ function dr_mqtt_connect(serverip) {
 }
 
 let tr_message_handler = (topic, message) => {
-    // TODO: 메시지 중복 처리 할 것
-    if (tr_mqtt_client !== null) {
+    if (tr_mqtt_client) {
         let result = parseMavFromDrone(message.toString('hex'));
 
         if (result === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
@@ -239,10 +265,27 @@ function mobius_mqtt_connect(serverip) {
 
 
         if (_topic === _dr_data_topic) {
+            let droneData = message.toString('hex');
+            let sequence;
+            if (droneData.substring(0, 2) === 'fe') {
+                sequence = parseInt(droneData.substring(4, 6), 16);
+                if (DroneData.hasOwnProperty(sequence)) {
+                    delete DroneData[sequence];
+                    return;
+                }
+            }
+            else {
+                sequence = parseInt(droneData.substring(4, 6), 16);
+                if (DroneData.hasOwnProperty(sequence)) {
+                    delete DroneData[sequence];
+                    return;
+                }
+            }
+            console.log('[LTE-Drone]', sequence);
             tr_message_handler(topic, message);
         }
         else if (topic === pn_ctrl_topic) {
-            if (tr_mqtt_client !== null) {
+            if (tr_mqtt_client) {
                 tr_mqtt_client.publish(topic, message);
             }
         }
