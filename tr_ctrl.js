@@ -366,6 +366,9 @@ let watchdogCtrl = () => {
         tr_heartbeat.angle = Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10;
         tr_heartbeat.flag_tracking = flagTracking;
         tr_heartbeat.state = stateCtrl;
+        tr_heartbeat.lat = tracker_latitude;
+        tr_heartbeat.lon = tracker_longitude;
+        tr_heartbeat.alt = tracker_altitude;
         count_tr_heartbeat++;
         if(count_tr_heartbeat >= 2) {
             count_tr_heartbeat = 0;
