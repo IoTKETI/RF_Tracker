@@ -308,8 +308,11 @@ const small_gap = 0.2 * DEG;
 const dir_gap = Math.PI;
 
 let turnTarget = () => {
-    let _in = Math.round((p_in) * 1000)/1000;
-    let _target = Math.round((g_target) * 1000)/1000;
+    // let _in = Math.round((p_in) * 1000)/1000;
+    // let _target = Math.round((g_target) * 1000)/1000;
+
+    let _in = p_in;
+    let _target = g_target;
 
     let result_in = _in;
 
