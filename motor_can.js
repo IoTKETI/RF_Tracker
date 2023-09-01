@@ -222,8 +222,7 @@ let commMotor = () => {
 
                 console.log('[enter] -> ',
                     //Math.round((g_target) * 1000) / 1000,
-                    p_in,
-                    p_out);
+                    p_in, p_out, p_in - p_out);
                     //Math.round((p_in - p_out) * 100) / 100);
             }
         }
@@ -390,10 +389,13 @@ exports.setTarget = (angle) => {
     let _in = Math.round((p_in) * 1000)/1000;
     let _target = Math.round((g_target) * 1000)/1000;
 
+    let n_turn = parseInt(_in / (2*Math.PI));
+
     let dir = _target - _in;
 
     if(Math.abs(dir) > dir_gap) {
-        g_target = g_target - (dir_gap * 2);
+        // g_target = g_target - (dir_gap * 2);
+        g_target = g_target - (dir_gap * 2) + ((2*Math.PI) * n_turn);
     }
 
     turn_flag = 1;
