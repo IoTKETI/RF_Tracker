@@ -339,6 +339,7 @@ let ctrlAngle = (angle) => {
 
     console.log('[targetAngle] -> ', targetAngle, (targetAngle * DEG));
 
+    motor_can.setStop();
     motor_can.setTarget(targetAngle);
 }
 
