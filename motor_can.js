@@ -256,7 +256,7 @@ let commMotor = () => {
             if(zero_flag === 1) {
                 zero_flag = 0;
                 Zero(() => {
-                    p_in = 0.0;
+                    p_in = 0.0001;
                     g_target = p_in;
                     pack_cmd(() => {
                         if(tidMotor !== null) {
