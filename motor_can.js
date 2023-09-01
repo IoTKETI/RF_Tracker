@@ -224,6 +224,10 @@ let commMotor = () => {
                     //Math.round((g_target) * 1000) / 1000,
                     p_in, p_out, p_in - p_out);
                     //Math.round((p_in - p_out) * 100) / 100);
+
+                if(Math.abs(p_in - p_out) <= 0.001) {
+                    zero_flag = 1;
+                }
             }
         }
 
@@ -249,7 +253,7 @@ let commMotor = () => {
                         if(tidMotor !== null) {
                             clearTimeout(tidMotor);
                         }
-                        tidMotor = setTimeout(commMotor, 500);
+                        tidMotor = setTimeout(commMotor, 400);
                     });
                 });
             }
@@ -258,7 +262,7 @@ let commMotor = () => {
                     if(tidMotor !== null) {
                         clearTimeout(tidMotor);
                     }
-                    tidMotor = setTimeout(commMotor, 500);
+                    tidMotor = setTimeout(commMotor, 400);
                 });
             }
 
@@ -326,7 +330,7 @@ let turn_flag = 0;
 const DEG = 0.0174533;
 const th_gap = 20 * DEG;
 const big_gap = 0.4 * DEG;
-const small_gap = 0.1 * DEG;
+const small_gap = 0.2 * DEG;
 const dir_gap = Math.PI;
 
 let turnTarget = () => {
@@ -349,7 +353,6 @@ let turnTarget = () => {
             if(result_in >= _target) {
                 result_in = _target;
                 turn_flag = 0;
-                zero_flag = 1;
                 console.log('turnTarget --------------', turn_flag, result_in);
             }
         }
