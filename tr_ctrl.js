@@ -102,7 +102,7 @@ function tr_mqtt_connect(host) {
 
             tracker_altitude = tracker_gpi.alt / 1000;
 
-            console.log(tracker_altitude);
+            //console.log(tracker_altitude);
 
             countBPM++;
         }
@@ -185,9 +185,9 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
     let x = result2.x - result1.x;
     let y = result2.y - result1.y;
 
-    console.log(cur_lat, cur_lon);
-    console.log(tar_lat, tar_lon);
-    console.log('x: ', x, '     y: ', y);
+    // console.log(cur_lat, cur_lon);
+    // console.log(tar_lat, tar_lon);
+    // console.log('x: ', x, '     y: ', y);
 
     let angle = Math.atan2(y, x);
     angle = -Math.round(angle * 180 / Math.PI) + 90;
@@ -231,9 +231,9 @@ function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
 
     let y = targetAltitude - tracker_altitude;
 
-    console.log(cur_lat, cur_lon, cur_alt);
-    console.log(tar_lat, tar_lon, tar_alt);
-    console.log('x: ', x, '     y: ', y);
+    // console.log(cur_lat, cur_lon, cur_alt);
+    // console.log(tar_lat, tar_lon, tar_alt);
+    // console.log('x: ', x, '     y: ', y);
 
     let angle = Math.atan2(y, x);
 
@@ -329,6 +329,7 @@ const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
         offsetCtrl = tracker_yaw;
+        console.log('[offsetCtrl] -> ', offsetCtrl);
     } else if (TYPE === 'tilt') {
         offsetCtrl = tracker_pitch;
     } else {
