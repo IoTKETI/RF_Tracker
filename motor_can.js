@@ -303,7 +303,7 @@ exports.setState = (state) => {
 let turn_flag = 0;
 const DEG = 0.0174533;
 const th_gap = 20 * DEG;
-const big_gap = 0.5 * DEG;
+const big_gap = 0.4 * DEG;
 const small_gap = 0.2 * DEG;
 const dir_gap = Math.PI;
 
