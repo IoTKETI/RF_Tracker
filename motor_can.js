@@ -234,25 +234,34 @@ let commMotor = () => {
             });
         }
         else if(turn_flag === 2) {
-            pack_cmd(() => {
-                Zero(() => {
-                    p_in = 0.0;
-                    pack_cmd(() => {
-                        turn_flag = 1;
-                        if(tidMotor !== null) {
-                            clearTimeout(tidMotor);
-                        }
-                        tidMotor = setTimeout(commMotor, 20);
-                    });
+            Zero(() => {
+                p_in = 0.0;
+                pack_cmd(() => {
+                    turn_flag = 1;
+                    if(tidMotor !== null) {
+                        clearTimeout(tidMotor);
+                    }
+                    tidMotor = setTimeout(commMotor, 20);
                 });
             });
         }
         else {
-            pack_cmd(() => {
-                if(tidMotor !== null) {
-                    clearTimeout(tidMotor);
-                }
-                tidMotor = setTimeout(commMotor, 500);
+            // pack_cmd(() => {
+            //     if(tidMotor !== null) {
+            //         clearTimeout(tidMotor);
+            //     }
+            //     tidMotor = setTimeout(commMotor, 500);
+            // });
+
+            Zero(() => {
+                p_in = 0.0;
+                g_target = p_in;
+                pack_cmd(() => {
+                    if(tidMotor !== null) {
+                        clearTimeout(tidMotor);
+                    }
+                    tidMotor = setTimeout(commMotor, 500);
+                });
             });
         }
     }
@@ -374,7 +383,7 @@ exports.setTarget = (angle) => {
         g_target = g_target - (dir_gap * 2);
     }
 
-    turn_flag = 2;
+    turn_flag = 1;
 
     // Zero(() => {
     //     p_in = 0.0;
