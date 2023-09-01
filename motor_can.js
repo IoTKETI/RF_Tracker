@@ -104,6 +104,7 @@ let tidMotor = null;
 exports.loop = () => {
     tidMotor = setTimeout(commMotor, 2000, p_in);
 }
+let zero_flag = 0;
 
 let commMotor = () => {
     if(stateMotor === 'toExit') {
@@ -252,23 +253,28 @@ let commMotor = () => {
             });
         }
         else {
-            // pack_cmd(() => {
-            //     if(tidMotor !== null) {
-            //         clearTimeout(tidMotor);
-            //     }
-            //     tidMotor = setTimeout(commMotor, 500);
-            // });
-
-            Zero(() => {
-                p_in = 0.0;
-                g_target = p_in;
+            if(zero_flag === 1) {
+                zero_flag = 0;
+                Zero(() => {
+                    p_in = 0.0;
+                    g_target = p_in;
+                    pack_cmd(() => {
+                        if(tidMotor !== null) {
+                            clearTimeout(tidMotor);
+                        }
+                        tidMotor = setTimeout(commMotor, 500);
+                    });
+                });
+            }
+            else {
                 pack_cmd(() => {
                     if(tidMotor !== null) {
                         clearTimeout(tidMotor);
                     }
                     tidMotor = setTimeout(commMotor, 500);
                 });
-            });
+            }
+
         }
     }
     else if(stateMotor === 'toZero') {
@@ -333,7 +339,7 @@ let turn_flag = 0;
 const DEG = 0.0174533;
 const th_gap = 20 * DEG;
 const big_gap = 0.4 * DEG;
-const small_gap = 0.2 * DEG;
+const small_gap = 0.1 * DEG;
 const dir_gap = Math.PI;
 
 let turnTarget = () => {
@@ -356,6 +362,7 @@ let turnTarget = () => {
             if(result_in >= _target) {
                 result_in = _target;
                 turn_flag = 0;
+                zero_flag = 1;
                 console.log('turnTarget --------------', turn_flag, result_in);
             }
         }
