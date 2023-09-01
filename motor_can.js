@@ -324,9 +324,9 @@ exports.setState = (state) => {
 
 let turn_flag = 0;
 const DEG = 0.0174533;
-const th_gap = 20 * DEG;
+const th_gap = 10 * DEG;
 const big_gap = 0.4 * DEG;
-const small_gap = 0.2 * DEG;
+const small_gap = 0.05 * DEG;
 const dir_gap = Math.PI;
 
 let turnTarget = () => {
@@ -349,6 +349,7 @@ let turnTarget = () => {
             if(result_in >= _target) {
                 result_in = _target;
                 turn_flag = 0;
+                zero_flag = 1;
                 console.log('turnTarget --------------', turn_flag, result_in);
             }
         }
@@ -362,6 +363,7 @@ let turnTarget = () => {
             if(result_in <= _target) {
                 result_in = _target;
                 turn_flag = 0;
+                zero_flag = 1;
                 console.log('turnTarget --------------', turn_flag, result_in);
             }
         }
