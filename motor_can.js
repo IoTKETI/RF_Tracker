@@ -241,17 +241,27 @@ let commMotor = () => {
         }
         else {
             if(zero_flag === 1) {
-                zero_flag = 0;
-                Zero(() => {
-                    p_in = 0.0001;
-                    g_target = p_in;
+                zero_flag++;
+                if(zero_flag >= 3) {
+                    Zero(() => {
+                        p_in = 0.0001;
+                        g_target = p_in;
+                        pack_cmd(() => {
+                            if (tidMotor !== null) {
+                                clearTimeout(tidMotor);
+                            }
+                            tidMotor = setTimeout(commMotor, 500);
+                        });
+                    });
+                }
+                else {
                     pack_cmd(() => {
                         if(tidMotor !== null) {
                             clearTimeout(tidMotor);
                         }
-                        tidMotor = setTimeout(commMotor, 500);
+                        tidMotor = setTimeout(commMotor, 50);
                     });
-                });
+                }
             }
             else {
                 pack_cmd(() => {
