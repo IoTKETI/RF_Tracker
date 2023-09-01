@@ -239,18 +239,6 @@ let commMotor = () => {
                 tidMotor = setTimeout(commMotor, 20);
             });
         }
-        else if(turn_flag === 2) {
-            Zero(() => {
-                p_in = 0.0;
-                pack_cmd(() => {
-                    turn_flag = 1;
-                    if(tidMotor !== null) {
-                        clearTimeout(tidMotor);
-                    }
-                    tidMotor = setTimeout(commMotor, 20);
-                });
-            });
-        }
         else {
             if(zero_flag === 1) {
                 zero_flag = 0;
