@@ -397,8 +397,12 @@ exports.setTarget = (angle) => {
     let dir = _target - _in;
 
     if(Math.abs(dir) > dir_th) {
-        g_target = -(g_target + (dir_th * 2))
-        // g_target = -(g_target + (dir_th * 2)) + ((2*Math.PI) * n_turn);
+        if(dir < 0) {
+            g_target = g_target + (dir_th * 2);
+        }
+        else {
+            g_target = g_target - (dir_th * 2);
+        }
     }
 
     turn_flag = 1;

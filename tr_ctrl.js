@@ -324,7 +324,7 @@ motor_can.canPortOpening(canPortNum, CAN_ID);
 motor_can.loop();
 
 let offsetCtrl = 0;
-let targetAngle = 0;
+let diffAngle = 0;
 const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
@@ -336,12 +336,21 @@ let ctrlAngle = (angle) => {
         offsetCtrl = 0;
     }
 
-    targetAngle = (angle - offsetCtrl);
+    diffAngle = (angle - offsetCtrl);
 
-    console.log('[targetAngle] -> ', targetAngle, (targetAngle * DEG));
+    console.log('[diffAngle] -> ', diffAngle, (diffAngle * DEG));
+
+    if(Math.abs(diffAngle) > 180) {
+        if(diffAngle < 0) {
+            diffAngle = diffAngle + 360;
+        }
+        else {
+            diffAngle = diffAngle -360;
+        }
+    }
 
     motor_can.setStop();
-    motor_can.setTarget(targetAngle);
+    motor_can.setDelta(diffAngle);
 }
 
 let tr_heartbeat = {};
