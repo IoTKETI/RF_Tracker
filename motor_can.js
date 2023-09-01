@@ -224,10 +224,6 @@ let commMotor = () => {
                     //Math.round((g_target) * 1000) / 1000,
                     p_in, p_out, p_in - p_out);
                     //Math.round((p_in - p_out) * 100) / 100);
-
-                if(Math.abs(p_in - p_out) <= 0.001) {
-                    zero_flag = 1;
-                }
             }
         }
 
@@ -253,7 +249,7 @@ let commMotor = () => {
                         if(tidMotor !== null) {
                             clearTimeout(tidMotor);
                         }
-                        tidMotor = setTimeout(commMotor, 400);
+                        tidMotor = setTimeout(commMotor, 500);
                     });
                 });
             }
@@ -262,7 +258,7 @@ let commMotor = () => {
                     if(tidMotor !== null) {
                         clearTimeout(tidMotor);
                     }
-                    tidMotor = setTimeout(commMotor, 400);
+                    tidMotor = setTimeout(commMotor, 500);
                 });
             }
 
