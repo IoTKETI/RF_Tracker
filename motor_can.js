@@ -220,10 +220,10 @@ let commMotor = () => {
                 //     Math.round((p_out) * 1000) / 1000,
                 //     Math.round((p_in - p_out) * 100) / 100);
 
-                console.log('[enter] -> ',
-                    //Math.round((g_target) * 1000) / 1000,
-                    p_in, p_out, p_in - p_out);
-                    //Math.round((p_in - p_out) * 100) / 100);
+                // console.log('[enter] -> ',
+                //     //Math.round((g_target) * 1000) / 1000,
+                //     p_in, p_out, p_in - p_out);
+                //     //Math.round((p_in - p_out) * 100) / 100);
             }
         }
 
