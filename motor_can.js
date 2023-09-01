@@ -324,10 +324,14 @@ exports.setState = (state) => {
 
 let turn_flag = 0;
 const DEG = 0.0174533;
-const th_gap = 10 * DEG;
+
+const big_th = 10 * DEG;
 const big_gap = 0.4 * DEG;
-const small_gap = 0.05 * DEG;
-const dir_gap = Math.PI;
+
+const small_th = 0.05 * DEG;
+const small_gap = 0.1 * DEG;
+
+const dir_th = Math.PI;
 
 let turnTarget = () => {
     // let _in = Math.round((p_in) * 1000)/1000;
@@ -341,7 +345,7 @@ let turnTarget = () => {
     let dir = _target - _in;
 
     if(dir >= 0) {
-        if(dir >= th_gap) {
+        if(dir >= big_th) {
             result_in = _in + big_gap;
         }
         else {
@@ -355,7 +359,7 @@ let turnTarget = () => {
         }
     }
     else {
-        if(dir <= -th_gap) {
+        if(dir <= -big_th) {
             result_in = _in - big_gap;
         }
         else {
@@ -378,13 +382,13 @@ exports.setTarget = (angle) => {
     let _in = Math.round((p_in) * 1000)/1000;
     let _target = Math.round((g_target) * 1000)/1000;
 
-    let n_turn = parseInt(_in / (2*Math.PI));
+    let n_turn = parseInt((_in / (2*Math.PI)).toString());
 
     let dir = _target - _in;
 
-    if(Math.abs(dir) > dir_gap) {
+    if(Math.abs(dir) > dir_th) {
         // g_target = g_target - (dir_gap * 2);
-        g_target = g_target - (dir_gap * 2) + ((2*Math.PI) * n_turn);
+        g_target = g_target - (dir_th * 2) + ((2*Math.PI) * n_turn);
     }
 
     turn_flag = 1;
