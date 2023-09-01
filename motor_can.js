@@ -374,7 +374,7 @@ let turnTarget = () => {
 exports.setTarget = (angle) => {
     g_target = Math.round((angle * DEG) * 1000) / 1000;
 
-    let _in = 0.0;
+    let _in = Math.round((p_in) * 1000)/1000;
     let _target = Math.round((g_target) * 1000)/1000;
 
     let dir = _target - _in;
