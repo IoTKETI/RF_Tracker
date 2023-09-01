@@ -392,13 +392,13 @@ exports.setTarget = (angle) => {
     let _in = Math.round((p_in) * 1000)/1000;
     let _target = Math.round((g_target) * 1000)/1000;
 
-    let n_turn = parseInt((_in / (2*Math.PI)).toString());
+    // let n_turn = parseInt((_in / (2*Math.PI)).toString());
 
     let dir = _target - _in;
 
     if(Math.abs(dir) > dir_th) {
-        // g_target = g_target - (dir_gap * 2);
-        g_target = -(g_target + (dir_th * 2)) + ((2*Math.PI) * n_turn);
+        g_target = -(g_target + (dir_th * 2))
+        // g_target = -(g_target + (dir_th * 2)) + ((2*Math.PI) * n_turn);
     }
 
     turn_flag = 1;
