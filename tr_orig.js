@@ -16,9 +16,9 @@ let tracker_heading = 0.0;
 
 
 let globalpositionint_msg = {};
-//let pre_globalpositionint_msg = {};
+let gps_raw_int_msg = {};
 let attitude_msg = {};
-let pre_attitude_msg = {};
+
 let position_refresh_flag = 0;
 let attitude_refresh_flag = 0;
 
@@ -28,17 +28,15 @@ globalpositionint_msg.alt = 0.0;
 globalpositionint_msg.relative_alt = 0.0;
 globalpositionint_msg.hdg = 0.0;
 
-pre_globalpositionint_msg = JSON.parse(JSON.stringify(globalpositionint_msg));
-
 
 attitude_msg.yaw = 0.0;
-pre_attitude_msg = JSON.parse(JSON.stringify(attitude_msg));
 
 let GcsName = 'KETI_GCS'
 
 let tr_mqtt_client = null;
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
+let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
 
 mavPortOpening();
 
@@ -278,8 +276,6 @@ function parseMavFromDrone(mavPacket) {
 
             }
             else {
-                // console.log('[pre_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
-
                 _globalpositionint_msg.lat = globalpositionint_msg.lat;
                 _globalpositionint_msg.lon = globalpositionint_msg.lon;
 
@@ -343,6 +339,37 @@ function parseMavFromDrone(mavPacket) {
                 });
             }
         }
+        else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
+
+            let my_len = 30;
+            if(ver === 'fd') {
+                my_len += 22;
+            }
+            let ar = mavPacket.split('');
+            for (let i = 0; i < (my_len - msg_len); i++) {
+                ar.splice(ar.length-4, 0, '0');
+                ar.splice(ar.length-4, 0, '0');
+            }
+            mavPacket = ar.join('');
+
+            base_offset += 16;
+            var fix_type = mavPacket.substr(base_offset, 2).toLowerCase();
+
+            base_offset += (2 + 8 + 8 + 8 + 4 + 4 + 4 + 4);
+            var satellites_visible = mavPacket.substr(base_offset, 2).toLowerCase();
+
+            let _gps_raw_int_msg = {};
+            _gps_raw_int_msg.fix_type = Buffer.from(fix_type, 'hex').readUInt8LE(0);
+            _gps_raw_int_msg.satellites_visible = Buffer.from(satellites_visible, 'hex').readUInt8LE(0);
+
+            gps_raw_int_msg = JSON.parse(JSON.stringify(_gps_raw_int_msg));
+
+            if (tr_mqtt_client !== null) {
+                tr_mqtt_client.publish(gps_raw_topic, JSON.stringify(gps_raw_int_msg), () => {
+                    console.log('publish gps_raw_int_msg to local mqtt('+gps_raw_topic+') : ', JSON.stringify(gps_raw_int_msg));
+                });
+            }
+        }
     }
     catch (e) {
         console.log('[parseMavFromDrone Error]', e);
@@ -358,13 +385,6 @@ let sendPosition = () => {
             });
         }
     }
-    //else {
-        //if (local_mqtt_client !== null) {
-            //local_mqtt_client.publish(pub_gps_position_topic, JSON.stringify(pre_globalpositionint_msg), () => {
-                //console.log('publish globalpositionint_msg to local mqtt(' + pub_gps_position_topic + ') : ', JSON.stringify(pre_globalpositionint_msg));
-            //});
-        //}
-    //}
 }
 
 let sendAttitude = () => {
@@ -376,13 +396,6 @@ let sendAttitude = () => {
             });
         }
     }
-    // else {
-    //     if (local_mqtt_client !== null) {
-    //         local_mqtt_client.publish(pub_gps_attitude_topic, JSON.stringify(pre_attitude_msg), () => {
-    //             console.log('publish attitude_msg to local mqtt('+pub_gps_attitude_topic+') : ', JSON.stringify(pre_attitude_msg));
-    //         });
-    //     }
-    // }
 }
 
 //setInterval(sendPosition, 2000);

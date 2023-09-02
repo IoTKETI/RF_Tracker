@@ -13,11 +13,15 @@ let tracker_control_message = '';
 let motor_altitude_message = '';
 let tracker_gpi = '';
 let tracker_att = '';
+let tracker_gri = '';
 
 let tracker_latitude = 37.4036621604629;
 let tracker_longitude = 127.16176249708046;
 let tracker_altitude = 0.0;
 let tracker_relative_altitude = 0.0;
+
+let tracker_fix_type = 0;
+let tracker_satellites_visible = 0;
 
 let tracker_roll = 0.0;
 let tracker_pitch = 0.0;
@@ -39,6 +43,7 @@ let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/Panel';
 let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + TYPE;
 
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
+let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
 let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 
 
@@ -70,24 +75,30 @@ function tr_mqtt_connect(host) {
 
         if (gps_alt_topic !== '') {
             tr_mqtt_client.subscribe(gps_alt_topic, () => {
-                console.log('[local_mqtt] sub_gps_attitude_topic is subscribed -> ', gps_alt_topic);
+                console.log('[local_mqtt] gps_alt_topic is subscribed -> ', gps_alt_topic);
             });
         }
 
         if (gps_pos_topic !== '') {
             tr_mqtt_client.subscribe(gps_pos_topic, () => {
-                console.log('[local_mqtt] sub_gps_position_topic is subscribed -> ', gps_pos_topic);
+                console.log('[local_mqtt] gps_pos_topic is subscribed -> ', gps_pos_topic);
+            });
+        }
+
+        if (gps_raw_topic !== '') {
+            tr_mqtt_client.subscribe(gps_raw_topic, () => {
+                console.log('[local_mqtt] gps_raw_topic is subscribed -> ', gps_raw_topic);
             });
         }
 
         if (pn_ctrl_topic !== '') {
             tr_mqtt_client.subscribe(pn_ctrl_topic, () => {
-                console.log('[local_mqtt] sub_tracker_control_topic is subscribed -> ', pn_ctrl_topic);
+                console.log('[local_mqtt] pn_ctrl_topic is subscribed -> ', pn_ctrl_topic);
             });
         }
         if (pn_alt_topic !== '') {
             tr_mqtt_client.subscribe(pn_alt_topic, () => {
-                console.log('[local_mqtt] sub_tracker_altitude_topic is subscribed -> ', pn_alt_topic);
+                console.log('[local_mqtt] pn_alt_topic is subscribed -> ', pn_alt_topic);
             });
         }
     });
@@ -100,12 +111,20 @@ function tr_mqtt_connect(host) {
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
-            tracker_latitude = tracker_gpi.lat / 10000000;
-            tracker_longitude = tracker_gpi.lon / 10000000;
-            tracker_altitude = tracker_gpi.alt / 1000;
-            tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
+            if(tracker_fix_type === mavlink.GPS_FIX_TYPE_STATIC) {
+                tracker_latitude = tracker_gpi.lat / 10000000;
+                tracker_longitude = tracker_gpi.lon / 10000000;
+                tracker_altitude = tracker_gpi.alt / 1000;
+                tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
+            }
 
-            //console.log(tracker_altitude);
+            countBPM++;
+        }
+        else if (topic === gps_raw_topic) { // 픽스호크로부터 받아오는 GPS 상태 정보
+            tracker_gri = JSON.parse(message.toString());
+
+            tracker_fix_type = tracker_gri.fix_type;
+            tracker_satellites_visible = tracker_gri.satellites_visible;
 
             countBPM++;
         }
@@ -494,6 +513,7 @@ let watchdogCtrl = () => {
         tr_heartbeat.lat = tracker_latitude;
         tr_heartbeat.lon = tracker_longitude;
         tr_heartbeat.alt = tracker_altitude;
+        tr_heartbeat.fix_type = tracker_fix_type;
         count_tr_heartbeat++;
         if(count_tr_heartbeat >= 2) {
             count_tr_heartbeat = 0;
