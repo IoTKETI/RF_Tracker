@@ -100,7 +100,10 @@ function tr_mqtt_connect(host) {
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
+            tracker_latitude = tracker_gpi.lat / 10000000;
+            tracker_longitude = tracker_gpi.lon / 10000000;
             tracker_altitude = tracker_gpi.alt / 1000;
+            tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
 
             //console.log(tracker_altitude);
 
@@ -161,6 +164,107 @@ function tr_mqtt_connect(host) {
     });
 }
 
+
+let tidControlTracker = null;
+let flagTracking = 'no';
+
+let tracker_handler = (_msg) => {
+    console.log('received message from panel', _msg);
+    if(_msg === 'test') {
+        if(tidTest !== null) {
+            clearTimeout(tidTest);
+            tidTest = null;
+
+            motor_can.setStop();
+            flagTracking = 'no';
+        }
+        else {
+            flagTracking = 'test';
+            testAction();
+        }
+    }
+    else if(_msg === 'arrange') {
+        if(tidTest !== null) {
+            clearTimeout(tidTest);
+            tidTest = null;
+        }
+
+        stateCtrl = 'arranging';
+    }
+    else if(_msg === 'tilt_up') {
+        if(TYPE === 'tilt') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
+
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(1);
+            }, 100);
+        }
+    }
+    else if(_msg === 'tilt_down') {
+        if(TYPE === 'tilt') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
+
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(-1);
+            }, 100);
+        }
+    }
+    else if(_msg === 'pan_up') {
+        if(TYPE === 'pan') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
+
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(1);
+            }, 100);
+        }
+    }
+    else if(_msg === 'pan_down') {
+        if(TYPE === 'pan') {
+            if (tidControlTracker !== null) {
+                clearInterval(tidControlTracker);
+                tidControlTracker = null;
+            }
+
+            tidControlTracker = setInterval(() => {
+                motor_can.setDelta(-1);
+            }, 100);
+        }
+    }
+    else if(_msg === 'stop') {
+        if(tidControlTracker !== null) {
+            clearInterval(tidControlTracker);
+            tidControlTracker = null;
+        }
+
+        motor_can.setStop();
+    }
+    else if(_msg === 'run') {
+        if(tidTest !== null) {
+            clearTimeout(tidTest);
+            tidTest = null;
+
+            motor_can.setStop();
+            flagTracking = 'no';
+        }
+
+        if(flagTracking === 'no') {
+            flagTracking = 'yes';
+        }
+        else {
+            flagTracking = 'no';
+        }
+    }
+}
+
 function calcTargetPanAngle(targetLatitude, targetLongitude) {
     // let target_latitude_rad = targetLatitude * Math.PI / 180;
     // let target_longitude_rad = targetLongitude * Math.PI / 180;
@@ -191,7 +295,6 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
 
     let angle = Math.atan2(y, x);
     angle = -Math.round(angle * 180 / Math.PI) + 90;
-
     return angle;
 }
 
@@ -455,106 +558,6 @@ let watchdogCtrl = () => {
 
 let stateCtrl = 'toReady'
 setTimeout(watchdogCtrl, 1000);
-
-let tidControlTracker = null;
-let flagTracking = 'no';
-
-let tracker_handler = (_msg) => {
-    console.log('received message from panel', _msg);
-    if(_msg === 'test') {
-        if(tidTest !== null) {
-            clearTimeout(tidTest);
-            tidTest = null;
-
-            motor_can.setStop();
-            flagTracking = 'no';
-        }
-        else {
-            flagTracking = 'test';
-            testAction();
-        }
-    }
-    else if(_msg === 'arrange') {
-        if(tidTest !== null) {
-            clearTimeout(tidTest);
-            tidTest = null;
-        }
-
-        stateCtrl = 'arranging';
-    }
-    else if(_msg === 'tilt_up') {
-        if(TYPE === 'tilt') {
-            if (tidControlTracker !== null) {
-                clearInterval(tidControlTracker);
-                tidControlTracker = null;
-            }
-
-            tidControlTracker = setInterval(() => {
-                motor_can.setDelta(1);
-            }, 100);
-        }
-    }
-    else if(_msg === 'tilt_down') {
-        if(TYPE === 'tilt') {
-            if (tidControlTracker !== null) {
-                clearInterval(tidControlTracker);
-                tidControlTracker = null;
-            }
-
-            tidControlTracker = setInterval(() => {
-                motor_can.setDelta(-1);
-            }, 100);
-        }
-    }
-    else if(_msg === 'pan_up') {
-        if(TYPE === 'pan') {
-            if (tidControlTracker !== null) {
-                clearInterval(tidControlTracker);
-                tidControlTracker = null;
-            }
-
-            tidControlTracker = setInterval(() => {
-                motor_can.setDelta(1);
-            }, 100);
-        }
-    }
-    else if(_msg === 'pan_down') {
-        if(TYPE === 'pan') {
-            if (tidControlTracker !== null) {
-                clearInterval(tidControlTracker);
-                tidControlTracker = null;
-            }
-
-            tidControlTracker = setInterval(() => {
-                motor_can.setDelta(-1);
-            }, 100);
-        }
-    }
-    else if(_msg === 'stop') {
-        if(tidControlTracker !== null) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
-        }
-
-        motor_can.setStop();
-    }
-    else if(_msg === 'run') {
-        if(tidTest !== null) {
-            clearTimeout(tidTest);
-            tidTest = null;
-
-            motor_can.setStop();
-            flagTracking = 'no';
-        }
-
-        if(flagTracking === 'no') {
-            flagTracking = 'yes';
-        }
-        else {
-            flagTracking = 'no';
-        }
-    }
-}
 
 let tidTest = null;
 let t_angle = 0;
