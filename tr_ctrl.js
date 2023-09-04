@@ -2,6 +2,8 @@ const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
 const motor_can = require('./motor_can');
 
+const mavlink = require('./mavlibrary/mavlink.js');
+
 const canPortNum = process.argv[2];
 const CAN_ID = process.argv[3];
 const TYPE = process.argv[4];
