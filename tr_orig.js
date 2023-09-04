@@ -359,8 +359,8 @@ function parseMavFromDrone(mavPacket) {
             var satellites_visible = mavPacket.substr(base_offset, 2).toLowerCase();
 
             let _gps_raw_int_msg = {};
-            _gps_raw_int_msg.fix_type = Buffer.from(fix_type, 'hex').readUInt8LE(0);
-            _gps_raw_int_msg.satellites_visible = Buffer.from(satellites_visible, 'hex').readUInt8LE(0);
+            _gps_raw_int_msg.fix_type = Buffer.from(fix_type, 'hex').readUInt8(0);
+            _gps_raw_int_msg.satellites_visible = Buffer.from(satellites_visible, 'hex').readUInt8(0);
 
             gps_raw_int_msg = JSON.parse(JSON.stringify(_gps_raw_int_msg));
 
