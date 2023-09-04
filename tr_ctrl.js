@@ -307,8 +307,8 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
 
     let result2 = dfs_xy_conv('toXY', tar_lat, tar_lon);
 
-    let x = result2.x - result1.x;
-    let y = result2.y - result1.y;
+    let x = result2.x - result1.x + 0.000001;
+    let y = result2.y - result1.y + 0.000001;
 
     // console.log(cur_lat, cur_lon);
     // console.log(tar_lat, tar_lon);
