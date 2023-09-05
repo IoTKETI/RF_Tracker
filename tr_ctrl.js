@@ -113,10 +113,11 @@ function tr_mqtt_connect(host) {
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
-            if(tracker_fix_type === mavlink.GPS_FIX_TYPE_STATIC) {
+            if(mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
                 tracker_latitude = tracker_gpi.lat / 10000000;
                 tracker_longitude = tracker_gpi.lon / 10000000;
-                tracker_altitude = tracker_gpi.alt / 1000;
+                //tracker_altitude = tracker_gpi.alt / 1000;
+                tracker_altitude = tracker_gpi.relative_alt / 1000;
                 tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
             }
 
@@ -162,7 +163,8 @@ function tr_mqtt_connect(host) {
                     //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
                     if (TYPE === 'tilt') {
-                        let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
+                        //let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
+                        let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
 
                         //console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
 
@@ -515,6 +517,7 @@ let watchdogCtrl = () => {
         tr_heartbeat.lat = tracker_latitude;
         tr_heartbeat.lon = tracker_longitude;
         tr_heartbeat.alt = tracker_altitude;
+        tr_heartbeat.relative_alt = tracker_relative_altitude;
         tr_heartbeat.fix_type = tracker_fix_type;
         count_tr_heartbeat++;
         if(count_tr_heartbeat >= 2) {
