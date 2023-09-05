@@ -236,6 +236,14 @@ function parseMavFromDrone(mavPacket) {
         }
 
         if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) { // #33
+            let my_len = 28;
+            let ar = mavPacket.split('');
+            for (let i = 0; i < (my_len - msg_len); i++) {
+                ar.splice(ar.length - 4, 0, '0');
+                ar.splice(ar.length - 4, 0, '0');
+            }
+            mavPacket = ar.join('');
+
             let time_boot_ms = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
             base_offset += 8;
             let lat = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
@@ -341,7 +349,7 @@ function parseMavFromDrone(mavPacket) {
         }
         else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
 
-            let my_len = 30;
+            let my_len = 52;
             if(ver === 'fd') {
                 my_len += 22;
             }
