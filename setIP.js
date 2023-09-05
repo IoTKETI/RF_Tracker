@@ -17,7 +17,8 @@ let local_pub_ready_topic = '/ip/ready';
 let drone_info = {};
 try {
     drone_info = JSON.parse(fs.readFileSync('./drone_info.json', 'utf8'));
-} catch (e) {
+}
+catch (e) {
     console.log('can not find [ ./drone_info.json ] file');
 
     drone_info.id = "Dione";
@@ -40,7 +41,7 @@ setIPandRoute(drone_info.gcs_ip);
 local_mqtt_connect('localhost');  // connect to GCS
 
 function local_mqtt_connect(serverip) {
-    if (local_mqtt_client === null) {
+    if (!local_mqtt_client) {
         let connectOptions = {
             host: serverip,
             port: 1883,
@@ -58,15 +59,15 @@ function local_mqtt_connect(serverip) {
 
         local_mqtt_client = mqtt.connect(connectOptions);
 
-        local_mqtt_client.on('connect', function () {
+        local_mqtt_client.on('connect', () => {
             console.log('local_mqtt_client is connected to Drone( ' + serverip + ' )');
         });
 
-        local_mqtt_client.on('message', function (topic, message) {
+        local_mqtt_client.on('message', (topic, message) => {
             console.log('[local_mqtt_client] Received ' + message.toString() + ' From ' + topic);
         });
 
-        local_mqtt_client.on('error', function (err) {
+        local_mqtt_client.on('error', (err) => {
             console.log('[local_mqtt_client] error - ' + err.message);
         });
     }
@@ -113,7 +114,7 @@ function setIPandRoute(host) {
                             }
                             if (stdout) {
                                 console.log(`stdout: ${stdout}`);
-                                if (local_mqtt_client !== null) {
+                                if (local_mqtt_client) {
                                     local_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
                                         console.log('send ready message to localhost(' + local_pub_ready_topic + ')-', 'ready');
                                     });
@@ -127,7 +128,8 @@ function setIPandRoute(host) {
                         });
                     });
                 });
-            } else {
+            }
+            else {
                 IPready.status = 'ready';
                 fs.writeFileSync('./readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
                 // set route
@@ -149,7 +151,7 @@ function setIPandRoute(host) {
                         }
                         if (stdout) {
                             console.log(`stdout: ${stdout}`);
-                            if (local_mqtt_client !== null) {
+                            if (local_mqtt_client) {
                                 local_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
                                     console.log('send ready message to localhost(' + local_pub_ready_topic + ')-', 'ready');
                                 });
@@ -163,10 +165,12 @@ function setIPandRoute(host) {
                     });
                 });
             }
-        } else {
+        }
+        else {
             setTimeout(setIPandRoute, 500, drone_ip);
         }
-    } else {
+    }
+    else {
         setTimeout(setIPandRoute, 500, drone_ip);
     }
 }
