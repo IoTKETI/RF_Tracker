@@ -348,7 +348,10 @@ function parseMavFromDrone(mavPacket) {
             }
         }
         else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
-            let my_len = 52;
+            let my_len = 30;
+            if(ver === 'fd') {
+                my_len += 22;
+            }
             let ar = mavPacket.split('');
             for (let i = 0; i < (my_len - msg_len); i++) {
                 ar.splice(ar.length-4, 0, '0');
@@ -356,7 +359,6 @@ function parseMavFromDrone(mavPacket) {
             }
             mavPacket = ar.join('');
 
-            let time_boot_ms = mavPacket.substring(base_offset, base_offset + 16).toLowerCase();
             base_offset += 16;
             var fix_type = mavPacket.substr(base_offset, 2).toLowerCase();
 
