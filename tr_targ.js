@@ -16,31 +16,9 @@ let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/#';
 
 let tr_mqtt_client = null;
 
-let pub_target_gpi_topic = '/Ant_Tracker/target_drone/gpi';  // Send mavlink(#33, GLOBAL_POSITION_INT) to Motors
-let sub_pan_motor_position_topic = '/Ant_Tracker/Motor_Pan';
-let sub_tilt_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
-
-
-
 let dr_mqtt_client = null;
-let rf_lte_pub_drone_topic = '/RF/TELE_HUB/drone';
-let rf_lte_sub_gcs_topic = '/RF/TELE/gcs';
-let rf_lte_sub_rc_topic = '/RF/RC'; // 드론에 RF 통신으로 전달하기 위한 토픽
-
-
-
-let pub_pan_motor_position_topic = '/Ant_Tracker/Motor_Pan';
-let pub_tilt_motor_position_topic = '/Ant_Tracker/Motor_Tilt';
 
 let mobius_mqtt_client = null;
-let rf_sub_drone_topic = '/RF/TELE_HUB/drone';  // Recieve mavlink from GCS
-let rf_pub_gcs_topic = '/RF/TELE/gcs';
-let rf_pub_rc_topic = '/RF/RC'; // 드론에 RF 통신으로 전달하기 위한 토픽
-
-let sitl_state = true;
-
-let sitl_mqtt_client = null;
-let sub_sitl_drone_data_topic = '';
 
 let my_sortie_name = 'unknown';
 
@@ -171,7 +149,7 @@ function dr_mqtt_connect(serverip) {
     dr_mqtt_client.on('message', (topic, message) => {
         let _dr_data_topic = dr_data_topic.replace('/#', '');
         let arr_topic = topic.split('/');
-        let _topic = arr_topic.splice(0, arr_topic.length-1).join('/');
+        let _topic = arr_topic.splice(0, arr_topic.length - 1).join('/');
 
 
         if (_topic === _dr_data_topic) {
@@ -261,7 +239,7 @@ function mobius_mqtt_connect(serverip) {
     mobius_mqtt_client.on('message', (topic, message) => {
         let _dr_data_topic = dr_data_topic.replace('/#', '');
         let arr_topic = topic.split('/');
-        let _topic = arr_topic.splice(0, arr_topic.length-1).join('/');
+        let _topic = arr_topic.splice(0, arr_topic.length - 1).join('/');
 
 
         if (_topic === _dr_data_topic) {
@@ -387,7 +365,7 @@ function parseMavFromDrone(mavPacket) {
 
             let _lat = _globalpositionint_msg.lat / 10000000;
             let _lon = _globalpositionint_msg.lon / 10000000
-            if((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132) )) {
+            if ((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132))) {
                 global_position_int = JSON.parse(JSON.stringify(_globalpositionint_msg));
             }
             else {

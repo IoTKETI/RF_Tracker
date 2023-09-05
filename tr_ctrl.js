@@ -1,5 +1,7 @@
 const mqtt = require('mqtt');
 const {nanoid} = require("nanoid");
+const fs = require("fs");
+
 const motor_can = require('./motor_can');
 
 const mavlink = require('./mavlibrary/mavlink.js');
@@ -34,8 +36,26 @@ let target_longitude = '';
 let target_altitude = '';
 let target_relative_altitude = '';
 
-let GcsName = 'KETI_GCS';
-let DroneName = 'KETI_Simul_1';
+let drone_info = {};
+try {
+    drone_info = JSON.parse(fs.readFileSync('./drone_info.json', 'utf8'));
+}
+catch (e) {
+    console.log('can not find [ ./drone_info.json ] file');
+    drone_info.id = "Dione";
+    drone_info.approval_gcs = "MUV";
+    drone_info.host = "121.137.228.240";
+    drone_info.drone = "KETI_Simul_1";
+    drone_info.gcs = "KETI_GCS";
+    drone_info.type = "ardupilot";
+    drone_info.system_id = 1;
+    drone_info.gcs_ip = "192.168.1.150";
+
+    fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
+}
+
+let GcsName = drone_info.gcs;
+let DroneName = drone_info.drone;
 
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
@@ -68,7 +88,7 @@ function tr_mqtt_connect(host) {
 
     tr_mqtt_client = mqtt.connect(connectOptions);
 
-    tr_mqtt_client.on('connect', function () {
+    tr_mqtt_client.on('connect', () => {
         if (dr_data_topic !== '') {
             tr_mqtt_client.subscribe(dr_data_topic, () => {
                 console.log('[local_mqtt] sub_target_data_topic is subscribed -> ', dr_data_topic);
@@ -105,15 +125,15 @@ function tr_mqtt_connect(host) {
         }
     });
 
-    tr_mqtt_client.on('message', function (topic, message) {
+    tr_mqtt_client.on('message', (topic, message) => {
         let _dr_data_topic = dr_data_topic.replace('/#', '');
         let arr_topic = topic.split('/');
-        let _topic = arr_topic.splice(0, arr_topic.length-1).join('/');
+        let _topic = arr_topic.splice(0, arr_topic.length - 1).join('/');
 
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
-            if(mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
+            if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
                 tracker_latitude = tracker_gpi.lat / 10000000;
                 tracker_longitude = tracker_gpi.lon / 10000000;
                 //tracker_altitude = tracker_gpi.alt / 1000;
@@ -134,8 +154,8 @@ function tr_mqtt_connect(host) {
         else if (topic === gps_alt_topic) {
             tracker_att = JSON.parse(message.toString());
 
-            tracker_yaw = ((tracker_att.yaw * 180)/Math.PI);
-            tracker_pitch = ((tracker_att.pitch * 180)/Math.PI);
+            tracker_yaw = ((tracker_att.yaw * 180) / Math.PI);
+            tracker_pitch = ((tracker_att.pitch * 180) / Math.PI);
 
             countBPM++;
         }
@@ -182,7 +202,7 @@ function tr_mqtt_connect(host) {
         }
     });
 
-    tr_mqtt_client.on('error', function (err) {
+    tr_mqtt_client.on('error', (err) => {
         console.log('[local_mqtt] error ' + err.message);
     });
 }
@@ -193,8 +213,8 @@ let flagTracking = 'no';
 
 let tracker_handler = (_msg) => {
     console.log('received message from panel', _msg);
-    if(_msg === 'test') {
-        if(tidTest !== null) {
+    if (_msg === 'test') {
+        if (tidTest) {
             clearTimeout(tidTest);
             tidTest = null;
 
@@ -206,17 +226,17 @@ let tracker_handler = (_msg) => {
             testAction();
         }
     }
-    else if(_msg === 'arrange') {
-        if(tidTest !== null) {
+    else if (_msg === 'arrange') {
+        if (tidTest) {
             clearTimeout(tidTest);
             tidTest = null;
         }
 
         stateCtrl = 'arranging';
     }
-    else if(_msg === 'tilt_up') {
-        if(TYPE === 'tilt') {
-            if (tidControlTracker !== null) {
+    else if (_msg === 'tilt_up') {
+        if (TYPE === 'tilt') {
+            if (tidControlTracker) {
                 clearInterval(tidControlTracker);
                 tidControlTracker = null;
             }
@@ -226,9 +246,9 @@ let tracker_handler = (_msg) => {
             }, 100);
         }
     }
-    else if(_msg === 'tilt_down') {
-        if(TYPE === 'tilt') {
-            if (tidControlTracker !== null) {
+    else if (_msg === 'tilt_down') {
+        if (TYPE === 'tilt') {
+            if (tidControlTracker) {
                 clearInterval(tidControlTracker);
                 tidControlTracker = null;
             }
@@ -238,9 +258,9 @@ let tracker_handler = (_msg) => {
             }, 100);
         }
     }
-    else if(_msg === 'pan_up') {
-        if(TYPE === 'pan') {
-            if (tidControlTracker !== null) {
+    else if (_msg === 'pan_up') {
+        if (TYPE === 'pan') {
+            if (tidControlTracker) {
                 clearInterval(tidControlTracker);
                 tidControlTracker = null;
             }
@@ -250,9 +270,9 @@ let tracker_handler = (_msg) => {
             }, 100);
         }
     }
-    else if(_msg === 'pan_down') {
-        if(TYPE === 'pan') {
-            if (tidControlTracker !== null) {
+    else if (_msg === 'pan_down') {
+        if (TYPE === 'pan') {
+            if (tidControlTracker) {
                 clearInterval(tidControlTracker);
                 tidControlTracker = null;
             }
@@ -262,16 +282,16 @@ let tracker_handler = (_msg) => {
             }, 100);
         }
     }
-    else if(_msg === 'stop') {
-        if(tidControlTracker !== null) {
+    else if (_msg === 'stop') {
+        if (tidControlTracker) {
             clearInterval(tidControlTracker);
             tidControlTracker = null;
         }
 
         motor_can.setStop();
     }
-    else if(_msg === 'run') {
-        if(tidTest !== null) {
+    else if (_msg === 'run') {
+        if (tidTest) {
             clearTimeout(tidTest);
             tidTest = null;
 
@@ -279,7 +299,7 @@ let tracker_handler = (_msg) => {
             flagTracking = 'no';
         }
 
-        if(flagTracking === 'no') {
+        if (flagTracking === 'no') {
             flagTracking = 'yes';
         }
         else {
@@ -435,7 +455,7 @@ function dfs_xy_conv(code, v1, v2) {
 let countBPM = 0;
 let flagBPM = 0;
 setInterval(() => {
-    if(countBPM > 5) {
+    if (countBPM > 5) {
         countBPM = 0;
         flagBPM = 1;
     }
@@ -456,9 +476,11 @@ let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
         offsetCtrl = tracker_yaw;
         console.log('[offsetCtrl] -> ', offsetCtrl);
-    } else if (TYPE === 'tilt') {
+    }
+    else if (TYPE === 'tilt') {
         offsetCtrl = tracker_pitch;
-    } else {
+    }
+    else {
         offsetCtrl = 0;
     }
 
@@ -466,12 +488,12 @@ let ctrlAngle = (angle) => {
 
     console.log('[diffAngle] -> ', diffAngle, (diffAngle * DEG));
 
-    if(Math.abs(diffAngle) > 180) {
-        if(diffAngle < 0) {
+    if (Math.abs(diffAngle) > 180) {
+        if (diffAngle < 0) {
             diffAngle = diffAngle + 360;
         }
         else {
-            diffAngle = diffAngle -360;
+            diffAngle = diffAngle - 360;
         }
     }
 
@@ -482,8 +504,8 @@ let ctrlAngle = (angle) => {
 let tr_heartbeat = {};
 let count_tr_heartbeat = 0;
 let watchdogCtrl = () => {
-    if(stateCtrl === 'toReady') {
-        if(motor_can.getState() === 'exit') {
+    if (stateCtrl === 'toReady') {
+        if (motor_can.getState() === 'exit') {
             motor_can.setState('toEnter');
             if (motor_can.getState() === 'enter') {
                 stateCtrl = 'toArrange';
@@ -493,7 +515,7 @@ let watchdogCtrl = () => {
                 setTimeout(watchdogCtrl, 1000);
             }
         }
-        else if(motor_can.getState() === 'enter') {
+        else if (motor_can.getState() === 'enter') {
             stateCtrl = 'toArrange';
             setTimeout(watchdogCtrl, 1000);
         }
@@ -501,7 +523,7 @@ let watchdogCtrl = () => {
             setTimeout(watchdogCtrl, 1000);
         }
     }
-    else if(stateCtrl === 'ready') {
+    else if (stateCtrl === 'ready') {
         // if(TYPE === 'pan') {
         //
         //     //console.log('[ready][PanMotorAngle] -> ', Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10);
@@ -511,7 +533,7 @@ let watchdogCtrl = () => {
         // }
 
         tr_heartbeat.type = TYPE;
-        tr_heartbeat.angle = Math.round((motor_can.getAngle()+offsetCtrl) * 10) / 10;
+        tr_heartbeat.angle = Math.round((motor_can.getAngle() + offsetCtrl) * 10) / 10;
         tr_heartbeat.flag_tracking = flagTracking;
         tr_heartbeat.state = stateCtrl;
         tr_heartbeat.lat = tracker_latitude;
@@ -520,18 +542,18 @@ let watchdogCtrl = () => {
         tr_heartbeat.relative_alt = tracker_relative_altitude;
         tr_heartbeat.fix_type = tracker_fix_type;
         count_tr_heartbeat++;
-        if(count_tr_heartbeat >= 2) {
+        if (count_tr_heartbeat >= 2) {
             count_tr_heartbeat = 0;
-            if (tr_mqtt_client !== null) {
+            if (tr_mqtt_client) {
                 tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat));
             }
         }
 
         setTimeout(watchdogCtrl, 500);
     }
-    else if(stateCtrl === 'toArrange') {
-        if(flagBPM) {
-            if(motor_can.getState() === 'enter') {
+    else if (stateCtrl === 'toArrange') {
+        if (flagBPM) {
+            if (motor_can.getState() === 'enter') {
                 motor_can.setState('toZero');
 
                 stateCtrl = 'ready';
@@ -547,9 +569,9 @@ let watchdogCtrl = () => {
             setTimeout(watchdogCtrl, 1000);
         }
     }
-    else if(stateCtrl === 'arranging') {
-        if(flagBPM) {
-            if(motor_can.getState() === 'enter') {
+    else if (stateCtrl === 'arranging') {
+        if (flagBPM) {
+            if (motor_can.getState() === 'enter') {
                 // motor_can.setState('toZero');
                 //
                 // if (TYPE === 'pan') {
@@ -586,13 +608,14 @@ setTimeout(watchdogCtrl, 1000);
 
 let tidTest = null;
 let t_angle = 0;
-function testAction() {
-    if(stateCtrl === 'ready') {
 
-        if(TYPE === 'pan') {
+function testAction() {
+    if (stateCtrl === 'ready') {
+
+        if (TYPE === 'pan') {
             t_angle = parseInt(Math.random() * 360);
         }
-        else if(TYPE === 'tilt') {
+        else if (TYPE === 'tilt') {
             t_angle = parseInt(Math.random() * 90);
         }
 

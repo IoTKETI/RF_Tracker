@@ -1,6 +1,7 @@
 const {SerialPort} = require('serialport');
 const mqtt = require('mqtt');
 const {nanoid} = require('nanoid');
+const fs = require("fs");
 
 const mavlink = require('./mavlibrary/mavlink.js');
 
@@ -8,12 +9,23 @@ let mavPortNum = '/dev/ttyAMA0';
 let mavBaudrate = '115200';
 let mavPort = null;
 
-let tracker_latitude = 37.4036621604629;
-let tracker_longitude = 127.16176249708046;
-let tracker_altitude = 0.0;
-let tracker_relative_altitude = 0.0;
-let tracker_heading = 0.0;
+let drone_info = {};
+try {
+    drone_info = JSON.parse(fs.readFileSync('./drone_info.json', 'utf8'));
+}
+catch (e) {
+    console.log('can not find [ ./drone_info.json ] file');
+    drone_info.id = "Dione";
+    drone_info.approval_gcs = "MUV";
+    drone_info.host = "121.137.228.240";
+    drone_info.drone = "KETI_Simul_1";
+    drone_info.gcs = "KETI_GCS";
+    drone_info.type = "ardupilot";
+    drone_info.system_id = 1;
+    drone_info.gcs_ip = "192.168.1.150";
 
+    fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
+}
 
 let globalpositionint_msg = {};
 let gps_raw_int_msg = {};
@@ -28,10 +40,9 @@ globalpositionint_msg.alt = 0.0;
 globalpositionint_msg.relative_alt = 0.0;
 globalpositionint_msg.hdg = 0.0;
 
-
 attitude_msg.yaw = 0.0;
 
-let GcsName = 'KETI_GCS'
+let GcsName = drone_info.gcs;
 
 let tr_mqtt_client = null;
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
@@ -43,7 +54,7 @@ mavPortOpening();
 tr_mqtt_connect('localhost');
 
 function mavPortOpening() {
-    if (mavPort === null) {
+    if (!mavPort) {
         mavPort = new SerialPort({
             path: mavPortNum,
             baudRate: parseInt(mavBaudrate, 10),
@@ -188,7 +199,7 @@ function mavPortData(data) {
 }
 
 function tr_mqtt_connect(serverip) {
-    if (tr_mqtt_client === null) {
+    if (!tr_mqtt_client) {
         let connectOptions = {
             host: serverip,
             port: 1883,
@@ -276,7 +287,7 @@ function parseMavFromDrone(mavPacket) {
 
             let _lat = _globalpositionint_msg.lat / 10000000;
             let _lon = _globalpositionint_msg.lon / 10000000
-            if((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132) )) {
+            if ((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132))) {
                 // console.log('[_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
 
                 globalpositionint_msg = JSON.parse(JSON.stringify(_globalpositionint_msg));
@@ -291,7 +302,7 @@ function parseMavFromDrone(mavPacket) {
                 position_refresh_flag = 1;
             }
 
-            if (tr_mqtt_client !== null) {
+            if (tr_mqtt_client) {
                 tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(globalpositionint_msg), () => {
                     console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(globalpositionint_msg));
                 });
@@ -329,33 +340,33 @@ function parseMavFromDrone(mavPacket) {
             _attitude_msg.pitchspeed = Buffer.from(pitchspeed, 'hex').readFloatLE(0);
             _attitude_msg.yawspeed = Buffer.from(yawspeed, 'hex').readFloatLE(0);
 
-            if(_attitude_msg.yaw < 0) {
+            if (_attitude_msg.yaw < 0) {
                 _attitude_msg.yaw += (2 * Math.PI);
             }
 
-            let tracker_yaw = Math.round(((_attitude_msg.yaw * 180)/Math.PI) * 10)/10;
+            let tracker_yaw = Math.round(((_attitude_msg.yaw * 180) / Math.PI) * 10) / 10;
             console.log('[yaw] -> ', tracker_yaw);
 
-            let tracker_pitch = Math.round(((_attitude_msg.pitch * 180)/Math.PI) * 10)/10;
+            let tracker_pitch = Math.round(((_attitude_msg.pitch * 180) / Math.PI) * 10) / 10;
             console.log('[pitch] -> ', tracker_pitch);
 
             attitude_msg = JSON.parse(JSON.stringify(_attitude_msg));
 
-            if (tr_mqtt_client !== null) {
+            if (tr_mqtt_client) {
                 tr_mqtt_client.publish(gps_alt_topic, JSON.stringify(attitude_msg), () => {
-                    console.log('publish attitude_msg to local mqtt('+gps_alt_topic+') : ', JSON.stringify(attitude_msg));
+                    console.log('publish attitude_msg to local mqtt(' + gps_alt_topic + ') : ', JSON.stringify(attitude_msg));
                 });
             }
         }
         else if (msg_id === mavlink.MAVLINK_MSG_ID_GPS_RAW_INT) {
             let my_len = 30;
-            if(ver === 'fd') {
+            if (ver === 'fd') {
                 my_len += 22;
             }
             let ar = mavPacket.split('');
             for (let i = 0; i < (my_len - msg_len); i++) {
-                ar.splice(ar.length-4, 0, '0');
-                ar.splice(ar.length-4, 0, '0');
+                ar.splice(ar.length - 4, 0, '0');
+                ar.splice(ar.length - 4, 0, '0');
             }
             mavPacket = ar.join('');
 
@@ -386,9 +397,9 @@ function parseMavFromDrone(mavPacket) {
 
             gps_raw_int_msg = JSON.parse(JSON.stringify(_gps_raw_int_msg));
 
-            if (tr_mqtt_client !== null) {
+            if (tr_mqtt_client) {
                 tr_mqtt_client.publish(gps_raw_topic, JSON.stringify(gps_raw_int_msg), () => {
-                    console.log('publish gps_raw_int_msg to local mqtt('+gps_raw_topic+') : ', JSON.stringify(gps_raw_int_msg));
+                    console.log('publish gps_raw_int_msg to local mqtt(' + gps_raw_topic + ') : ', JSON.stringify(gps_raw_int_msg));
                 });
             }
         }
@@ -399,9 +410,9 @@ function parseMavFromDrone(mavPacket) {
 }
 
 let sendPosition = () => {
-    if(position_refresh_flag) {
+    if (position_refresh_flag) {
         position_refresh_flag = 0;
-        if (tr_mqtt_client !== null) {
+        if (tr_mqtt_client) {
             tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(globalpositionint_msg), () => {
                 console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(globalpositionint_msg));
             });
@@ -410,11 +421,11 @@ let sendPosition = () => {
 }
 
 let sendAttitude = () => {
-    if(attitude_refresh_flag) {
+    if (attitude_refresh_flag) {
         attitude_refresh_flag = 0;
-        if (tr_mqtt_client !== null) {
+        if (tr_mqtt_client) {
             tr_mqtt_client.publish(gps_alt_topic, JSON.stringify(attitude_msg), () => {
-                console.log('publish attitude_msg to local mqtt('+gps_alt_topic+') : ', JSON.stringify(attitude_msg));
+                console.log('publish attitude_msg to local mqtt(' + gps_alt_topic + ') : ', JSON.stringify(attitude_msg));
             });
         }
     }
