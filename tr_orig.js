@@ -360,7 +360,8 @@ function parseMavFromDrone(mavPacket) {
             }
             mavPacket = ar.join('');
 
-            base_offset += 16;
+            let time_boot_ms = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
+            base_offset += 8;
             var fix_type = mavPacket.substr(base_offset, 2).toLowerCase();
 
             base_offset += (2 + 8 + 8 + 8 + 4 + 4 + 4 + 4);
