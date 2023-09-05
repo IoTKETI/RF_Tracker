@@ -361,8 +361,6 @@ function parseMavFromDrone(mavPacket) {
 
             let time_boot_ms = mavPacket.substring(base_offset, base_offset + 16).toLowerCase();
             base_offset += 16;
-            let fix_type = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
-            base_offset += 2;
             let lat = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
             base_offset += 8;
             let lon = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
@@ -377,6 +375,8 @@ function parseMavFromDrone(mavPacket) {
             base_offset += 4;
             let cog = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
             base_offset += 4;
+            let fix_type = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
+            base_offset += 2;
             let satellites_visible = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
             base_offset += 2;
 
