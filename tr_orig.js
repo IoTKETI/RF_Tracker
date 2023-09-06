@@ -27,27 +27,30 @@ catch (e) {
     fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
 }
 
-let globalpositionint_msg = {};
+let global_position_int_msg = {};
 let gps_raw_int_msg = {};
 let attitude_msg = {};
 
 let position_refresh_flag = 0;
 let attitude_refresh_flag = 0;
 
-globalpositionint_msg.lat = 37.4036621604629;
-globalpositionint_msg.lon = 127.16176249708046;
-globalpositionint_msg.alt = 0.0;
-globalpositionint_msg.relative_alt = 0.0;
-globalpositionint_msg.hdg = 0.0;
+global_position_int_msg.lat = 37.4036621604629;
+global_position_int_msg.lon = 127.16176249708046;
+global_position_int_msg.alt = 0.0;
+global_position_int_msg.relative_alt = 0.0;
+global_position_int_msg.hdg = 0.0;
 
 attitude_msg.yaw = 0.0;
 
 let GcsName = drone_info.gcs;
 
 let tr_mqtt_client = null;
+
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
+
+let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
 
 mavPortOpening();
 
@@ -219,10 +222,23 @@ function tr_mqtt_connect(serverip) {
 
         tr_mqtt_client.on('connect', () => {
             console.log('local_mqtt_client is connected ' + serverip);
+
+            if (pn_dinfo_topic !== '') {
+                tr_mqtt_client.subscribe(pn_dinfo_topic, () => {
+                    console.log('[local_mqtt] pn_ctrl_topic is subscribed -> ', pn_dinfo_topic);
+                });
+            }
         });
 
         tr_mqtt_client.on('error', (err) => {
             console.log('[local_mqtt_client error] ' + err.message);
+        });
+
+        tr_mqtt_client.on('message', (topic, message) => {
+            if (topic === pn_dinfo_topic) { // 모터 제어 메세지 수신
+                let drone_info = JSON.parse(message.toString());
+                fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
+            }
         });
     }
 }
@@ -273,38 +289,38 @@ function parseMavFromDrone(mavPacket) {
             base_offset += 4;
             let hdg = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
 
-            let _globalpositionint_msg = {};
+            let _global_position_int_msg = {};
 
-            _globalpositionint_msg.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
-            _globalpositionint_msg.lat = Buffer.from(lat, 'hex').readInt32LE(0);
-            _globalpositionint_msg.lon = Buffer.from(lon, 'hex').readInt32LE(0);
-            _globalpositionint_msg.alt = Buffer.from(alt, 'hex').readInt32LE(0);
-            _globalpositionint_msg.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
-            _globalpositionint_msg.vx = Buffer.from(vx, 'hex').readInt16LE(0);
-            _globalpositionint_msg.vy = Buffer.from(vy, 'hex').readInt16LE(0);
-            _globalpositionint_msg.vz = Buffer.from(vz, 'hex').readInt16LE(0);
-            _globalpositionint_msg.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
+            _global_position_int_msg.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
+            _global_position_int_msg.lat = Buffer.from(lat, 'hex').readInt32LE(0);
+            _global_position_int_msg.lon = Buffer.from(lon, 'hex').readInt32LE(0);
+            _global_position_int_msg.alt = Buffer.from(alt, 'hex').readInt32LE(0);
+            _global_position_int_msg.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
+            _global_position_int_msg.vx = Buffer.from(vx, 'hex').readInt16LE(0);
+            _global_position_int_msg.vy = Buffer.from(vy, 'hex').readInt16LE(0);
+            _global_position_int_msg.vz = Buffer.from(vz, 'hex').readInt16LE(0);
+            _global_position_int_msg.hdg = Buffer.from(hdg, 'hex').readUInt16LE(0);
 
-            let _lat = _globalpositionint_msg.lat / 10000000;
-            let _lon = _globalpositionint_msg.lon / 10000000
+            let _lat = _global_position_int_msg.lat / 10000000;
+            let _lon = _global_position_int_msg.lon / 10000000
             if ((33 < _lat && _lat < 43) && ((124 < _lon && _lon < 132))) {
-                // console.log('[_globalpositionint_msg] -> ', _globalpositionint_msg.lat, _globalpositionint_msg.lon, _globalpositionint_msg.hdg);
+                // console.log('[_global_position_int_msg] -> ', _global_position_int_msg.lat, _global_position_int_msg.lon, _global_position_int_msg.hdg);
 
-                globalpositionint_msg = JSON.parse(JSON.stringify(_globalpositionint_msg));
+                global_position_int_msg = JSON.parse(JSON.stringify(_global_position_int_msg));
                 position_refresh_flag = 1;
 
             }
             else {
-                _globalpositionint_msg.lat = globalpositionint_msg.lat;
-                _globalpositionint_msg.lon = globalpositionint_msg.lon;
+                _global_position_int_msg.lat = global_position_int_msg.lat;
+                _global_position_int_msg.lon = global_position_int_msg.lon;
 
-                globalpositionint_msg = JSON.parse(JSON.stringify(_globalpositionint_msg));
+                global_position_int_msg = JSON.parse(JSON.stringify(_global_position_int_msg));
                 position_refresh_flag = 1;
             }
 
             if (tr_mqtt_client) {
-                tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(globalpositionint_msg), () => {
-                    console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(globalpositionint_msg));
+                tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(global_position_int_msg), () => {
+                    console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(global_position_int_msg));
                 });
             }
         }
@@ -413,8 +429,8 @@ let sendPosition = () => {
     if (position_refresh_flag) {
         position_refresh_flag = 0;
         if (tr_mqtt_client) {
-            tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(globalpositionint_msg), () => {
-                console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(globalpositionint_msg));
+            tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(global_position_int_msg), () => {
+                console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(global_position_int_msg));
             });
         }
     }

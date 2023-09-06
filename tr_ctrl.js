@@ -42,6 +42,7 @@ try {
 }
 catch (e) {
     console.log('can not find [ ./drone_info.json ] file');
+
     drone_info.id = "Dione";
     drone_info.approval_gcs = "MUV";
     drone_info.host = "121.137.228.240";
@@ -118,6 +119,7 @@ function tr_mqtt_connect(host) {
                 console.log('[local_mqtt] pn_ctrl_topic is subscribed -> ', pn_ctrl_topic);
             });
         }
+
         if (pn_alt_topic !== '') {
             tr_mqtt_client.subscribe(pn_alt_topic, () => {
                 console.log('[local_mqtt] pn_alt_topic is subscribed -> ', pn_alt_topic);
