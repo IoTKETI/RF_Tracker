@@ -477,7 +477,7 @@ const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
         offsetCtrl = tracker_yaw;
-        console.log('[offsetCtrl] -> ', offsetCtrl);
+        //console.log('[offsetCtrl] -> ', offsetCtrl);
     }
     else if (TYPE === 'tilt') {
         offsetCtrl = tracker_pitch;

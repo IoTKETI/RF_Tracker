@@ -104,7 +104,9 @@ let tidMotor = null;
 exports.loop = () => {
     tidMotor = setTimeout(commMotor, 2000, p_in);
 }
+
 let zero_flag = 0;
+let zero_flag_count = 0;
 
 let commMotor = () => {
     if(stateMotor === 'toExit') {
@@ -241,8 +243,11 @@ let commMotor = () => {
         }
         else {
             if(zero_flag === 1) {
-                zero_flag++;
-                if(zero_flag >= 3) {
+                zero_flag_count++;
+                if(zero_flag_count >= 3) {
+                    zero_flag = 0;
+                    zero_flag_count = 0;
+
                     Zero(() => {
                         p_in = 0.0001;
                         g_target = p_in;
@@ -360,12 +365,14 @@ let turnTarget = () => {
         }
         else {
             result_in = _in + small_gap;
-            if(result_in >= _target) {
-                result_in = _target;
-                turn_flag = 0;
-                zero_flag = 1;
-                console.log('turnTarget --------------', turn_flag, result_in);
-            }
+        }
+
+        if(result_in >= _target) {
+            result_in = _target;
+            turn_flag = 0;
+            zero_flag = 1;
+            zero_flag_count = 0;
+            console.log('turnTarget --------------', turn_flag, result_in);
         }
     }
     else {
@@ -374,12 +381,14 @@ let turnTarget = () => {
         }
         else {
             result_in = _in - small_gap;
-            if(result_in <= _target) {
-                result_in = _target;
-                turn_flag = 0;
-                zero_flag = 1;
-                console.log('turnTarget --------------', turn_flag, result_in);
-            }
+        }
+
+        if(result_in <= _target) {
+            result_in = _target;
+            turn_flag = 0;
+            zero_flag = 1;
+            zero_flag_count = 0;
+            console.log('turnTarget --------------', turn_flag, result_in);
         }
     }
 
@@ -424,7 +433,8 @@ exports.setTarget = (angle) => {
 }
 
 exports.setDelta = (diff_angle) => {
-    g_target = p_in + Math.round((diff_angle * DEG) * 1000) / 1000;
+    // g_target = p_in + Math.round((diff_angle * DEG) * 1000) / 1000;
+    g_target = p_in + (diff_angle * DEG);
     turn_flag = 1;
 }
 
