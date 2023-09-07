@@ -251,15 +251,11 @@ let commMotor = () => {
                     Zero(() => {
                         p_in = 0;
                         g_target = p_in;
-                        Zero(() => {
-                            p_in = 0;
-                            g_target = p_in;
-                            pack_cmd(() => {
-                                if (tidMotor !== null) {
-                                    clearTimeout(tidMotor);
-                                }
-                                tidMotor = setTimeout(commMotor, 500);
-                            });
+                        pack_cmd(() => {
+                            if (tidMotor !== null) {
+                                clearTimeout(tidMotor);
+                            }
+                            tidMotor = setTimeout(commMotor, 500);
                         });
                     });
                 }
