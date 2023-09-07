@@ -277,6 +277,10 @@ let commMotor = () => {
                 // });
             }
 
+            if(tidMotor !== null) {
+                clearTimeout(tidMotor);
+            }
+            tidMotor = setTimeout(commMotor, 500);
         }
     }
     else if(stateMotor === 'toZero') {
