@@ -244,8 +244,8 @@ let commMotor = () => {
         else {
             if(zero_flag === 1) {
                 zero_flag_count++;
-                if(zero_flag_count >= 3) {
-                    zero_flag = 0;
+                zero_flag = 0;
+                if(zero_flag_count >= 16) {
                     zero_flag_count = 0;
 
                     Zero(() => {
