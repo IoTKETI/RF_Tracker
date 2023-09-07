@@ -244,43 +244,38 @@ let commMotor = () => {
         else {
             if(zero_flag === 1) {
                 zero_flag_count++;
-                if(zero_flag_count >= 10) {
+                if(zero_flag_count >= 5) {
                     zero_flag = 0;
                     zero_flag_count = 0;
 
                     Zero(() => {
                         p_in = 0;
                         g_target = p_in;
-                        // pack_cmd(() => {
-                        //     if (tidMotor !== null) {
-                        //         clearTimeout(tidMotor);
-                        //     }
-                        //     tidMotor = setTimeout(commMotor, 500);
-                        // });
+                        //pack_cmd(() => {
+                            if (tidMotor !== null) {
+                                clearTimeout(tidMotor);
+                            }
+                            tidMotor = setTimeout(commMotor, 500);
+                        //});
                     });
                 }
                 else {
-                    // pack_cmd(() => {
-                    //     if(tidMotor !== null) {
-                    //         clearTimeout(tidMotor);
-                    //     }
-                    //     tidMotor = setTimeout(commMotor, 50);
-                    // });
+                    //pack_cmd(() => {
+                        if(tidMotor !== null) {
+                            clearTimeout(tidMotor);
+                        }
+                        tidMotor = setTimeout(commMotor, 50);
+                    //});
                 }
             }
             else {
-                // pack_cmd(() => {
-                //     if(tidMotor !== null) {
-                //         clearTimeout(tidMotor);
-                //     }
-                //     tidMotor = setTimeout(commMotor, 500);
-                // });
+                //pack_cmd(() => {
+                    if(tidMotor !== null) {
+                        clearTimeout(tidMotor);
+                    }
+                    tidMotor = setTimeout(commMotor, 500);
+                //});
             }
-
-            if(tidMotor !== null) {
-                clearTimeout(tidMotor);
-            }
-            tidMotor = setTimeout(commMotor, 500);
         }
     }
     else if(stateMotor === 'toZero') {
