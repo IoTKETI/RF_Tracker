@@ -215,7 +215,7 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            if(turn_flag === 0 && zero_flag_count < 5) {
+            if(turn_flag === 0 && 1 <= zero_flag_count && zero_flag_count < 5) {
                 // console.log('[enter] -> ',
                 //     Math.round((g_target) * 1000) / 1000,
                 //     Math.round((p_in) * 1000) / 1000,
@@ -249,7 +249,7 @@ let commMotor = () => {
                     zero_flag_count = 0;
 
                     Zero(() => {
-                        p_in = 0.0001;
+                        p_in = 0;
                         g_target = p_in;
                         pack_cmd(() => {
                             if (tidMotor !== null) {
