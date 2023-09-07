@@ -244,7 +244,7 @@ let commMotor = () => {
         else {
             if(zero_flag === 1) {
                 zero_flag_count++;
-                if(zero_flag_count >= 5) {
+                if(zero_flag_count >= 3) {
                     zero_flag = 0;
                     zero_flag_count = 0;
 
@@ -344,7 +344,7 @@ const big_th = 10 * DEG;
 const big_gap = 0.45 * DEG;
 
 const small_th = 0.05 * DEG;
-const small_gap = 0.2 * DEG;
+const small_gap = 0.1 * DEG;
 
 const dir_th = Math.PI;
 
