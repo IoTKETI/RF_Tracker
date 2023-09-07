@@ -5,8 +5,8 @@ let CAN_ID = '00000002';
 let MOTOR_CAN_ID = CAN_ID + '0000';
 
 // Value limits ------
-const P_MIN = -12.500;
-const P_MAX = 12.500;
+const P_MIN = -12.300;
+const P_MAX = 12.300;
 const V_MIN = -50.000;
 const V_MAX = 50.000;
 const KP_MIN = 0.000;
@@ -244,20 +244,22 @@ let commMotor = () => {
         else {
             if(zero_flag === 1) {
                 zero_flag_count++;
-                zero_flag = 0;
-                if(zero_flag_count >= 16) {
+                if(zero_flag_count >= 3) {
                     zero_flag_count = 0;
+                    zero_flag = 0;
 
-                    Zero(() => {
-                        p_in = 0;
-                        g_target = p_in;
-                        pack_cmd(() => {
-                            if (tidMotor !== null) {
-                                clearTimeout(tidMotor);
-                            }
-                            tidMotor = setTimeout(commMotor, 500);
+                    if(p_in >= P_MAX || p_in <= P_MIN) {
+                        Zero(() => {
+                            p_in = 0;
+                            g_target = p_in;
+                            pack_cmd(() => {
+                                if (tidMotor !== null) {
+                                    clearTimeout(tidMotor);
+                                }
+                                tidMotor = setTimeout(commMotor, 500);
+                            });
                         });
-                    });
+                    }
                 }
                 else {
                     pack_cmd(() => {
@@ -435,6 +437,13 @@ exports.setTarget = (angle) => {
 exports.setDelta = (diff_angle) => {
     // g_target = p_in + Math.round((diff_angle * DEG) * 1000) / 1000;
     g_target = p_in + (diff_angle * DEG);
+
+    if(g_target >= P_MAX) {
+        g_target = P_MAX;
+    }
+    else if(g_target <= P_MIN) {
+        g_target = P_MIN;
+    }
     turn_flag = 1;
 }
 
