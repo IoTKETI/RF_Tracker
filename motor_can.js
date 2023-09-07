@@ -249,7 +249,7 @@ let commMotor = () => {
                     zero_flag_count = 0;
 
                     Zero(() => {
-                        p_in = 0.00114;
+                        p_in = 0.0009;
                         g_target = p_in;
                         pack_cmd(() => {
                             if (tidMotor !== null) {
