@@ -261,7 +261,7 @@ let commMotor = () => {
                                 tidMotor = setTimeout(commMotor, 500);
                             });
                         });
-                    }
+                    });
                 }
                 else {
                     pack_cmd(() => {
