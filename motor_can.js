@@ -215,16 +215,16 @@ let commMotor = () => {
 
             motor_return_msg = '';
 
-            if(turn_flag === 0) {
+            if(turn_flag === 0 && zero_flag_count < 5) {
                 // console.log('[enter] -> ',
                 //     Math.round((g_target) * 1000) / 1000,
                 //     Math.round((p_in) * 1000) / 1000,
                 //     Math.round((p_out) * 1000) / 1000,
                 //     Math.round((p_in - p_out) * 100) / 100);
 
-                // console.log('[enter] -> ',
+                 console.log('[enter] -> ',
                 //     //Math.round((g_target) * 1000) / 1000,
-                //     p_in, p_out, p_in - p_out);
+                     p_in, p_out, p_in - p_out);
                 //     //Math.round((p_in - p_out) * 100) / 100);
             }
         }
