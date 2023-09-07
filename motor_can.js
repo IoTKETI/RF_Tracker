@@ -251,31 +251,32 @@ let commMotor = () => {
                     Zero(() => {
                         p_in = 0;
                         g_target = p_in;
-                        //pack_cmd(() => {
+                        pack_cmd(() => {
                             if (tidMotor !== null) {
                                 clearTimeout(tidMotor);
                             }
                             tidMotor = setTimeout(commMotor, 500);
-                        //});
+                        });
                     });
                 }
                 else {
-                    //pack_cmd(() => {
+                    pack_cmd(() => {
                         if(tidMotor !== null) {
                             clearTimeout(tidMotor);
                         }
                         tidMotor = setTimeout(commMotor, 50);
-                    //});
+                    });
                 }
             }
             else {
-                //pack_cmd(() => {
+                pack_cmd(() => {
                     if(tidMotor !== null) {
                         clearTimeout(tidMotor);
                     }
                     tidMotor = setTimeout(commMotor, 500);
-                //});
+                });
             }
+
         }
     }
     else if(stateMotor === 'toZero') {
@@ -340,10 +341,10 @@ let turn_flag = 0;
 const DEG = 0.0174533;
 
 const big_th = 10 * DEG;
-const big_gap = 0.4 * DEG;
+const big_gap = 0.45 * DEG;
 
 const small_th = 0.05 * DEG;
-const small_gap = 0.1 * DEG;
+const small_gap = 0.2 * DEG;
 
 const dir_th = Math.PI;
 
