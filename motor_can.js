@@ -438,12 +438,12 @@ exports.setDelta = (diff_angle) => {
     // g_target = p_in + Math.round((diff_angle * DEG) * 1000) / 1000;
     g_target = p_in + (diff_angle * DEG);
 
-    if(g_target >= P_MAX) {
-        g_target = P_MAX;
-    }
-    else if(g_target <= P_MIN) {
-        g_target = P_MIN;
-    }
+    // if(g_target >= P_MAX) {
+    //     g_target = P_MAX;
+    // }
+    // else if(g_target <= P_MIN) {
+    //     g_target = P_MIN;
+    // }
     turn_flag = 1;
 }
 
