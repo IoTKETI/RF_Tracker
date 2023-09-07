@@ -245,8 +245,8 @@ let commMotor = () => {
             if(zero_flag === 1) {
                 zero_flag_count++;
                 if(zero_flag_count >= 3) {
-                    zero_flag_count = 0;
                     zero_flag = 0;
+                    zero_flag_count = 0;
 
                     if(p_in >= P_MAX || p_in <= P_MIN) {
                         Zero(() => {
