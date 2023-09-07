@@ -260,6 +260,14 @@ let commMotor = () => {
                             });
                         });
                     }
+                    else {
+                        pack_cmd(() => {
+                            if (tidMotor !== null) {
+                                clearTimeout(tidMotor);
+                            }
+                            tidMotor = setTimeout(commMotor, 500);
+                        });
+                    }
                 }
                 else {
                     pack_cmd(() => {
