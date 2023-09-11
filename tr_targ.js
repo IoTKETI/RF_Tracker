@@ -98,13 +98,13 @@ function tr_mqtt_connect(serverip) {
     });
 
     tr_mqtt_client.on('message', (topic, message) => {
-        if (mobius_mqtt_client !== null) {
+        if (mobius_mqtt_client) {
             let _tr_data_topic = tr_data_topic;
             if (topic.includes('/pan')) {
-                _tr_data_topic = tr_data_topic.replace('/#', '/' + drone_info.drone + '/pan')
+                _tr_data_topic = tr_data_topic.replace('/#', '/' + drone_info.drone + '/pan');
             }
             else if (topic.includes('/tilt')) {
-                _tr_data_topic = tr_data_topic.replace('/#', '/' + drone_info.drone + '/tilt')
+                _tr_data_topic = tr_data_topic.replace('/#', '/' + drone_info.drone + '/tilt');
             }
 
             if (topic === _tr_data_topic) {
