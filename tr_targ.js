@@ -102,13 +102,11 @@ function tr_mqtt_connect(serverip) {
             let _tr_data_topic = tr_data_topic;
             if (topic.includes('/pan')) {
                 _tr_data_topic = tr_data_topic.replace('/#', '/' + drone_info.drone + '/pan');
+                mobius_mqtt_client.publish(_tr_data_topic, message);
             }
             else if (topic.includes('/tilt')) {
                 _tr_data_topic = tr_data_topic.replace('/#', '/' + drone_info.drone + '/tilt');
-            }
-
-            if (topic === _tr_data_topic) {
-                mobius_mqtt_client.publish(topic, message);
+                mobius_mqtt_client.publish(_tr_data_topic, message);
             }
         }
     });
