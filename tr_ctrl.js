@@ -543,6 +543,7 @@ let watchdogCtrl = () => {
         tr_heartbeat.alt = tracker_altitude;
         tr_heartbeat.relative_alt = tracker_relative_altitude;
         tr_heartbeat.fix_type = tracker_fix_type;
+        tr_heartbeat.heading = tracker_yaw;
         count_tr_heartbeat++;
         if (count_tr_heartbeat >= 2) {
             count_tr_heartbeat = 0;
