@@ -11,8 +11,11 @@ const fs = require("fs");
 
 const rfPort = 'eth0'; // Set to eth1 if using Crow-Cube, and set to eth0 if using Crow-D.
 
-let local_mqtt_client = null;
-let local_pub_ready_topic = '/ip/ready';
+let tr_mqtt_client = null;
+let tr_pub_ready_topic = '/ip/ready';
+let tr_sub_change_ip_topic = '/ip/change';
+
+let curIP = '';
 
 let drone_info = {};
 try {
@@ -38,10 +41,10 @@ fs.writeFileSync('./readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
 
 setIPandRoute(drone_info.gcs_ip);
 
-local_mqtt_connect('localhost');  // connect to GCS
+tr_mqtt_connect('localhost');  // connect to GCS
 
-function local_mqtt_connect(serverip) {
-    if (!local_mqtt_client) {
+function tr_mqtt_connect(serverip) {
+    if (!tr_mqtt_client) {
         let connectOptions = {
             host: serverip,
             port: 1883,
@@ -57,18 +60,44 @@ function local_mqtt_connect(serverip) {
             rejectUnauthorized: false
         }
 
-        local_mqtt_client = mqtt.connect(connectOptions);
+        tr_mqtt_client = mqtt.connect(connectOptions);
 
-        local_mqtt_client.on('connect', () => {
-            console.log('local_mqtt_client is connected to Drone( ' + serverip + ' )');
+        tr_mqtt_client.on('connect', () => {
+            console.log('tr_mqtt_client is connected to Drone( ' + serverip + ' )');
+
+            if (tr_sub_change_ip_topic !== '') {
+                tr_mqtt_client.subscribe(tr_sub_change_ip_topic, () => {
+                    console.log('[tr_mqtt_client] tr_sub_change_ip_topic is subscribed -> ', tr_sub_change_ip_topic);
+                });
+            }
         });
 
-        local_mqtt_client.on('message', (topic, message) => {
-            console.log('[local_mqtt_client] Received ' + message.toString() + ' From ' + topic);
+        tr_mqtt_client.on('message', (topic, message) => {
+            if (topic === tr_sub_change_ip_topic) {
+                console.log(message.toString());
+                let host_arr = curIP.split('.');
+
+                exec('sudo route delete -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + curIP, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`[error] in routing table setting : ${error}`);
+                        return;
+                    }
+                    if (stdout) {
+                        console.log(`stdout: ${stdout}`);
+                    }
+                    if (stderr) {
+                        console.error(`stderr: ${stderr}`);
+                    }
+                    setIPandRoute(message.toString());
+                });
+            }
+            else {
+                console.log('[tr_mqtt_client] Received ' + message.toString() + ' From ' + topic);
+            }
         });
 
-        local_mqtt_client.on('error', (err) => {
-            console.log('[local_mqtt_client] error - ' + err.message);
+        tr_mqtt_client.on('error', (err) => {
+            console.log('[tr_mqtt_client] error - ' + err.message);
         });
     }
 }
@@ -76,14 +105,14 @@ function local_mqtt_connect(serverip) {
 function setIPandRoute(host) {
     let host_arr = host.split('.');
     host_arr[3] = '120';
-    let drone_ip = host_arr.join('.');
+    curIP = host_arr.join('.');
 
     let networkInterfaces = os.networkInterfaces();
     if (networkInterfaces.hasOwnProperty(rfPort)) {
         if (networkInterfaces[rfPort][0].family === 'IPv4') {
-            if (networkInterfaces[rfPort][0].address !== drone_ip) {
+            if (networkInterfaces[rfPort][0].address !== curIP) {
                 // set static ip
-                exec('sudo ifconfig ' + rfPort + ' ' + drone_ip, (error, stdout, stderr) => {
+                exec('sudo ifconfig ' + rfPort + ' ' + curIP, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`[error] in static ip setting : ${error}`);
                         return;
@@ -96,7 +125,7 @@ function setIPandRoute(host) {
                     }
                     // console.log(os.networkInterfaces());
                     // set route
-                    exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + drone_ip, (error, stdout, stderr) => {
+                    exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + curIP, (error, stdout, stderr) => {
                         if (error) {
                             console.error(`[error] in routing table setting : ${error}`);
                             return;
@@ -114,8 +143,8 @@ function setIPandRoute(host) {
                             }
                             if (stdout) {
                                 console.log(`stdout: ${stdout}`);
-                                if (local_mqtt_client) {
-                                    local_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
+                                if (tr_mqtt_client) {
+                                    tr_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
                                         console.log('send ready message to localhost(' + local_pub_ready_topic + ')-', 'ready');
                                     });
                                     IPready.status = 'ready';
@@ -133,7 +162,7 @@ function setIPandRoute(host) {
                 IPready.status = 'ready';
                 fs.writeFileSync('./readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
                 // set route
-                exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + drone_ip, (error, stdout, stderr) => {
+                exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + curIP, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`[error] in routing table setting : ${error}`);
                         return;
@@ -151,8 +180,8 @@ function setIPandRoute(host) {
                         }
                         if (stdout) {
                             console.log(`stdout: ${stdout}`);
-                            if (local_mqtt_client) {
-                                local_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
+                            if (tr_mqtt_client) {
+                                tr_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
                                     console.log('send ready message to localhost(' + local_pub_ready_topic + ')-', 'ready');
                                 });
                             }
@@ -167,10 +196,10 @@ function setIPandRoute(host) {
             }
         }
         else {
-            setTimeout(setIPandRoute, 500, drone_ip);
+            setTimeout(setIPandRoute, 500, curIP);
         }
     }
     else {
-        setTimeout(setIPandRoute, 500, drone_ip);
+        setTimeout(setIPandRoute, 500, curIP);
     }
 }
