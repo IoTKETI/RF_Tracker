@@ -535,7 +535,12 @@ let watchdogCtrl = () => {
         // }
 
         tr_heartbeat.type = TYPE;
-        tr_heartbeat.angle = Math.round((motor_can.getAngle() + offsetCtrl) * 10) / 10;
+        if (TYPE === 'pan') {
+            tr_heartbeat.angle = tracker_yaw;
+        }
+        else if (TYPE === 'tilt') {
+            tr_heartbeat.angle = tracker_pitch;
+        }
         tr_heartbeat.flag_tracking = flagTracking;
         tr_heartbeat.state = stateCtrl;
         tr_heartbeat.lat = tracker_latitude;
@@ -543,7 +548,6 @@ let watchdogCtrl = () => {
         tr_heartbeat.alt = tracker_altitude;
         tr_heartbeat.relative_alt = tracker_relative_altitude;
         tr_heartbeat.fix_type = tracker_fix_type;
-        tr_heartbeat.heading = tracker_yaw;
         count_tr_heartbeat++;
         if (count_tr_heartbeat >= 2) {
             count_tr_heartbeat = 0;
