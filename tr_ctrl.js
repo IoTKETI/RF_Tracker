@@ -138,8 +138,8 @@ function tr_mqtt_connect(host) {
             if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
                 tracker_latitude = tracker_gpi.lat / 10000000;
                 tracker_longitude = tracker_gpi.lon / 10000000;
-                //tracker_altitude = tracker_gpi.alt / 1000;
-                tracker_altitude = tracker_gpi.relative_alt / 1000;
+                tracker_altitude = tracker_gpi.alt / 1000;
+                // tracker_altitude = tracker_gpi.relative_alt / 1000;
                 tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
             }
 
@@ -185,8 +185,8 @@ function tr_mqtt_connect(host) {
                     //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
                     if (TYPE === 'tilt') {
-                        //let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
-                        let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
+                        let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
+                        // let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
 
                         //console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
 
