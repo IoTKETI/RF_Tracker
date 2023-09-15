@@ -478,15 +478,22 @@ let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
         offsetCtrl = tracker_yaw;
         //console.log('[offsetCtrl] -> ', offsetCtrl);
+        diffAngle = (angle - offsetCtrl);
     }
     else if (TYPE === 'tilt') {
         offsetCtrl = tracker_pitch;
+
+        if(offsetCtrl <= -10) {
+            diffAngle = 0;
+        }
+        else {
+            diffAngle = (angle - offsetCtrl);
+        }
     }
     else {
         offsetCtrl = 0;
+        diffAngle = (angle - offsetCtrl);
     }
-
-    diffAngle = (angle - offsetCtrl);
 
     console.log('[diffAngle] -> ', diffAngle, (diffAngle * DEG));
 
