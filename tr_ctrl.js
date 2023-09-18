@@ -60,8 +60,8 @@ let DroneName = drone_info.drone;
 
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
-let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/Panel';
-let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/Panel';
+let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
+let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 
 let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + TYPE;
 

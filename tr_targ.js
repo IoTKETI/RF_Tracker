@@ -7,8 +7,8 @@ const mavlink = require('./mavlibrary/mavlink.js');
 let GcsName = 'KETI_GCS';
 let DroneName = 'KETI_Simul_1';
 
-let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/Panel';
-let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/Panel';
+let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
+let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
@@ -51,8 +51,8 @@ function init() {
     GcsName = drone_info.gcs;
     DroneName = drone_info.drone;
 
-    pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/Panel';
-    pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/Panel';
+    pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
+    pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 
     dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
