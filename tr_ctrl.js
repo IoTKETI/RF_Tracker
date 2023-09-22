@@ -36,6 +36,8 @@ let target_longitude = '';
 let target_altitude = '';
 let target_relative_altitude = '';
 
+let gpsFlag = false;
+
 let drone_info = {};
 try {
     drone_info = JSON.parse(fs.readFileSync('./drone_info.json', 'utf8'));
@@ -61,7 +63,9 @@ let DroneName = drone_info.drone;
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
 let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
+let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
+let pn_gps_ctrl_topic = '/Mobius/' + GcsName + '/Gps_Ctrl_Data/' + DroneName + '/Panel';
 
 let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + TYPE;
 
@@ -90,39 +94,53 @@ function tr_mqtt_connect(host) {
     tr_mqtt_client = mqtt.connect(connectOptions);
 
     tr_mqtt_client.on('connect', () => {
+        console.log('tr_mqtt_client is connected to ' + host);
+
         if (dr_data_topic !== '') {
             tr_mqtt_client.subscribe(dr_data_topic, () => {
-                console.log('[local_mqtt] sub_target_data_topic is subscribed -> ', dr_data_topic);
+                console.log('[tr_mqtt_client] sub_target_data_topic is subscribed -> ', dr_data_topic);
             });
         }
 
         if (gps_alt_topic !== '') {
             tr_mqtt_client.subscribe(gps_alt_topic, () => {
-                console.log('[local_mqtt] gps_alt_topic is subscribed -> ', gps_alt_topic);
+                console.log('[tr_mqtt_client] gps_alt_topic is subscribed -> ', gps_alt_topic);
             });
         }
 
         if (gps_pos_topic !== '') {
             tr_mqtt_client.subscribe(gps_pos_topic, () => {
-                console.log('[local_mqtt] gps_pos_topic is subscribed -> ', gps_pos_topic);
+                console.log('[tr_mqtt_client] gps_pos_topic is subscribed -> ', gps_pos_topic);
             });
         }
 
         if (gps_raw_topic !== '') {
             tr_mqtt_client.subscribe(gps_raw_topic, () => {
-                console.log('[local_mqtt] gps_raw_topic is subscribed -> ', gps_raw_topic);
+                console.log('[tr_mqtt_client] gps_raw_topic is subscribed -> ', gps_raw_topic);
             });
         }
 
         if (pn_ctrl_topic !== '') {
             tr_mqtt_client.subscribe(pn_ctrl_topic, () => {
-                console.log('[local_mqtt] pn_ctrl_topic is subscribed -> ', pn_ctrl_topic);
+                console.log('[tr_mqtt_client] pn_ctrl_topic is subscribed -> ', pn_ctrl_topic);
+            });
+        }
+
+        if (pn_offset_topic !== '') {
+            tr_mqtt_client.subscribe(pn_offset_topic, () => {
+                console.log('[tr_mqtt_client] pn_offset_topic is subscribed -> ', pn_offset_topic);
+            });
+        }
+
+        if (pn_gps_ctrl_topic !== '') {
+            tr_mqtt_client.subscribe(pn_gps_ctrl_topic, () => {
+                console.log('[tr_mqtt_client] pn_gps_ctrl_topic is subscribed -> ', pn_gps_ctrl_topic);
             });
         }
 
         if (pn_alt_topic !== '') {
             tr_mqtt_client.subscribe(pn_alt_topic, () => {
-                console.log('[local_mqtt] pn_alt_topic is subscribed -> ', pn_alt_topic);
+                console.log('[tr_mqtt_client] pn_alt_topic is subscribed -> ', pn_alt_topic);
             });
         }
     });
@@ -135,12 +153,14 @@ function tr_mqtt_connect(host) {
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
-            if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
-                tracker_latitude = tracker_gpi.lat / 10000000;
-                tracker_longitude = tracker_gpi.lon / 10000000;
-                tracker_altitude = tracker_gpi.alt / 1000;
-                // tracker_altitude = tracker_gpi.relative_alt / 1000;
-                tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
+            if (!gpsFlag) {
+                if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
+                    tracker_latitude = tracker_gpi.lat / 10000000;
+                    tracker_longitude = tracker_gpi.lon / 10000000;
+                    tracker_altitude = tracker_gpi.alt / 1000;
+                    // tracker_altitude = tracker_gpi.relative_alt / 1000;
+                    tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
+                }
             }
 
             countBPM++;
@@ -164,6 +184,21 @@ function tr_mqtt_connect(host) {
         else if (topic === pn_ctrl_topic) { // 모터 제어 메세지 수신
             tracker_control_message = message.toString();
             tracker_handler(tracker_control_message);
+        }
+        else if (topic === pn_offset_topic) { // 모터 제어 메세지 수신
+            let offsetObj = JSON.parse(message.toString());
+            p_offset = offsetObj.p_offset;
+            t_offset = offsetObj.t_offset;
+        }
+        else if (topic === pn_gps_ctrl_topic) { // 모터 제어 메세지 수신
+            if (message.toString() === 'move') {
+                gpsFlag = false;
+            }
+            else if (message.toString().includes('fix')) {
+                gpsFlag = true;
+                let msg_arr = message.toString().split(',');
+                tracker_altitude = msg_arr[1];
+            }
         }
         else if (topic === pn_alt_topic) {
             motor_altitude_message = message.toString();
@@ -205,7 +240,7 @@ function tr_mqtt_connect(host) {
     });
 
     tr_mqtt_client.on('error', (err) => {
-        console.log('[local_mqtt] error ' + err.message);
+        console.log('[tr_mqtt_client] error ' + err.message);
     });
 }
 
@@ -215,25 +250,7 @@ let flagTracking = 'no';
 
 let tracker_handler = (_msg) => {
     console.log('received message from panel', _msg);
-    if (_msg === 'test') {
-        if (tidTest) {
-            clearTimeout(tidTest);
-            tidTest = null;
-
-            motor_can.setStop();
-            flagTracking = 'no';
-        }
-        else {
-            flagTracking = 'test';
-            testAction();
-        }
-    }
-    else if (_msg === 'arrange') {
-        if (tidTest) {
-            clearTimeout(tidTest);
-            tidTest = null;
-        }
-
+    if (_msg === 'arrange') {
         stateCtrl = 'arranging';
     }
     else if (_msg === 'tilt_up') {
@@ -293,14 +310,6 @@ let tracker_handler = (_msg) => {
         motor_can.setStop();
     }
     else if (_msg === 'run') {
-        if (tidTest) {
-            clearTimeout(tidTest);
-            tidTest = null;
-
-            motor_can.setStop();
-            flagTracking = 'no';
-        }
-
         if (flagTracking === 'no') {
             flagTracking = 'yes';
         }
@@ -473,17 +482,20 @@ motor_can.loop();
 
 let offsetCtrl = 0;
 let diffAngle = 0;
+let p_offset = 0;
+let t_offset = 0;
+
 const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
-        offsetCtrl = tracker_yaw;
+        offsetCtrl = tracker_yaw + p_offset;
         //console.log('[offsetCtrl] -> ', offsetCtrl);
         diffAngle = (angle - offsetCtrl);
     }
     else if (TYPE === 'tilt') {
-        offsetCtrl = tracker_pitch;
+        offsetCtrl = tracker_pitch + t_offset;
 
-        if(offsetCtrl <= -10) {
+        if (offsetCtrl <= -10) {
             diffAngle = 0;
         }
         else {
@@ -619,29 +631,3 @@ let watchdogCtrl = () => {
 
 let stateCtrl = 'toReady'
 setTimeout(watchdogCtrl, 1000);
-
-let tidTest = null;
-let t_angle = 0;
-
-function testAction() {
-    if (stateCtrl === 'ready') {
-
-        if (TYPE === 'pan') {
-            t_angle = parseInt(Math.random() * 360);
-        }
-        else if (TYPE === 'tilt') {
-            t_angle = parseInt(Math.random() * 90);
-        }
-
-        ctrlAngle(t_angle);
-
-        let period = (1 + parseInt(Math.random() * 3)) * 1000;
-        //let period = (10) * 1000;
-        tidTest = setTimeout(testAction, period);
-    }
-    else {
-        tidTest = setTimeout(testAction, 1000);
-    }
-}
-
-
