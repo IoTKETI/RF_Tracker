@@ -10,7 +10,7 @@
         "underscore": "^1.13.2"
     },
     "scripts": {
-        "start": "pm2 start Tracker.js --name Tracker && pm2 start pan_motor.js --name PAN && pm2 start tilt_motor.js --name TILT && pm2 start get_tracker_FC.js  --name GET-Tracker-FC && pm2 save"
+        "start": "pm2 start tr_ctrl.js -- /dev/ttyAMA1 00000001 pan --name PAN && pm2 start tr_ctrl.js -- /dev/ttyAMA2 00000001 tilt --name TILT && pm2 start tr_orig.js && pm2 start tr_targ.js && pm2 save"
     },
     "license": "ISC",
     "repository": {
