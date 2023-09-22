@@ -12,6 +12,10 @@ let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
+let rc_data_topic = '/Mobius/' + GcsName + '/RC_Data/' + DroneName;
+
+let res_data_topic = '/Mobius/' + GcsName + '/RC_Res_Data/' + DroneName;
+
 let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/#';
 
 let tr_mqtt_client = null;
@@ -55,6 +59,10 @@ function init() {
     pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 
     dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
+
+    rc_data_topic = '/Mobius/' + GcsName + '/RC_Data/' + DroneName;
+
+    res_data_topic = '/Mobius/' + GcsName + '/RC_Res_Data/' + DroneName;
 
     tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/#';
 
@@ -144,13 +152,17 @@ function dr_mqtt_connect(serverip) {
                 console.log('[dr_mqtt_client] dr_data_topic is subscribed -> ', dr_data_topic);
             });
         }
+        if (res_data_topic !== '') {
+            dr_mqtt_client.subscribe(res_data_topic, () => {
+                console.log('[dr_mqtt_client] res_data_topic is subscribed -> ', res_data_topic);
+            });
+        }
     });
 
     dr_mqtt_client.on('message', (topic, message) => {
         let _dr_data_topic = dr_data_topic.replace('/#', '');
         let arr_topic = topic.split('/');
         let _topic = arr_topic.splice(0, arr_topic.length - 1).join('/');
-
 
         if (_topic === _dr_data_topic) {
             if (t_id) {
@@ -177,6 +189,11 @@ function dr_mqtt_connect(serverip) {
             }
             console.log('[RF]', sequence);
             tr_message_handler(topic, message);
+        }
+        else if (topic === res_data_topic) {
+            if (mobius_mqtt_client) {
+                mobius_mqtt_client.publish(topic + '/tr', message);
+            }
         }
     });
 
@@ -234,6 +251,10 @@ function mobius_mqtt_connect(serverip) {
         mobius_mqtt_client.subscribe(pn_alt_topic, () => {
             console.log('[mobius_mqtt_client] pn_alt_topic is subscribed -> ' + pn_alt_topic);
         });
+
+        mobius_mqtt_client.subscribe(rc_data_topic, () => {
+            console.log('[mobius_mqtt_client] rc_data_topic is subscribed: ' + rc_data_topic);
+        });
     });
 
     mobius_mqtt_client.on('message', (topic, message) => {
@@ -265,6 +286,13 @@ function mobius_mqtt_connect(serverip) {
         else if (topic === pn_ctrl_topic) {
             if (tr_mqtt_client) {
                 tr_mqtt_client.publish(topic, message);
+            }
+        }
+        else if (topic === rc_data_topic) {
+            if (dr_mqtt_client) {
+                dr_mqtt_client.publish(rc_data_topic + '/tr', message, () => {
+                    // console.log("send to " + rc_data_topic + " -", message.toString('hex'));
+                });
             }
         }
     });
