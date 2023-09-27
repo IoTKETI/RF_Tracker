@@ -117,10 +117,25 @@ function tr_mqtt_connect(serverip) {
 
     tr_mqtt_client.on('message', (topic, message) => {
         if (topic === dr_info_topic) {
+            let prev_ip = drone_info.gcs_ip;
+            let host_arr = prev_ip.split('.');
+            host_arr[3] = parseInt(drone_info.system_id) - 2;
+
             drone_info = JSON.parse(message.toString());
             fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
-            // console.log('pm2 restart all', drone_info);
-            exec('pm2 restart all');
+            exec('sudo route delete -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + prev_ip, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[error] in routing table setting : ${error}`);
+                    return;
+                }
+                if (stdout) {
+                    console.log(`stdout: ${stdout}`);
+                }
+                if (stderr) {
+                    console.error(`stderr: ${stderr}`);
+                }
+                exec('pm2 restart all');
+            });
         }
 
         if (mobius_mqtt_client) {
@@ -304,10 +319,25 @@ function mobius_mqtt_connect(serverip) {
             tr_message_handler(topic, message);
         }
         else if (topic === dr_info_topic) {
+            let prev_ip = drone_info.gcs_ip;
+            let host_arr = prev_ip.split('.');
+            host_arr[3] = parseInt(drone_info.system_id) - 2;
+
             drone_info = JSON.parse(message.toString());
             fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
-            // console.log('pm2 restart all', drone_info);
-            exec('pm2 restart all');
+            exec('sudo route delete -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + prev_ip, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[error] in routing table setting : ${error}`);
+                    return;
+                }
+                if (stdout) {
+                    console.log(`stdout: ${stdout}`);
+                }
+                if (stderr) {
+                    console.error(`stderr: ${stderr}`);
+                }
+                exec('pm2 restart all');
+            });
         }
         else if (topic === pn_ctrl_topic) {
             if (tr_mqtt_client) {
