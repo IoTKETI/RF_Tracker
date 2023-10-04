@@ -67,7 +67,7 @@ let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Pan
 let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 let pn_gps_ctrl_topic = '/Mobius/' + GcsName + '/Gps_Ctrl_Data/' + DroneName + '/Panel';
 
-let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + TYPE;
+let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/' + TYPE;
 
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
