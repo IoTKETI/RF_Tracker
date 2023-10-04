@@ -173,9 +173,6 @@ function setIPandRoute(host) {
                     });
                 }
             }
-            else if (networkInterfaces[rfPort][idx].family === 'IPv6') {
-                console.log('Network family is ', networkInterfaces[rfPort][idx].family);
-            }
             else {
                 setTimeout(setIPandRoute, 500, host);
             }
