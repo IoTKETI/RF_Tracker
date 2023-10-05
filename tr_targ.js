@@ -12,6 +12,7 @@ let dr_info_topic = '/Mobius/' + GcsName + '/Drinfo_Data/' + DroneName + '/Panel
 
 let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
 let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
+let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
@@ -20,6 +21,7 @@ let rc_data_topic = '/Mobius/' + GcsName + '/RC_Data/' + DroneName;
 let res_data_topic = '/Mobius/' + GcsName + '/RC_Res_Data/' + DroneName;
 
 let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/#';
+
 
 let tr_mqtt_client = null;
 
@@ -62,6 +64,7 @@ function init() {
 
     pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
     pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
+    pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
     dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
@@ -292,6 +295,10 @@ function mobius_mqtt_connect(serverip) {
             console.log('[mobius_mqtt_client] pn_alt_topic is subscribed -> ' + pn_alt_topic);
         });
 
+        mobius_mqtt_client.subscribe(pn_offset_topic, () => {
+            console.log('[mobius_mqtt_client] pn_offset_topic is subscribed -> ' + pn_offset_topic);
+        });
+
         mobius_mqtt_client.subscribe(rc_data_topic, () => {
             console.log('[mobius_mqtt_client] rc_data_topic is subscribed: ' + rc_data_topic);
         });
@@ -352,6 +359,13 @@ function mobius_mqtt_connect(serverip) {
             if (dr_mqtt_client) {
                 dr_mqtt_client.publish(rc_data_topic + '/tr', message, () => {
                     // console.log("send to " + rc_data_topic + " -", message.toString('hex'));
+                });
+            }
+        }
+        else if (topic === pn_offset_topic) {
+            if (tr_mqtt_client) {
+                tr_mqtt_client.publish(topic, message, () => {
+                    // console.log("send to " + pn_offset_topic + " -", message.toString());
                 });
             }
         }
