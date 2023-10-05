@@ -207,6 +207,7 @@ function tr_mqtt_connect(host) {
             }
         }
         else if (_topic === _dr_data_topic) { // 드론데이터 수신
+            console.log('\r\n_dr_data_topic: ',message.toString(),'\r\n')
             if (flagTracking === 'yes') {
                 let arr_msg = message.toString().split(';');
                 if (arr_msg[0] === 'gpi') {
