@@ -489,13 +489,14 @@ const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
         offsetCtrl = tracker_yaw + p_offset;
-        console.log('[tracker_yaw] -> ', tracker_yaw, '[p_offset] -> ', p_offset);
-        console.log('[offsetCtrl] -> ', offsetCtrl);
+        // console.log('[tracker_yaw] -> ', tracker_yaw, '[p_offset] -> ', p_offset);
+        // console.log('[offsetCtrl] -> ', offsetCtrl);
         diffAngle = (angle - offsetCtrl);
     }
     else if (TYPE === 'tilt') {
         offsetCtrl = tracker_pitch + t_offset;
-
+        console.log('[tracker_pitch] -> ', tracker_pitch, '[t_offset] -> ', t_offset);
+        console.log('[offsetCtrl] -> ', offsetCtrl);
         if (offsetCtrl <= -10) {
             diffAngle = 0;
         }
