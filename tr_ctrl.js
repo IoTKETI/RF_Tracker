@@ -223,7 +223,7 @@ function tr_mqtt_connect(host) {
                         let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
                         // let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
 
-                        console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
+                        // console.log('\n\n[tilt] t_angle = ', t_angle, '\n\n');
 
                         //motor_can.setTarget(t_angle);
                         ctrlAngle(t_angle);
@@ -390,7 +390,7 @@ function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
 
     // console.log(cur_lat, cur_lon, cur_alt);
     // console.log(tar_lat, tar_lon, tar_alt);
-    // console.log('x: ', x, '     y: ', y);
+    console.log('x: ', x, '     y: ', y);
 
     let angle = Math.atan2(y, x);
 
