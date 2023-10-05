@@ -189,6 +189,7 @@ function tr_mqtt_connect(host) {
             let offsetObj = JSON.parse(message.toString());
             p_offset = offsetObj.p_offset;
             t_offset = offsetObj.t_offset;
+            console.log('[p_offset] -->', p_offset, '[t_offset] -->', t_offset);
         }
         else if (topic === pn_gps_ctrl_topic) { // 모터 제어 메세지 수신
             if (message.toString() === 'release') {
