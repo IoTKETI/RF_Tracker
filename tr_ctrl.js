@@ -191,10 +191,10 @@ function tr_mqtt_connect(host) {
             t_offset = offsetObj.t_offset;
         }
         else if (topic === pn_gps_ctrl_topic) { // 모터 제어 메세지 수신
-            if (message.toString() === 'move') {
+            if (message.toString() === 'release') {
                 gpsFlag = false;
             }
-            else if (message.toString().includes('fix')) {
+            else if (message.toString().includes('hold')) {
                 gpsFlag = true;
                 let msg_arr = message.toString().split(',');
                 tracker_altitude = msg_arr[1];
