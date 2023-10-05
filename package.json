@@ -10,7 +10,7 @@
         "underscore": "^1.13.2"
     },
     "scripts": {
-        "start": "pm2 start tr_ctrl.js --name PAN -- /dev/ttyAMA1 00000001 pan && pm2 start tr_ctrl.js --name TILT -- /dev/ttyAMA2 00000001 tilt && pm2 start tr_orig.js && pm2 start tr_targ.js && pm2 save"
+        "start": "pm2 start setIP.js && pm2 start tr_ctrl.js --name PAN -- /dev/ttyAMA1 00000001 pan && pm2 start tr_ctrl.js --name TILT -- /dev/ttyAMA2 00000001 tilt && pm2 start tr_orig.js && pm2 start tr_targ.js && pm2 save"
     },
     "license": "ISC",
     "repository": {
