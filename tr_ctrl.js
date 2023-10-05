@@ -220,6 +220,7 @@ function tr_mqtt_connect(host) {
                     //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
                     if (TYPE === 'tilt') {
+                        console.log('\r\ntarget_altitude: ',target_altitude, ' tracker_altitude: ', tracker_altitude,'\r\n')
                         let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
                         // let t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_relative_altitude);
 
