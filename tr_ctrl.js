@@ -207,7 +207,6 @@ function tr_mqtt_connect(host) {
             }
         }
         else if (_topic === _dr_data_topic) { // 드론데이터 수신
-            console.log('\r\n_dr_data_topic: ',message.toString(),'\r\n')
             if (flagTracking === 'yes') {
                 let arr_msg = message.toString().split(';');
                 if (arr_msg[0] === 'gpi') {
@@ -219,6 +218,7 @@ function tr_mqtt_connect(host) {
                     target_relative_altitude = target_gpi.relative_alt / 1000;
 
                     //console.log('target_gpi: ', JSON.stringify(target_gpi));
+                    console.log('\r\nTYPE: ', TYPE,'\r\n')
 
                     if (TYPE === 'tilt') {
                         console.log('\r\ntarget_altitude: ',target_altitude, ' tracker_altitude: ', tracker_altitude,'\r\n')
