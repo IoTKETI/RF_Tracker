@@ -507,7 +507,7 @@ let ctrlAngle = (angle) => {
         diffAngle = (angle - offsetCtrl);
     }
 
-    console.log('[diffAngle] -> ', diffAngle, (diffAngle * DEG));
+    console.log('[diffAngle] -> ', diffAngle, (diffAngle * DEG), '\n offset ->', offsetCtrl);
 
     if (Math.abs(diffAngle) > 180) {
         if (diffAngle < 0) {

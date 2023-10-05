@@ -143,13 +143,16 @@ function tr_mqtt_connect(serverip) {
             if (topic.includes('/pan')) {
                 _tr_data_topic = tr_data_topic.replace('/#', '/pan');
                 // _tr_data_topic = tr_data_topic.replace('/#', '/pan');
-                mobius_mqtt_client.publish(_tr_data_topic, message);
+                mobius_mqtt_client.publish(_tr_data_topic, message, () => {
+                    console.log(_tr_data_topic, message.toString());
+                });
             }
             else if (topic.includes('/tilt')) {
                 _tr_data_topic = tr_data_topic.replace('/#', '/tilt');
                 // _tr_data_topic = tr_data_topic.replace('/#', '/tilt');
-                mobius_mqtt_client.publish(_tr_data_topic, message);
-                mobius_mqtt_client.publish(_tr_data_topic, message);
+                mobius_mqtt_client.publish(_tr_data_topic, message, () => {
+                    console.log(_tr_data_topic, message.toString());
+                });
             }
         }
     });
