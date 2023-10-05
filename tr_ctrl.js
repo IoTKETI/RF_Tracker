@@ -390,7 +390,7 @@ function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
 
     // console.log(cur_lat, cur_lon, cur_alt);
     // console.log(tar_lat, tar_lon, tar_alt);
-    console.log('x: ', x, '     y: ', y);
+    // console.log('x: ', x, '     y: ', y);
 
     let angle = Math.atan2(y, x);
 
@@ -489,7 +489,8 @@ const DEG = 0.0174533;
 let ctrlAngle = (angle) => {
     if (TYPE === 'pan') {
         offsetCtrl = tracker_yaw + p_offset;
-        //console.log('[offsetCtrl] -> ', offsetCtrl);
+        console.log('[tracker_yaw] -> ', tracker_yaw, '[p_offset] -> ', p_offset);
+        console.log('[offsetCtrl] -> ', offsetCtrl);
         diffAngle = (angle - offsetCtrl);
     }
     else if (TYPE === 'tilt') {
@@ -507,7 +508,7 @@ let ctrlAngle = (angle) => {
         diffAngle = (angle - offsetCtrl);
     }
 
-    console.log('[diffAngle] -> ', diffAngle, (diffAngle * DEG), '\n offset ->', offsetCtrl, '\tangle ->', angle);
+    console.log('[diffAngle] -> ', diffAngle, (diffAngle * DEG));
 
     if (Math.abs(diffAngle) > 180) {
         if (diffAngle < 0) {
