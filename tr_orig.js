@@ -424,29 +424,3 @@ function parseMavFromDrone(mavPacket) {
         console.log('[parseMavFromDrone Error]', e);
     }
 }
-
-let sendPosition = () => {
-    if (position_refresh_flag) {
-        position_refresh_flag = 0;
-        if (tr_mqtt_client) {
-            tr_mqtt_client.publish(gps_pos_topic, JSON.stringify(global_position_int_msg), () => {
-                console.log('publish globalpositionint_msg to local mqtt(' + gps_pos_topic + ') : ', JSON.stringify(global_position_int_msg));
-            });
-        }
-    }
-}
-
-let sendAttitude = () => {
-    if (attitude_refresh_flag) {
-        attitude_refresh_flag = 0;
-        if (tr_mqtt_client) {
-            tr_mqtt_client.publish(gps_alt_topic, JSON.stringify(attitude_msg), () => {
-                console.log('publish attitude_msg to local mqtt(' + gps_alt_topic + ') : ', JSON.stringify(attitude_msg));
-            });
-        }
-    }
-}
-
-//setInterval(sendPosition, 2000);
-//setInterval(sendAttitude, 1000);
-

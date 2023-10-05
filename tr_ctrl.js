@@ -571,7 +571,9 @@ let watchdogCtrl = () => {
         if (count_tr_heartbeat >= 2) {
             count_tr_heartbeat = 0;
             if (tr_mqtt_client) {
-                tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat));
+                tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
+                    console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
+                });
             }
         }
 
