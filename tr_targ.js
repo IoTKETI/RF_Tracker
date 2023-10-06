@@ -365,7 +365,7 @@ function mobius_mqtt_connect(serverip) {
         else if (topic === pn_offset_topic) {
             if (tr_mqtt_client) {
                 tr_mqtt_client.publish(topic, message, () => {
-                    console.log("send to " + pn_offset_topic + " -", message.toString());
+                    // console.log("send to " + pn_offset_topic + " -", message.toString());
                 });
             }
         }
