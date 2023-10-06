@@ -202,6 +202,8 @@ function tr_mqtt_connect(host) {
         }
         else if (topic === pn_offset_topic) { // 모터 제어 메세지 수신
             let offsetObj = JSON.parse(message.toString());
+            console.log(antenaType)
+            console.log(offsetObj)
             if (offsetObj.hasOwnProperty('type')) {
                 console.log(antenaType)
                 antenaType.type = offsetObj.type;
