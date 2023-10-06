@@ -57,6 +57,21 @@ catch (e) {
     fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
 }
 
+
+if (TYPE === 'tilt') {
+    let antenaType = {};
+    try {
+        antenaType = JSON.parse(fs.readFileSync('./antenaType.json', 'utf8'));
+    }
+    catch (e) {
+        console.log('can not find [ ./antenaType.json ] file');
+
+        antenaType.type = "T0";
+
+        fs.writeFileSync('./antenaType.json', JSON.stringify(antenaType, null, 4), 'utf8');
+    }
+}
+
 let GcsName = drone_info.gcs;
 let DroneName = drone_info.drone;
 
@@ -187,9 +202,15 @@ function tr_mqtt_connect(host) {
         }
         else if (topic === pn_offset_topic) { // 모터 제어 메세지 수신
             let offsetObj = JSON.parse(message.toString());
-            p_offset = offsetObj.p_offset;
-            t_offset = offsetObj.t_offset;
-            console.log('[p_offset] -->', p_offset, '[t_offset] -->', t_offset);
+            if (offsetObj.hasOwnProperty('type')) {
+                antenaType.type = offsetObj.type;
+                fs.writeFileSync('./antenaType.json', JSON.stringify(antenaType, null, 4), 'utf8');
+            }
+            else {
+                p_offset = offsetObj.p_offset;
+                t_offset = offsetObj.t_offset;
+                console.log('[p_offset] -->', p_offset, '[t_offset] -->', t_offset);
+            }
         }
         else if (topic === pn_gps_ctrl_topic) { // 모터 제어 메세지 수신
             if (message.toString() === 'release') {
@@ -499,10 +520,16 @@ let ctrlAngle = (angle) => {
         console.log('[tracker_pitch] -> ', tracker_pitch, '[t_offset] -> ', t_offset);
         console.log('[offsetCtrl] -> ', offsetCtrl);
         if (offsetCtrl <= -10) {
+            // TODO: 처음 상태가 -10이하면 0도로 올릴 수 있게 수정. 부팅 시 -10 이하면 arrange,run 동작 안함
             diffAngle = 0;
         }
         else {
-            diffAngle = (angle - offsetCtrl);
+            if (antenaType.type === 'T90') {
+                diffAngle = (angle - offsetCtrl + 90);
+            }
+            else {
+                diffAngle = (angle - offsetCtrl);
+            }
         }
     }
     else {
