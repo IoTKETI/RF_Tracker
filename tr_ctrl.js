@@ -57,9 +57,9 @@ catch (e) {
     fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
 }
 
+let antenaType = {};
 
 if (TYPE === 'tilt') {
-    let antenaType = {};
     try {
         antenaType = JSON.parse(fs.readFileSync('./antenaType.json', 'utf8'));
     }
@@ -203,6 +203,7 @@ function tr_mqtt_connect(host) {
         else if (topic === pn_offset_topic) { // 모터 제어 메세지 수신
             let offsetObj = JSON.parse(message.toString());
             if (offsetObj.hasOwnProperty('type')) {
+                console.log(antenaType)
                 antenaType.type = offsetObj.type;
                 fs.writeFileSync('./antenaType.json', JSON.stringify(antenaType, null, 4), 'utf8');
             }
