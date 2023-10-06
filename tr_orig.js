@@ -43,6 +43,7 @@ global_position_int_msg.hdg = 0.0;
 attitude_msg.yaw = 0.0;
 
 let GcsName = drone_info.gcs;
+let DroneName = drone_info.drone;
 
 let tr_mqtt_client = null;
 
@@ -51,6 +52,8 @@ let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
 
 let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
+
+let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
 mavPortOpening();
 
@@ -221,23 +224,69 @@ function tr_mqtt_connect(serverip) {
         tr_mqtt_client = mqtt.connect(connectOptions);
 
         tr_mqtt_client.on('connect', () => {
-            console.log('local_mqtt_client is connected ' + serverip);
+            console.log('tr_mqtt_client is connected ' + serverip);
 
             if (pn_dinfo_topic !== '') {
                 tr_mqtt_client.subscribe(pn_dinfo_topic, () => {
-                    console.log('[local_mqtt] pn_ctrl_topic is subscribed -> ', pn_dinfo_topic);
+                    console.log('[tr_mqtt_client] pn_ctrl_topic is subscribed -> ', pn_dinfo_topic);
+                });
+            }
+            if (pn_offset_topic !== '') {
+                tr_mqtt_client.subscribe(pn_offset_topic, () => {
+                    console.log('[tr_mqtt_client] pn_offset_topic is subscribed -> ', pn_offset_topic);
                 });
             }
         });
 
         tr_mqtt_client.on('error', (err) => {
-            console.log('[local_mqtt_client error] ' + err.message);
+            console.log('[tr_mqtt_client error] ' + err.message);
         });
 
         tr_mqtt_client.on('message', (topic, message) => {
             if (topic === pn_dinfo_topic) { // 모터 제어 메세지 수신
                 let drone_info = JSON.parse(message.toString());
                 fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
+            }
+            else if (topic === pn_offset_topic) {
+                let offsetObj = JSON.parse(message.toString());
+                console.log('offsetObj -', offsetObj);
+                if (offsetObj.hasOwnProperty('type')) {
+                    let btn_params;
+                    if (offsetObj.type === "T90") {
+                        btn_params = {};
+                        btn_params.target_system = 254;
+                        btn_params.target_component = 1;
+                        btn_params.param_id = "AHRS_ORIENTATION";
+                        btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
+                        btn_params.param_value = 24; // PITCH90
+                    }
+                    else {
+                        btn_params = {};
+                        btn_params.target_system = 254;
+                        btn_params.target_component = 1;
+                        btn_params.param_id = "AHRS_ORIENTATION";
+                        btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
+                        btn_params.param_value = 0; // None
+                    }
+                    try {
+                        let msg = mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_PARAM_SET, btn_params);
+                        if (!msg) {
+                            console.log("mavlink message is null");
+                        }
+                        else {
+                            if (mavPort) {
+                                if (mavPort.isOpen) {
+                                    mavPort.write(msg, () => {
+                                        console.log('Send AHRS_ORIENTATION param set command.');
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    catch (ex) {
+                        console.log('[ERROR] ' + ex);
+                    }
+                }
             }
         });
     }
@@ -423,4 +472,38 @@ function parseMavFromDrone(mavPacket) {
     catch (e) {
         console.log('[parseMavFromDrone Error]', e);
     }
+}
+
+function mavlinkGenerateMessage(src_sys_id, src_comp_id, type, params) {
+    const mavlinkParser = new MAVLink(null/*logger*/, src_sys_id, src_comp_id, mavVersion);
+    try {
+        var mavMsg = null;
+        var genMsg = null;
+        //var targetSysId = sysId;
+        // eslint-disable-next-line no-unused-vars
+        //var targetCompId = (params.targetCompId === undefined) ? 0 : params.targetCompId;
+
+        switch (type) {
+            // MESSAGE ////////////////////////////////////
+            case mavlink.MAVLINK_MSG_ID_PARAM_SET:
+                mavMsg = new mavlink.messages.param_set(
+                    params.target_system,
+                    params.target_component,
+                    params.param_id,
+                    params.param_value,
+                    params.param_type
+                );
+                break;
+        }
+    }
+    catch (e) {
+        console.log('MAVLINK EX:' + e);
+    }
+
+    if (mavMsg) {
+        genMsg = Buffer.from(mavMsg.pack(mavlinkParser));
+        //console.log('>>>>> MAVLINK OUTGOING MSG: ' + genMsg.toString('hex'));
+    }
+
+    return genMsg;
 }

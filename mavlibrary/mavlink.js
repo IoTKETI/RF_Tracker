@@ -7922,7 +7922,7 @@ mavlink.messages.bad_data = function(data, reason) {
 }
 
 /* MAVLink protocol handling class */
-MAVLink = function(logger, srcSystem, srcComponent) {
+MAVLink = function(logger, srcSystem, srcComponent, protocolVersion='v1') {
     this.logger = logger;
 
     this.seq = 0;
@@ -7931,7 +7931,12 @@ MAVLink = function(logger, srcSystem, srcComponent) {
 
     this.incompatFlags = 0;
     this.compatFlags = 0;
-    this.protocolVersion = mavlink.WIRE_PROTOCOL_VERSION_1; // 1.0:mavlink v1, 2.0:mavlink v2
+    if (protocolVersion === 'v2') {
+        this.protocolVersion = mavlink.WIRE_PROTOCOL_VERSION_2; // 1.0:mavlink v1, 2.0:mavlink v2
+    }
+    else {
+        this.protocolVersion = mavlink.WIRE_PROTOCOL_VERSION_1; // 1.0:mavlink v1, 2.0:mavlink v2
+    }
 
     this.srcSystem = (typeof srcSystem === 'undefined') ? 0 : srcSystem;
     this.srcComponent =  (typeof srcComponent === 'undefined') ? 0 : srcComponent;
