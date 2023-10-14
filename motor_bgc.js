@@ -5,8 +5,8 @@ let sbus1PortNum = '/dev/ttyAMA3';
 let sbus1Baudrate = 100000;
 
 let sequence = 0;
+let sbus_gen_tid = null;
 
-const RC_LENGTH = 68;
 const CH_SCALE = 8;
 
 let SBUS1_CH = new Uint16Array([1024, 1024, 1024, 1024, 1024, 223, 223, 1024, 223, 223, 223, 1024, 223, 223, 223, 223, 223, 223]);
@@ -40,6 +40,13 @@ let sbus1PortOpening = () => {
 
         sbus1Port.on('open', () => {
             console.log('sbus1Port(' + sbus1Port.path + '), sbus1Port rate: ' + sbus1Port.baudRate + ' open.');
+
+            if(sbus_gen_tid) {
+                clearInterval(sbus_gen_tid);
+                sbus_gen_tid = null;
+            }
+
+            sbus_gen_tid = setInterval(SbusDataGenerator, 30);
         });
 
         sbus1Port.on('close', () => {
@@ -190,8 +197,6 @@ let sbus1Packet_Generator = (SBUS_CH) => {
     }
 }
 
-setInterval(SbusDataGenerator, 30);
-
 exports.setDelta = (pan_diff_angle, tilt_diff_angle) => {
     // pan
     sbus_ch_val[4] = CH_VAL_MID + pan_diff_angle;
@@ -216,3 +221,5 @@ exports.setStop = () => {
     sbus_ch_val[4] = CH_VAL_MID;
     sbus_ch_val[2] = CH_VAL_MID;
 }
+
+sbus1PortOpening();

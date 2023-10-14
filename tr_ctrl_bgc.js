@@ -34,6 +34,9 @@ let target_relative_altitude = '';
 
 let gpsFlag = false;
 
+let g_pan_t_angle = 0;
+let g_tilt_t_angle = 0;
+
 let drone_info = {};
 try {
     drone_info = JSON.parse(fs.readFileSync('./drone_info.json', 'utf8'));
@@ -218,10 +221,8 @@ function tr_mqtt_connect(host) {
 
                     //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
-                    let tilt_t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
-                    let pan_t_angle = calcTargetPanAngle(target_latitude, target_longitude);
-
-                    ctrlAngle(pan_t_angle, tilt_t_angle);
+                    g_pan_t_angle = calcTargetPanAngle(target_latitude, target_longitude);
+                    g_tilt_t_angle = calcTargetTiltAngle(target_latitude, target_longitude, target_altitude);
                 }
             }
         }
@@ -239,6 +240,8 @@ let flagTracking = 'no';
 let tracker_handler = (_msg) => {
     console.log('received message from panel', _msg);
     if (_msg === 'arrange') {
+        flagTracking = 'no';
+
         stateCtrl = 'arranging';
     }
     else if (_msg === 'tilt_up') {
@@ -515,25 +518,22 @@ let watchdogCtrl = () => {
                 console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
             });
         }
-
-        setTimeout(watchdogCtrl, 1000);
     }
     else if (stateCtrl === 'arranging') {
         if (flagBPM) {
-            setTimeout(() => {
-                ctrlAngle(0, 0);
+            g_pan_t_angle = 0;
+            g_tilt_t_angle = 0;
 
-                stateCtrl = 'ready';
-                setTimeout(watchdogCtrl, 1000);
-            }, 1000);
+            stateCtrl = 'ready';
         }
         else {
             console.log('unknown My Position');
-            setTimeout(watchdogCtrl, 1000);
         }
     }
+
+    ctrlAngle(g_pan_t_angle, g_tilt_t_angle);
 }
 
 
-let stateCtrl = 'toReady'
-setTimeout(watchdogCtrl, 1000);
+let stateCtrl = 'ready'
+setInterval(watchdogCtrl, 1000);
