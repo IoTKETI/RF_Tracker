@@ -53,7 +53,7 @@ let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
 
 let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
 
-let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
+//let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
 mavPortOpening();
 
@@ -231,11 +231,11 @@ function tr_mqtt_connect(serverip) {
                     console.log('[tr_mqtt_client] pn_ctrl_topic is subscribed -> ', pn_dinfo_topic);
                 });
             }
-            if (pn_offset_topic !== '') {
-                tr_mqtt_client.subscribe(pn_offset_topic, () => {
-                    console.log('[tr_mqtt_client] pn_offset_topic is subscribed -> ', pn_offset_topic);
-                });
-            }
+            // if (pn_offset_topic !== '') {
+            //     tr_mqtt_client.subscribe(pn_offset_topic, () => {
+            //         console.log('[tr_mqtt_client] pn_offset_topic is subscribed -> ', pn_offset_topic);
+            //     });
+            // }
         });
 
         tr_mqtt_client.on('error', (err) => {
@@ -247,47 +247,47 @@ function tr_mqtt_connect(serverip) {
                 let drone_info = JSON.parse(message.toString());
                 fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
             }
-            else if (topic === pn_offset_topic) {
-                let offsetObj = JSON.parse(message.toString());
-                console.log('offsetObj -', offsetObj);
-                if (offsetObj.hasOwnProperty('type')) {
-                    let btn_params;
-                    if (offsetObj.type === "T90") {
-                        btn_params = {};
-                        btn_params.target_system = 254;
-                        btn_params.target_component = 1;
-                        btn_params.param_id = "AHRS_ORIENTATION";
-                        btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
-                        btn_params.param_value = 24; // PITCH90
-                    }
-                    else {
-                        btn_params = {};
-                        btn_params.target_system = 254;
-                        btn_params.target_component = 1;
-                        btn_params.param_id = "AHRS_ORIENTATION";
-                        btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
-                        btn_params.param_value = 0; // None
-                    }
-                    try {
-                        let msg = mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_PARAM_SET, btn_params);
-                        if (!msg) {
-                            console.log("mavlink message is null");
-                        }
-                        else {
-                            if (mavPort) {
-                                if (mavPort.isOpen) {
-                                    mavPort.write(msg, () => {
-                                        console.log('Send AHRS_ORIENTATION param set command.');
-                                    });
-                                }
-                            }
-                        }
-                    }
-                    catch (ex) {
-                        console.log('[ERROR] ' + ex);
-                    }
-                }
-            }
+            // else if (topic === pn_offset_topic) {
+            //     let offsetObj = JSON.parse(message.toString());
+            //     console.log('offsetObj -', offsetObj);
+            //     if (offsetObj.hasOwnProperty('type')) {
+            //         let btn_params;
+            //         if (offsetObj.type === "T90") {
+            //             btn_params = {};
+            //             btn_params.target_system = 254;
+            //             btn_params.target_component = 1;
+            //             btn_params.param_id = "AHRS_ORIENTATION";
+            //             btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
+            //             btn_params.param_value = 24; // PITCH90
+            //         }
+            //         else {
+            //             btn_params = {};
+            //             btn_params.target_system = 254;
+            //             btn_params.target_component = 1;
+            //             btn_params.param_id = "AHRS_ORIENTATION";
+            //             btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
+            //             btn_params.param_value = 0; // None
+            //         }
+            //         try {
+            //             let msg = mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_PARAM_SET, btn_params);
+            //             if (!msg) {
+            //                 console.log("mavlink message is null");
+            //             }
+            //             else {
+            //                 if (mavPort) {
+            //                     if (mavPort.isOpen) {
+            //                         mavPort.write(msg, () => {
+            //                             console.log('Send AHRS_ORIENTATION param set command.');
+            //                         });
+            //                     }
+            //                 }
+            //             }
+            //         }
+            //         catch (ex) {
+            //             console.log('[ERROR] ' + ex);
+            //         }
+            //     }
+            // }
         });
     }
 }

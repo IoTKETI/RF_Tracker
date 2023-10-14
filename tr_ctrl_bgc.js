@@ -32,7 +32,7 @@ let target_longitude = '';
 let target_altitude = '';
 let target_relative_altitude = '';
 
-let gpsFlag = false;
+let gpsUpdateFlag = true;
 
 let g_pan_t_angle = 0;
 let g_tilt_t_angle = 0;
@@ -66,7 +66,7 @@ let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Pan
 let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 let pn_gps_ctrl_topic = '/Mobius/' + GcsName + '/Gps_Ctrl_Data/' + DroneName + '/Panel';
 
-let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/PANTILT';
+let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
@@ -152,7 +152,7 @@ function tr_mqtt_connect(host) {
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
 
-            if (!gpsFlag) {
+            if (gpsUpdateFlag) {
                 if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
                     tracker_latitude = tracker_gpi.lat / 10000000;
                     tracker_longitude = tracker_gpi.lon / 10000000;
@@ -184,29 +184,34 @@ function tr_mqtt_connect(host) {
             tracker_control_message = message.toString();
             tracker_handler(tracker_control_message);
         }
-        else if (topic === pn_offset_topic) { // 모터 제어 메세지 수신
+        else if (topic === pn_offset_topic) { // 모터 옵셋 설정 메세지 수신
             let offsetObj = JSON.parse(message.toString());
             if (!offsetObj.hasOwnProperty('type')) {
-                p_offset = offsetObj.p_offset;
-                t_offset = offsetObj.t_offset;
-                console.log('[p_offset] -->', p_offset, '[t_offset] -->', t_offset);
+                pan_offset = offsetObj.p_offset;
+                tilt_offset = offsetObj.t_offset;
+
+                fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
+
+                console.log('[pan_offset_ctrl] -->', pan_offset, '[tilt_offset_ctrl] -->', tilt_offset);
             }
         }
-        else if (topic === pn_gps_ctrl_topic) { // 모터 제어 메세지 수신
+        else if (topic === pn_gps_ctrl_topic) { // GPS 좌표 고정 여부 메세지 수신
             if (message.toString() === 'release') {
-                gpsFlag = false;
+                gpsUpdateFlag = true;
             }
             else if (message.toString().includes('hold')) {
-                gpsFlag = true;
-                let msg_arr = message.toString().split(',');
-                tracker_altitude = msg_arr[1];
+                gpsUpdateFlag = false;
             }
+
+            fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
         else if (topic === pn_alt_topic) {
             motor_altitude_message = message.toString();
             if (typeof (parseInt(motor_altitude_message)) === 'number') {
                 tracker_relative_altitude = motor_altitude_message;
             }
+
+            fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
         else if (_topic === _dr_data_topic) { // 드론데이터 수신
             if (flagTracking === 'yes') {
@@ -431,16 +436,16 @@ let pan_offset_ctrl = 0;
 let tilt_offset_ctrl = 0;
 let pan_diff_angle = 0;
 let tilt_diff_angle = 0;
-let p_offset = 0;
-let t_offset = 0;
+let pan_offset = 0;
+let tilt_offset = 0;
 
 const DEG = 0.0174533;
 let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
 
-    pan_offset_ctrl = tracker_yaw + p_offset;
+    pan_offset_ctrl = tracker_yaw + pan_offset;
     pan_diff_angle = (pan_t_angle - pan_offset_ctrl);
 
-    tilt_offset_ctrl = tracker_pitch + t_offset;
+    tilt_offset_ctrl = tracker_pitch + tilt_offset;
     tilt_diff_angle = (tilt_t_angle - tilt_offset_ctrl);
 
     console.log('[diff_angle] -> ', pan_diff_angle, tilt_diff_angle);
@@ -468,6 +473,28 @@ let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
 }
 
 let tr_heartbeat = {};
+try {
+    tr_heartbeat = JSON.parse(fs.readFileSync('./tr_heartbeat.json', 'utf8'));
+}
+catch (e) {
+    console.log('can not find [ ./tr_heartbeat.json ] file');
+
+    tr_heartbeat.pan_angle = 0;
+    tr_heartbeat.tilt_angle = 0;
+    tr_heartbeat.flag_tracking = 'no';
+    tr_heartbeat.state = 'ready';
+    tr_heartbeat.lat = 37.4036621604629;
+    tr_heartbeat.lon = 127.16176249708046;
+    tr_heartbeat.alt = 0;
+    tr_heartbeat.relative_alt = 0;
+    tr_heartbeat.fix_type = 0;
+    tr_heartbeat.pan_offset = 0;
+    tr_heartbeat.tilt_offset = 0;
+    tr_heartbeat.gps_update = true;
+
+    fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
+}
+
 let count_tr_heartbeat = 0;
 let watchdogCtrl = () => {
     if (stateCtrl === 'ready') {
@@ -480,6 +507,9 @@ let watchdogCtrl = () => {
         tr_heartbeat.alt = tracker_altitude;
         tr_heartbeat.relative_alt = tracker_relative_altitude;
         tr_heartbeat.fix_type = tracker_fix_type;
+        tr_heartbeat.pan_offset = pan_offset;
+        tr_heartbeat.tilt_offset = tilt_offset;
+        tr_heartbeat.gps_update = gpsUpdateFlag;
         if (tr_mqtt_client) {
             tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
                 console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
