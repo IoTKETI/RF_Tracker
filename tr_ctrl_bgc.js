@@ -245,51 +245,18 @@ let tracker_handler = (_msg) => {
         stateCtrl = 'arranging';
     }
     else if (_msg === 'tilt_up') {
-        if (tidControlTracker) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
-        }
-
-        tidControlTracker = setInterval(() => {
-            motor_bgc.setDelta(0,1);
-        }, 100);
+        motor_bgc.setDelta(0,1);
     }
     else if (_msg === 'tilt_down') {
-        if (tidControlTracker) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
-        }
-
-        tidControlTracker = setInterval(() => {
-            motor_bgc.setDelta(0,-1);
-        }, 100);
+        motor_bgc.setDelta(0,-1);
     }
     else if (_msg === 'pan_up') {
-        if (tidControlTracker) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
-        }
-
-        tidControlTracker = setInterval(() => {
-            motor_bgc.setDelta(1, 0);
-        }, 100);
+        motor_bgc.setDelta(1, 0);
     }
     else if (_msg === 'pan_down') {
-        if (tidControlTracker) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
-        }
-
-        tidControlTracker = setInterval(() => {
-            motor_bgc.setDelta(-1, 0);
-        }, 100);
+        motor_bgc.setDelta(-1, 0);
     }
     else if (_msg === 'stop') {
-        if (tidControlTracker) {
-            clearInterval(tidControlTracker);
-            tidControlTracker = null;
-        }
-
         motor_bgc.setStop();
     }
     else if (_msg === 'run') {
