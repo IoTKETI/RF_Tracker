@@ -245,9 +245,17 @@ let flagTracking = 'no';
 let tracker_handler = (_msg) => {
     console.log('received message from panel', _msg);
     if (_msg === 'arrange') {
-        flagTracking = 'no';
+        if (stateCtrl === 'arranging') {
+            stateCtrl = 'ready';
+            flagTracking = 'no';
+        }
+        else {
+            g_pan_t_angle = 0;
+            g_tilt_t_angle = 0;
 
-        stateCtrl = 'arranging';
+            stateCtrl = 'arranging';
+            flagTracking = 'no';
+        }
     }
     else if (_msg === 'tilt_up') {
         motor_bgc.setDelta(0,1);
@@ -265,11 +273,13 @@ let tracker_handler = (_msg) => {
         motor_bgc.setStop();
     }
     else if (_msg === 'run') {
-        if (flagTracking === 'no') {
-            flagTracking = 'yes';
+        if (stateCtrl === 'run') {
+            stateCtrl = 'ready';
+            flagTracking = 'no';
         }
         else {
-            flagTracking = 'no';
+            stateCtrl = 'run';
+            flagTracking = 'yes';
         }
     }
 }
@@ -498,37 +508,35 @@ catch (e) {
 let count_tr_heartbeat = 0;
 let watchdogCtrl = () => {
     if (stateCtrl === 'ready') {
-        tr_heartbeat.pan_angle = tracker_yaw;
-        tr_heartbeat.tilt_angle = tracker_pitch;
-        tr_heartbeat.flag_tracking = flagTracking;
-        tr_heartbeat.state = stateCtrl;
-        tr_heartbeat.lat = tracker_latitude;
-        tr_heartbeat.lon = tracker_longitude;
-        tr_heartbeat.alt = tracker_altitude;
-        tr_heartbeat.relative_alt = tracker_relative_altitude;
-        tr_heartbeat.fix_type = tracker_fix_type;
-        tr_heartbeat.pan_offset = pan_offset;
-        tr_heartbeat.tilt_offset = tilt_offset;
-        tr_heartbeat.gps_update = gpsUpdateFlag;
-        if (tr_mqtt_client) {
-            tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
-                console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
-            });
-        }
+        motor_bgc.setStop();
     }
-    else if (stateCtrl === 'arranging') {
+    else if ((stateCtrl === 'arranging') || (stateCtrl === 'run')) {
         if (flagBPM) {
-            g_pan_t_angle = 0;
-            g_tilt_t_angle = 0;
-
-            stateCtrl = 'ready';
+            ctrlAngle(g_pan_t_angle, g_tilt_t_angle);
         }
         else {
             console.log('unknown My Position');
+            motor_bgc.setStop();
         }
     }
 
-    ctrlAngle(g_pan_t_angle, g_tilt_t_angle);
+    tr_heartbeat.pan_angle = tracker_yaw;
+    tr_heartbeat.tilt_angle = tracker_pitch;
+    tr_heartbeat.flag_tracking = flagTracking;
+    tr_heartbeat.state = stateCtrl;
+    tr_heartbeat.lat = tracker_latitude;
+    tr_heartbeat.lon = tracker_longitude;
+    tr_heartbeat.alt = tracker_altitude;
+    tr_heartbeat.relative_alt = tracker_relative_altitude;
+    tr_heartbeat.fix_type = tracker_fix_type;
+    tr_heartbeat.pan_offset = pan_offset;
+    tr_heartbeat.tilt_offset = tilt_offset;
+    tr_heartbeat.gps_update = gpsUpdateFlag;
+    if (tr_mqtt_client) {
+        tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
+            console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
+        });
+    }
 }
 
 
