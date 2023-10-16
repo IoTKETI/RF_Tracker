@@ -69,6 +69,7 @@ let sbus1PortOpening = () => {
             if (dr_mqtt_client) {
                 dr_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
             }
+
             if (mobius_mqtt_client) {
                 mobius_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
             }
@@ -162,7 +163,7 @@ let Parse_RcData = (rc_str) => {
     SBUS1_CH[14] = GCS_DataBuffer[15] * CH_SCALE + 1;
     SBUS1_CH[15] = GCS_DataBuffer[16] * CH_SCALE + 1;
 
-    console.log(SBUS1_CH);
+    //console.log(SBUS1_CH);
 
 
     sbus1Packet_Generator(SBUS1_CH);
@@ -197,7 +198,7 @@ let sbus1Packet_Generator = (SBUS_CH) => {
     SBUS_Buffer.push(0x00);
     SBUS_Buffer.push(0x00);
 
-    console.log('SBUS1_Buffer -\t\t', Buffer.from(SBUS_Buffer, 'hex'));
+    //console.log('SBUS1_Buffer -\t\t', Buffer.from(SBUS_Buffer, 'hex'));
 
     if (sbus1Port) {
         sbus1Port.write(Buffer.from(SBUS_Buffer, 'hex'), () => {
