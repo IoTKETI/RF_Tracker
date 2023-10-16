@@ -508,7 +508,7 @@ catch (e) {
 let count_tr_heartbeat = 0;
 let watchdogCtrl = () => {
     if (stateCtrl === 'ready') {
-        motor_bgc.setStop();
+        //motor_bgc.setStop();
     }
     else if ((stateCtrl === 'arranging') || (stateCtrl === 'run')) {
         if (flagBPM) {
