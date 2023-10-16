@@ -46,7 +46,7 @@ let sbus1PortOpening = () => {
                 sbus_gen_tid = null;
             }
 
-            sbus_gen_tid = setInterval(SbusDataGenerator, 50);
+            sbus_gen_tid = setInterval(SbusDataGenerator, 100);
         });
 
         sbus1Port.on('close', () => {
