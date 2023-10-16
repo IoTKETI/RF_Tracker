@@ -104,9 +104,9 @@ const CH_VAL_MIN = 25;
 let sbus_ch_val = [
     255,
     CH_VAL_MID,
+    100,//CH_VAL_MID,
     CH_VAL_MID,
     CH_VAL_MID,
-    56,// CH_VAL_MID,
     CH_VAL_MIN,
     CH_VAL_MIN,
     CH_VAL_MIN,
