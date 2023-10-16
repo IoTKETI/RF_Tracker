@@ -35,7 +35,7 @@ let sbus1PortOpening = () => {
         sbus1Port = new SerialPort({
             path: sbus1PortNum,
             baudRate: parseInt(sbus1Baudrate, 10),
-            parity: "even",
+            parity: "odd",
         });
 
         sbus1Port.on('open', () => {
