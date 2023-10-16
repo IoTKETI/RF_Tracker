@@ -40,7 +40,7 @@ let sbus1PortOpening = () => {
         sbus1Port.on('open', () => {
             console.log('sbus1Port(' + sbus1Port.path + '), sbus1Port rate: ' + sbus1Port.baudRate + ' open.');
 
-            //setTimeout(init, 1000);
+            setTimeout(init, 1000);
         });
 
         sbus1Port.on('close', () => {
@@ -121,7 +121,7 @@ let sbus_ch_val = [
     CH_VAL_MIN,
 ];
 
-let SbusDataGenerator = (sbus_ch_val) => {
+let SbusDataGenerator = () => {
     let neutralSbus = '';
     for(let i in sbus_ch_val) {
         neutralSbus += sbus_ch_val[i].toString(16);
@@ -132,7 +132,7 @@ let SbusDataGenerator = (sbus_ch_val) => {
 
     Parse_RcData(neutralSbus);
 
-    setTimeout(SbusDataGenerator, 30, sbus_ch_val);
+    //setTimeout(SbusDataGenerator, 30);
 }
 
 let Parse_RcData = (rc_str) => {
@@ -238,4 +238,4 @@ let init = () => {
 
 sbus1PortOpening();
 
-setTimeout(SbusDataGenerator, 1000, sbus_ch_val);
+//setTimeout(SbusDataGenerator, 1000, sbus_ch_val);
