@@ -121,7 +121,7 @@ let sbus_ch_val = [
     CH_VAL_MIN,
 ];
 
-let SbusDataGenerator = () => {
+let SbusDataGenerator = (sbus_ch_val) => {
     let neutralSbus = '';
     for(let i in sbus_ch_val) {
         neutralSbus += sbus_ch_val[i].toString(16);
@@ -132,7 +132,7 @@ let SbusDataGenerator = () => {
 
     Parse_RcData(neutralSbus);
 
-    setTimeout(SbusDataGenerator, 30);
+    setTimeout(SbusDataGenerator, 30, sbus_ch_val);
 }
 
 let Parse_RcData = (rc_str) => {
@@ -238,4 +238,4 @@ let init = () => {
 
 sbus1PortOpening();
 
-setTimeout(SbusDataGenerator, 1000);
+setTimeout(SbusDataGenerator, 1000, sbus_ch_val);
