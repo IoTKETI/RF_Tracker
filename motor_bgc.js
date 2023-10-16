@@ -134,7 +134,7 @@ let SbusDataGenerator = () => {
 
     let neutralSbus = 'ff7d7d7d7d3819e1191919191919191919';
 
-    Parse_RcData(sbus_ch_val);
+    Parse_RcData(neutralSbus);
 }
 
 let Parse_RcData = (rc_str) => {
