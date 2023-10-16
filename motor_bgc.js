@@ -61,13 +61,13 @@ let sbus1PortOpening = () => {
 
             _resData = (sequence.toString(16).padStart(2, '0')) + _resData;
 
-            if (dr_mqtt_client) {
-                dr_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
-            }
-
-            if (mobius_mqtt_client) {
-                mobius_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
-            }
+            // if (dr_mqtt_client) {
+            //     dr_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
+            // }
+            //
+            // if (mobius_mqtt_client) {
+            //     mobius_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
+            // }
 
             sequence++;
             sequence %= 255;
