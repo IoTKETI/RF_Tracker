@@ -41,12 +41,7 @@ let sbus1PortOpening = () => {
         sbus1Port.on('open', () => {
             console.log('sbus1Port(' + sbus1Port.path + '), sbus1Port rate: ' + sbus1Port.baudRate + ' open.');
 
-            if(sbus_gen_tid) {
-                clearInterval(sbus_gen_tid);
-                sbus_gen_tid = null;
-            }
-
-            sbus_gen_tid = setInterval(SbusDataGenerator, 100);
+            setTimeout(init, 1000);
         });
 
         sbus1Port.on('close', () => {
@@ -230,6 +225,15 @@ exports.setDelta = (pan_diff_angle, tilt_diff_angle) => {
 exports.setStop = () => {
     sbus_ch_val[4] = CH_VAL_MID;
     sbus_ch_val[2] = CH_VAL_MID;
+}
+
+let init = () => {
+    if(sbus_gen_tid) {
+        clearInterval(sbus_gen_tid);
+        sbus_gen_tid = null;
+    }
+
+    sbus_gen_tid = setInterval(SbusDataGenerator, 30);
 }
 
 sbus1PortOpening();
