@@ -41,7 +41,7 @@ let sbus1PortOpening = () => {
         sbus1Port.on('open', () => {
             console.log('sbus1Port(' + sbus1Port.path + '), sbus1Port rate: ' + sbus1Port.baudRate + ' open.');
 
-            setTimeout(init, 1000);
+            //setTimeout(init, 1000);
         });
 
         sbus1Port.on('close', () => {
@@ -135,6 +135,8 @@ let SbusDataGenerator = () => {
     let neutralSbus = 'ff7d7d7d7d191919191919191919191919';
 
     Parse_RcData(neutralSbus);
+
+    setTimeout(SbusDataGenerator, 30);
 }
 
 let Parse_RcData = (rc_str) => {
@@ -235,7 +237,9 @@ let init = () => {
         sbus_gen_tid = null;
     }
 
-    sbus_gen_tid = setInterval(SbusDataGenerator, 500);
+    sbus_gen_tid = setInterval(SbusDataGenerator, 50);
 }
 
 sbus1PortOpening();
+
+setTimeout(SbusDataGenerator, 1000);
