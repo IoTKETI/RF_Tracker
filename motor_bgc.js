@@ -158,7 +158,7 @@ let Parse_RcData = (rc_str) => {
     SBUS1_CH[14] = GCS_DataBuffer[15] * CH_SCALE + 1;
     SBUS1_CH[15] = GCS_DataBuffer[16] * CH_SCALE + 1;
 
-    //console.log(SBUS1_CH);
+    console.log(SBUS1_CH);
 
 
     sbus1Packet_Generator(SBUS1_CH);
