@@ -112,7 +112,7 @@ let sbus_ch_val = [
     CH_VAL_MID,
     CH_VAL_MID,
     CH_VAL_MID,
-    CH_VAL_MIDMIN,
+    CH_VAL_MIN,
     CH_VAL_MIN,
     CH_VAL_MAX,
     CH_VAL_MIN,
@@ -131,7 +131,7 @@ let SbusDataGenerator = () => {
     for(let i in sbus_ch_val) {
         neutralSbus += sbus_ch_val[i].toString(16);
     }
-    neutralSbus += Calc_CRC_8(neutralSbus, sbus_ch_val.length).toString(16).padStart(2, '0');
+    neutralSbus += Calc_CRC_8(neutralSbus, (sbus_ch_val.length)/2).toString(16).padStart(2, '0');
 
     console.log(neutralSbus);
 
