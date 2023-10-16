@@ -102,7 +102,7 @@ let Calc_CRC_8 = (DataArray, Length) => {
 }
 
 const CH_VAL_MAX = 225;
-const CH_VAL_MID = 125;
+const CH_VAL_MID = 120;
 const CH_VAL_MIDMIN = 56;
 const CH_VAL_MIN = 25;
 
