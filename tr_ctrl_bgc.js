@@ -534,7 +534,7 @@ let watchdogCtrl = () => {
     tr_heartbeat.gps_update = gpsUpdateFlag;
     if (tr_mqtt_client) {
         tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
-            console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
+            //console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
         });
     }
 }
