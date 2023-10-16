@@ -102,7 +102,7 @@ let Calc_CRC_8 = (DataArray, Length) => {
 }
 
 const CH_VAL_MAX = 225;
-const CH_VAL_MID = 125;
+const CH_VAL_MID = 128;
 const CH_VAL_MIDMIN = 56;
 const CH_VAL_MIN = 25;
 
@@ -141,7 +141,6 @@ let SbusDataGenerator = () => {
 let Parse_RcData = (rc_str) => {
     let GCS_DataBuffer = Buffer.from(rc_str, 'hex');
 
-    console.log(GCS_DataBuffer);
 
     SBUS1_CH[0] = GCS_DataBuffer[1] * CH_SCALE + 1;
     SBUS1_CH[1] = GCS_DataBuffer[2] * CH_SCALE + 1;
@@ -159,6 +158,9 @@ let Parse_RcData = (rc_str) => {
     SBUS1_CH[13] = GCS_DataBuffer[14] * CH_SCALE + 1;
     SBUS1_CH[14] = GCS_DataBuffer[15] * CH_SCALE + 1;
     SBUS1_CH[15] = GCS_DataBuffer[16] * CH_SCALE + 1;
+
+    console.log(SBUS1_CH);
+
 
     sbus1Packet_Generator(SBUS1_CH);
 }
