@@ -56,28 +56,28 @@ let sbus1PortOpening = () => {
             setTimeout(sbus1PortOpening, 2000);
         });
 
-        sbus1Port.on('data', (data) => {
-            //let _resData = data.toString('hex').toLowerCase();
-
-            //_resData = (sequence.toString(16).padStart(2, '0')) + _resData;
-
-            // if (dr_mqtt_client) {
-            //     dr_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
-            // }
-            //
-            // if (mobius_mqtt_client) {
-            //     mobius_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
-            // }
-
-            //sequence++;
-            //sequence %= 255;
-        });
+        // sbus1Port.on('data', (data) => {
+        //     //let _resData = data.toString('hex').toLowerCase();
+        //
+        //     //_resData = (sequence.toString(16).padStart(2, '0')) + _resData;
+        //
+        //     // if (dr_mqtt_client) {
+        //     //     dr_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
+        //     // }
+        //     //
+        //     // if (mobius_mqtt_client) {
+        //     //     mobius_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
+        //     // }
+        //
+        //     //sequence++;
+        //     //sequence %= 255;
+        // });
     }
     else {
         if (sbus1Port.isOpen) {
             sbus1Port.close();
             sbus1Port = null;
-            setTimeout(sbus1PortOpening, 2000);
+            //setTimeout(sbus1PortOpening, 2000);
         }
         else {
             sbus1Port.open();
