@@ -37,7 +37,7 @@ let sbus1PortOpening = () => {
             baudRate: parseInt(sbus1Baudrate, 10),
             dataBits: 8,
             stopBits: 2,
-            parity: "none"
+            parity: "even"
         });
 
         sbus1Port.on('open', () => {
