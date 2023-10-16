@@ -57,9 +57,9 @@ let sbus1PortOpening = () => {
         });
 
         sbus1Port.on('data', (data) => {
-            let _resData = data.toString('hex').toLowerCase();
+            //let _resData = data.toString('hex').toLowerCase();
 
-            _resData = (sequence.toString(16).padStart(2, '0')) + _resData;
+            //_resData = (sequence.toString(16).padStart(2, '0')) + _resData;
 
             // if (dr_mqtt_client) {
             //     dr_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
@@ -69,8 +69,8 @@ let sbus1PortOpening = () => {
             //     mobius_mqtt_client.publish(res_topic, Buffer.from(_resData, 'hex'));
             // }
 
-            sequence++;
-            sequence %= 255;
+            //sequence++;
+            //sequence %= 255;
         });
     }
     else {
