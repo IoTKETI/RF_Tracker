@@ -102,7 +102,7 @@ let Calc_CRC_8 = (DataArray, Length) => {
 }
 
 const CH_VAL_MAX = 225;
-const CH_VAL_MID = 131;
+const CH_VAL_MID = 125;
 const CH_VAL_MIDMIN = 56;
 const CH_VAL_MIN = 25;
 
@@ -132,6 +132,8 @@ let SbusDataGenerator = () => {
         neutralSbus += sbus_ch_val[i].toString(16);
     }
     neutralSbus += Calc_CRC_8(neutralSbus, sbus_ch_val.length).toString(16).padStart(2, '0');
+
+    console.log(neutralSbus);
 
     Parse_RcData(neutralSbus);
 }
