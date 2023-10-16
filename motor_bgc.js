@@ -46,7 +46,7 @@ let sbus1PortOpening = () => {
                 sbus_gen_tid = null;
             }
 
-            sbus_gen_tid = setInterval(SbusDataGenerator, 30);
+            sbus_gen_tid = setInterval(SbusDataGenerator, 50);
         });
 
         sbus1Port.on('close', () => {
@@ -143,9 +143,9 @@ let Parse_RcData = (rc_str) => {
 
 
     SBUS1_CH[0] = GCS_DataBuffer[1] * CH_SCALE + 1;
-    SBUS1_CH[1] = 1515; //GCS_DataBuffer[2] * CH_SCALE + 1;
+    SBUS1_CH[1] = GCS_DataBuffer[2] * CH_SCALE + 1;
     SBUS1_CH[2] = GCS_DataBuffer[3] * CH_SCALE + 1;
-    SBUS1_CH[3] = 1515; // GCS_DataBuffer[4] * CH_SCALE + 1;
+    SBUS1_CH[3] = GCS_DataBuffer[4] * CH_SCALE + 1;
     SBUS1_CH[4] = GCS_DataBuffer[5] * CH_SCALE + 1;
     SBUS1_CH[5] = GCS_DataBuffer[6] * CH_SCALE + 1;
     SBUS1_CH[6] = GCS_DataBuffer[7] * CH_SCALE + 1;
