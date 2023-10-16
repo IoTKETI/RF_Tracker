@@ -106,7 +106,7 @@ let sbus_ch_val = [
     CH_VAL_MID,
     CH_VAL_MID,
     CH_VAL_MID,
-    CH_VAL_MID,
+    56,// CH_VAL_MID,
     CH_VAL_MIN,
     CH_VAL_MIN,
     CH_VAL_MIN,
