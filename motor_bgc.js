@@ -128,7 +128,7 @@ let SbusDataGenerator = (sbus_ch_val) => {
     }
     neutralSbus += Calc_CRC_8(neutralSbus, (sbus_ch_val.length)/2).toString(16).padStart(2, '0');
 
-    // console.log(neutralSbus);
+    console.log(neutralSbus);
 
     Parse_RcData(neutralSbus);
 
