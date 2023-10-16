@@ -235,7 +235,7 @@ let init = () => {
         sbus_gen_tid = null;
     }
 
-    sbus_gen_tid = setInterval(SbusDataGenerator, 30);
+    sbus_gen_tid = setInterval(SbusDataGenerator, 500);
 }
 
 sbus1PortOpening();
