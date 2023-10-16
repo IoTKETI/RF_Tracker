@@ -132,13 +132,15 @@ let SbusDataGenerator = () => {
 
     //console.log(neutralSbus);
 
+    let neutralSbus = 'ff7d7d7d7d3819e1191919191919191919';
+
     Parse_RcData(sbus_ch_val);
 }
 
 let Parse_RcData = (rc_str) => {
-    //let GCS_DataBuffer = Buffer.from(rc_str, 'hex');
+    let GCS_DataBuffer = Buffer.from(rc_str, 'hex');
 
-    let GCS_DataBuffer = rc_str;
+    //let GCS_DataBuffer = rc_str;
 
 
     SBUS1_CH[0] = GCS_DataBuffer[1] * CH_SCALE + 1;
