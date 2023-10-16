@@ -194,7 +194,7 @@ let sbus1Packet_Generator = (SBUS_CH) => {
     SBUS_Buffer.push((SBUS_CH[15] & 0x07FF) >> 3);
 
     SBUS_Buffer.push(0x00);
-    SBUS_Buffer.push(0x00);
+    //SBUS_Buffer.push(0x00);
 
     //console.log('SBUS1_Buffer -\t\t', Buffer.from(SBUS_Buffer, 'hex'));
 
