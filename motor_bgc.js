@@ -141,6 +141,8 @@ let SbusDataGenerator = () => {
 let Parse_RcData = (rc_str) => {
     let GCS_DataBuffer = Buffer.from(rc_str, 'hex');
 
+    console.log(GCS_DataBuffer);
+
     SBUS1_CH[0] = GCS_DataBuffer[1] * CH_SCALE + 1;
     SBUS1_CH[1] = GCS_DataBuffer[2] * CH_SCALE + 1;
     SBUS1_CH[2] = GCS_DataBuffer[3] * CH_SCALE + 1;
