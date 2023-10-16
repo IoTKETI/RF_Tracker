@@ -131,16 +131,18 @@ let SbusDataGenerator = () => {
     // for(let i in sbus_ch_val) {
     //     neutralSbus += sbus_ch_val[i].toString(16);
     // }
-    let neutralSbus = sbus_ch_val.toString(16);
-    neutralSbus += Calc_CRC_8(neutralSbus, (sbus_ch_val.length)/2).toString(16).padStart(2, '0');
+    //let neutralSbus = sbus_ch_val.toString(16);
+    //neutralSbus += Calc_CRC_8(neutralSbus, (sbus_ch_val.length)/2).toString(16).padStart(2, '0');
 
-    console.log(neutralSbus);
+    //console.log(neutralSbus);
 
-    Parse_RcData(neutralSbus);
+    Parse_RcData(sbus_ch_val);
 }
 
 let Parse_RcData = (rc_str) => {
-    let GCS_DataBuffer = Buffer.from(rc_str, 'hex');
+    //let GCS_DataBuffer = Buffer.from(rc_str, 'hex');
+
+    let GCS_DataBuffer = rc_str;
 
 
     SBUS1_CH[0] = GCS_DataBuffer[1] * CH_SCALE + 1;
