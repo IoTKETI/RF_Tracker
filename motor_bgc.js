@@ -132,7 +132,7 @@ let SbusDataGenerator = () => {
 
     //console.log(neutralSbus);
 
-    let neutralSbus = 'ff7d7d7d7d3819e1191919191919191919';
+    let neutralSbus = 'ff7d7d7d7d191919191919191919191919';
 
     Parse_RcData(neutralSbus);
 }
