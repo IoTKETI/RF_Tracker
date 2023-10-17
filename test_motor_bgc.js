@@ -1,4 +1,10 @@
 const {SerialPort} = require('serialport');
+const {nanoid} = require("nanoid");
+const mqtt = require("mqtt");
+
+let mobius_mqtt_client = null;
+
+let rc_topic = '/Mobius/KETI_MUV/RC_Data/KETI_AIoT_02';
 
 let sbus1Port = null;
 let sbus1PortNum = '/dev/ttyAMA2';
@@ -35,7 +41,8 @@ let sbus1PortOpening = () => {
         sbus1Port.on('open', () => {
             console.log('sbus1Port(' + sbus1Port.path + '), sbus1Port rate: ' + sbus1Port.baudRate + ' open.');
 
-            setTimeout(init, 1000);
+            // setTimeout(init, 1000);
+            mobius_mqtt_connect('gcs.iotocean.org');
         });
 
         sbus1Port.on('close', () => {
@@ -59,6 +66,55 @@ let sbus1PortOpening = () => {
         else {
             sbus1Port.open();
         }
+    }
+}
+
+function mobius_mqtt_connect(serverip) {
+    if (!mobius_mqtt_client) {
+        let connectOptions = {
+            host: serverip,
+            port: 1883,
+            protocol: "mqtt",
+            keepalive: 10,
+            clientId: 'mobius_mqtt_client_' + nanoid(15),
+            protocolId: "MQTT",
+            protocolVersion: 4,
+            clean: true,
+            reconnectPeriod: 2 * 1000,
+            connectTimeout: 30 * 1000,
+            queueQoSZero: false,
+            rejectUnauthorized: false
+        }
+
+        mobius_mqtt_client = mqtt.connect(connectOptions);
+
+        mobius_mqtt_client.on('connect', () => {
+            console.log('mobius_mqtt_client is connected to ( ' + serverip + ' )');
+
+            if (rc_topic !== '') {
+                mobius_mqtt_client.subscribe(rc_topic, () => {
+                    console.log('[mobius_mqtt_client] rc_topic is subscribed: ' + rc_topic);
+                });
+            }
+        });
+
+        mobius_mqtt_client.on('message', (topic, message) => {
+            if (topic === rc_topic) {
+                let RC_data = message.toString('hex');
+                let sequence = parseInt(RC_data.substring(0, 2), 16);
+                let rcRawData = RC_data.slice(2);
+
+                if (sbus1Port) {
+                    sbus1Port.write(Buffer.from(rcRawData, 'hex'), () => {
+                        // console.log(Buffer.from(rcRawData, 'hex'));
+                    });
+                }
+            }
+        });
+
+        mobius_mqtt_client.on('error', (err) => {
+            console.log('[mobius_mqtt_client error] ' + err.message);
+        });
     }
 }
 
