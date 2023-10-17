@@ -5,6 +5,7 @@ const fs = require("fs");
 const motor_bgc = require('./motor_bgc');
 
 const mavlink = require('./mavlibrary/mavlink.js');
+const motor_can = require("./motor_can");
 
 let tr_mqtt_client = null;
 
@@ -264,10 +265,24 @@ let tracker_handler = (_msg) => {
         motor_bgc.setDelta(0,-50);
     }
     else if (_msg === 'pan_up') {
-        motor_bgc.setDelta(1, 0);
+        if (tidControlTracker) {
+            clearInterval(tidControlTracker);
+            tidControlTracker = null;
+        }
+
+        tidControlTracker = setInterval(() => {
+            motor_bgc.setDelta(1, 0);
+        }, 100);
     }
     else if (_msg === 'pan_down') {
-        motor_bgc.setDelta(-1, 0);
+        if (tidControlTracker) {
+            clearInterval(tidControlTracker);
+            tidControlTracker = null;
+        }
+
+        tidControlTracker = setInterval(() => {
+            motor_bgc.setDelta(-1, 0);
+        }, 100);
     }
     else if (_msg === 'stop') {
         motor_bgc.setStop();
