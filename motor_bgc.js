@@ -101,7 +101,7 @@ let SbusDataGenerator = () => {
 let Parse_RcData = (rc_str) => {
     let GCS_DataBuffer = Buffer.from(rc_str, 'hex');
 
-    console.log('GCS_DataBuffer', GCS_DataBuffer);
+    // console.log('GCS_DataBuffer', GCS_DataBuffer);
 
     SBUS1_CH[0] = GCS_DataBuffer[1] * CH_SCALE + 1;
     SBUS1_CH[1] = GCS_DataBuffer[2] * CH_SCALE + 1;
@@ -156,7 +156,7 @@ let sbus1Packet_Generator = (SBUS_CH) => {
 
     if (sbus1Port) {
         sbus1Port.write(Buffer.from(SBUS_Buffer, 'hex'), () => {
-            console.log('SBUS_Buffer -\t\t', Buffer.from(SBUS_Buffer, 'hex'));
+            // console.log('SBUS_Buffer -\t\t', Buffer.from(SBUS_Buffer, 'hex'));
         });
     }
 }
@@ -179,6 +179,7 @@ exports.setDelta = (pan_diff_angle, tilt_diff_angle) => {
     else if (sbus_ch_val[2] <= CH_VAL_MIN) {
         sbus_ch_val[2] = CH_VAL_MIN;
     }
+    console.log('PAN -', sbus_ch_val[4], ' TILT -', sbus_ch_val[2]);
 }
 
 exports.setStop = () => {

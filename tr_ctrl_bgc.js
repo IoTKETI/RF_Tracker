@@ -261,13 +261,13 @@ let tracker_handler = (_msg) => {
         motor_bgc.setDelta(0,1);
     }
     else if (_msg === 'tilt_down') {
-        motor_bgc.setDelta(0,-50);
+        motor_bgc.setDelta(0,-1);
     }
     else if (_msg === 'pan_up') {
-        motor_bgc.setDelta(1, 0);
+        motor_bgc.setDelta(5, 0);
     }
     else if (_msg === 'pan_down') {
-        motor_bgc.setDelta(-1, 0);
+        motor_bgc.setDelta(-5, 0);
     }
     else if (_msg === 'stop') {
         motor_bgc.setStop();
