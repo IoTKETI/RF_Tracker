@@ -248,6 +248,7 @@ let tracker_handler = (_msg) => {
         if (stateCtrl === 'arranging') {
             stateCtrl = 'ready';
             flagTracking = 'no';
+            motor_bgc.setStop();
         }
         else {
             g_pan_t_angle = 0;
@@ -261,7 +262,7 @@ let tracker_handler = (_msg) => {
         motor_bgc.setDelta(0,1);
     }
     else if (_msg === 'tilt_down') {
-        motor_bgc.setDelta(0,-50);
+        motor_bgc.setDelta(0,-1);
     }
     else if (_msg === 'pan_up') {
         motor_bgc.setDelta(1, 0);
@@ -276,6 +277,7 @@ let tracker_handler = (_msg) => {
         if (stateCtrl === 'run') {
             stateCtrl = 'ready';
             flagTracking = 'no';
+            motor_bgc.setStop();
         }
         else {
             stateCtrl = 'run';
@@ -508,7 +510,7 @@ catch (e) {
 let count_tr_heartbeat = 0;
 let watchdogCtrl = () => {
     if (stateCtrl === 'ready') {
-        motor_bgc.setStop();
+        //motor_bgc.setStop();
     }
     else if ((stateCtrl === 'arranging') || (stateCtrl === 'run')) {
         if (flagBPM) {
