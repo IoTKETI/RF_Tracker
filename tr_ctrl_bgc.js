@@ -568,6 +568,8 @@ setTimeout(() => {
     tilt_offset = tr_heartbeat.tilt_offset;
     pan_offset = tr_heartbeat.pan_offset;
 
+    console.log(pan_offset, tilt_offset);
+
     g_pan_t_angle = tracker_yaw;
     g_tilt_t_angle = tracker_pitch;
     setInterval(watchdogCtrl, 100);
