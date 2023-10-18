@@ -537,22 +537,26 @@ let watchdogCtrl = () => {
         }
     }
 
-    tr_heartbeat.pan_angle = tracker_yaw;
-    tr_heartbeat.tilt_angle = tracker_pitch;
-    tr_heartbeat.flag_tracking = flagTracking;
-    tr_heartbeat.state = stateCtrl;
-    tr_heartbeat.lat = tracker_latitude;
-    tr_heartbeat.lon = tracker_longitude;
-    tr_heartbeat.alt = tracker_altitude;
-    tr_heartbeat.relative_alt = tracker_relative_altitude;
-    tr_heartbeat.fix_type = tracker_fix_type;
-    tr_heartbeat.pan_offset = pan_offset;
-    tr_heartbeat.tilt_offset = tilt_offset;
-    tr_heartbeat.gps_update = gpsUpdateFlag;
-    if (tr_mqtt_client) {
-        tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
-            //console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
-        });
+    count_tr_heartbeat++;
+    if(count_tr_heartbeat > 10) {
+        count_tr_heartbeat = 0;
+        tr_heartbeat.pan_angle = tracker_yaw;
+        tr_heartbeat.tilt_angle = tracker_pitch;
+        tr_heartbeat.flag_tracking = flagTracking;
+        tr_heartbeat.state = stateCtrl;
+        tr_heartbeat.lat = tracker_latitude;
+        tr_heartbeat.lon = tracker_longitude;
+        tr_heartbeat.alt = tracker_altitude;
+        tr_heartbeat.relative_alt = tracker_relative_altitude;
+        tr_heartbeat.fix_type = tracker_fix_type;
+        tr_heartbeat.pan_offset = pan_offset;
+        tr_heartbeat.tilt_offset = tilt_offset;
+        tr_heartbeat.gps_update = gpsUpdateFlag;
+        if (tr_mqtt_client) {
+            tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
+                //console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
+            });
+        }
     }
 }
 
@@ -560,6 +564,10 @@ let watchdogCtrl = () => {
 let stateCtrl = 'ready'
 
 setTimeout(() => {
+
+    tilt_offset = tr_heartbeat.tilt_offset;
+    pan_offset = tr_heartbeat.pan_offset;
+
     g_pan_t_angle = tracker_yaw;
     g_tilt_t_angle = tracker_pitch;
     setInterval(watchdogCtrl, 100);
