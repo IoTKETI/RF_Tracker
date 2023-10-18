@@ -262,18 +262,23 @@ let tracker_handler = (_msg) => {
         }
     }
     else if (_msg === 'tilt_up') {
+        stateCtrl = 'manual';
         motor_bgc.setDelta(0,STEP);
     }
     else if (_msg === 'tilt_down') {
+        stateCtrl = 'manual';
         motor_bgc.setDelta(0,-STEP);
     }
     else if (_msg === 'pan_up') {
+        stateCtrl = 'manual';
         motor_bgc.setDelta(STEP, 0);
     }
     else if (_msg === 'pan_down') {
+        stateCtrl = 'manual';
         motor_bgc.setDelta(-STEP, 0);
     }
     else if (_msg === 'stop') {
+        stateCtrl = 'ready';
         motor_bgc.setStop();
     }
     else if (_msg === 'run') {
