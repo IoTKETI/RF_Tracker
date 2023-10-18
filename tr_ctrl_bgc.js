@@ -502,6 +502,7 @@ let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
 let tr_heartbeat = {};
 try {
     tr_heartbeat = JSON.parse(fs.readFileSync('./tr_heartbeat.json', 'utf8'));
+    console.log('tr_heartbeat.json', tr_heartbeat);
 }
 catch (e) {
     console.log('can not find [ ./tr_heartbeat.json ] file');
