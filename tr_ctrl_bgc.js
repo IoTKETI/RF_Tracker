@@ -241,7 +241,7 @@ function tr_mqtt_connect(host) {
 
 let tidControlTracker = null;
 let flagTracking = 'no';
-
+const STEP = 72;
 let tracker_handler = (_msg) => {
     console.log('received message from panel', _msg);
     if (_msg === 'arrange') {
@@ -259,16 +259,16 @@ let tracker_handler = (_msg) => {
         }
     }
     else if (_msg === 'tilt_up') {
-        motor_bgc.setDelta(0,56);
+        motor_bgc.setDelta(0,STEP);
     }
     else if (_msg === 'tilt_down') {
-        motor_bgc.setDelta(0,-56);
+        motor_bgc.setDelta(0,-STEP);
     }
     else if (_msg === 'pan_up') {
-        motor_bgc.setDelta(56, 0);
+        motor_bgc.setDelta(STEP, 0);
     }
     else if (_msg === 'pan_down') {
-        motor_bgc.setDelta(-56, 0);
+        motor_bgc.setDelta(-STEP, 0);
     }
     else if (_msg === 'stop') {
         motor_bgc.setStop();
