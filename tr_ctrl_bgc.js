@@ -184,17 +184,17 @@ function tr_mqtt_connect(host) {
             tracker_control_message = message.toString();
             tracker_handler(tracker_control_message);
         }
-        else if (topic === pn_offset_topic) { // 모터 옵셋 설정 메세지 수신
-            let offsetObj = JSON.parse(message.toString());
-            if (!offsetObj.hasOwnProperty('type')) {
-                pan_offset = offsetObj.p_offset;
-                tilt_offset = offsetObj.t_offset;
-
-                fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
-
-                console.log('[pan_offset_ctrl] -->', pan_offset, '[tilt_offset_ctrl] -->', tilt_offset);
-            }
-        }
+        // else if (topic === pn_offset_topic) { // 모터 옵셋 설정 메세지 수신
+        //     let offsetObj = JSON.parse(message.toString());
+        //     if (!offsetObj.hasOwnProperty('type')) {
+        //         pan_offset = offsetObj.p_offset;
+        //         tilt_offset = offsetObj.t_offset;
+        //
+        //         fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
+        //
+        //         console.log('[pan_offset_ctrl] -->', pan_offset, '[tilt_offset_ctrl] -->', tilt_offset);
+        //     }
+        // }
         else if (topic === pn_gps_ctrl_topic) { // GPS 좌표 고정 여부 메세지 수신
             if (message.toString() === 'release') {
                 gpsUpdateFlag = true;
