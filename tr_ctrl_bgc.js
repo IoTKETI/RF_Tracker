@@ -278,6 +278,8 @@ let tracker_handler = (_msg) => {
         motor_bgc.setDelta(-STEP, 0);
     }
     else if (_msg === 'stop') {
+        g_pan_t_angle = tracker_yaw;
+        g_tilt_t_angle = tracker_pitch;
         stateCtrl = 'ready';
         motor_bgc.setStop();
     }
@@ -560,6 +562,6 @@ let stateCtrl = 'ready'
 setTimeout(() => {
     g_pan_t_angle = tracker_yaw;
     g_tilt_t_angle = tracker_pitch;
-    setInterval(watchdogCtrl, 250);
+    setInterval(watchdogCtrl, 100);
 }, 3000);
 
