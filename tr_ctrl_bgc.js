@@ -452,6 +452,8 @@ let pan_offset = 0;
 let tilt_offset = 0;
 
 const DEG = 0.0174533;
+
+const SPEED = 8.88;
 let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
 
     pan_offset_ctrl = tracker_yaw + pan_offset;
@@ -481,7 +483,7 @@ let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
     }
 
     motor_bgc.setStop();
-    motor_bgc.setDelta(pan_diff_angle, tilt_diff_angle);
+    motor_bgc.setDelta((pan_diff_angle*SPEED), (tilt_diff_angle*SPEED));
 }
 
 let tr_heartbeat = {};
