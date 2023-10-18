@@ -105,7 +105,7 @@ let Parse_RcData = (ch_val) => {
     }
     //Buffer.from(ch_val, 'hex').readUInt16LE(0);;
 
-    console.log('SBUS1_CH', SBUS1_CH);
+    //console.log('SBUS1_CH', SBUS1_CH);
 
     // SBUS1_CH[0] =  GCS_DataBuffer[1];  //GCS_DataBuffer[1] * CH_SCALE + 1;
     // SBUS1_CH[1] =  GCS_DataBuffer[2];  //GCS_DataBuffer[2] * CH_SCALE + 1;
