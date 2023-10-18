@@ -554,5 +554,5 @@ let stateCtrl = 'ready'
 
 setTimeout(() => {
     setInterval(watchdogCtrl, 250);
-}, 2000);
+}, 3000);
 
