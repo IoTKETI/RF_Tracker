@@ -543,4 +543,4 @@ let watchdogCtrl = () => {
 
 
 let stateCtrl = 'ready'
-setInterval(watchdogCtrl, 500);
+setInterval(watchdogCtrl, 250);
