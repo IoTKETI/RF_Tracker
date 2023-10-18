@@ -241,7 +241,7 @@ function tr_mqtt_connect(host) {
 
 let tidControlTracker = null;
 let flagTracking = 'no';
-const STEP = 120;
+const STEP = 152;
 let tracker_handler = (_msg) => {
     console.log('received message from panel', _msg);
     if (_msg === 'arrange') {
