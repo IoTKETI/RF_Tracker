@@ -95,7 +95,7 @@ let sbus_ch_val = [
 ];
 
 let SbusDataGenerator = () => {
-    Parse_RcData(sbus_ch_val);
+    Parse_RcData(sbus_ch_val.toString(16));
 }
 
 let Parse_RcData = (ch_val) => {
