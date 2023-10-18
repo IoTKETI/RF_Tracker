@@ -258,7 +258,7 @@ function tr_mqtt_connect(serverip) {
                         btn_params.target_component = 1;
                         btn_params.param_id = "AHRS_ORIENTATION";
                         btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
-                        btn_params.param_value = 24; // PITCH90
+                        btn_params.param_value = 29; // PITCH90
                     }
                     else {
                         btn_params = {};
