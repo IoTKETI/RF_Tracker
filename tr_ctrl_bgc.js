@@ -259,16 +259,16 @@ let tracker_handler = (_msg) => {
         }
     }
     else if (_msg === 'tilt_up') {
-        motor_bgc.setDelta(0,5);
+        motor_bgc.setDelta(0,40);
     }
     else if (_msg === 'tilt_down') {
-        motor_bgc.setDelta(0,-5);
+        motor_bgc.setDelta(0,-40);
     }
     else if (_msg === 'pan_up') {
-        motor_bgc.setDelta(5, 0);
+        motor_bgc.setDelta(40, 0);
     }
     else if (_msg === 'pan_down') {
-        motor_bgc.setDelta(-5, 0);
+        motor_bgc.setDelta(-40, 0);
     }
     else if (_msg === 'stop') {
         motor_bgc.setStop();
