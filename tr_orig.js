@@ -50,10 +50,13 @@ let tr_mqtt_client = null;
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
+let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
 let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
 
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
+
+let ant_type = '';
 
 mavPortOpening();
 
@@ -84,6 +87,8 @@ function mavPortOpening() {
 
 function mavPortOpen() {
     console.log('mavPort(' + mavPort.path + '), mavPort rate: ' + mavPort.baudRate + ' open.');
+
+    send_param_get_command();
 }
 
 function mavPortClose() {
@@ -204,6 +209,36 @@ function mavPortData(data) {
     }
 }
 
+function send_param_get_command(){
+    let btn_params = {};
+    btn_params.target_system = 254;
+    btn_params.target_component = -1;
+    btn_params.param_id = "AHRS_ORIENTATION";
+    btn_params.param_index = -1;
+
+    try {
+        let msg = mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_PARAM_REQUEST_READ, btn_params);
+        if (!msg) {
+            console.log("mavlink message is null");
+        }
+        else {
+            if (mavPort) {
+                if (mavPort.isOpen) {
+                    mavPort.write(msg, () => {
+                        console.log('Send AHRS_ORIENTATION param get command.');
+                    });
+                }
+            }
+        }
+    }
+    catch (ex) {
+        console.log('[ERROR] ' + ex);
+    }
+
+    if (ant_type === '') {
+        setTimeout(send_param_get_command, 500);
+    }
+}
 function tr_mqtt_connect(serverip) {
     if (!tr_mqtt_client) {
         let connectOptions = {
@@ -466,6 +501,44 @@ function parseMavFromDrone(mavPacket) {
                 tr_mqtt_client.publish(gps_raw_topic, JSON.stringify(gps_raw_int_msg), () => {
                     console.log('publish gps_raw_int_msg to local mqtt(' + gps_raw_topic + ') : ', JSON.stringify(gps_raw_int_msg));
                 });
+            }
+        }
+        else if (msg_id === mavlink.MAVLINK_MSG_ID_PARAM_VALUE) {
+            let my_len = 25;
+            let ar = mavPacket.split('');
+            for (let i = 0; i < (my_len - msg_len); i++) {
+                ar.splice(ar.length-4, 0, '0');
+                ar.splice(ar.length-4, 0, '0');
+            }
+            mavPacket = ar.join('');
+
+            var param_value = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
+            base_offset += 8;
+            var param_count = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
+            base_offset += 4;
+            var param_index = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
+            base_offset += 4;
+            var param_id = mavPacket.substring(base_offset, base_offset + 32).toLowerCase();
+            base_offset += 32;
+            var param_type = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
+
+            param_id = Buffer.from(param_id, "hex").toString('ASCII');
+
+            if (param_id.includes('AHRS_ORIENTATION')) {
+                param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
+
+                if (param_value.toString() === '0') {
+                    ant_type = "T0";
+                }
+                else if (param_value.toString() === '29') {
+                    ant_type = "T90";
+                }
+
+                if (tr_mqtt_client) {
+                    tr_mqtt_client.publish(gps_type_topic, ant_type, () => {
+                        console.log('publish ahrs_orientation_msg to local mqtt(' + gps_type_topic + ') : ', ant_type);
+                    });
+                }
             }
         }
     }

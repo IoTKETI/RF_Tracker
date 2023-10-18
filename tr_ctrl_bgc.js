@@ -71,7 +71,9 @@ let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
 let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
+let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
+let antType = 'T0';
 
 //------------- local mqtt connect ------------------
 function tr_mqtt_connect(host) {
@@ -116,6 +118,12 @@ function tr_mqtt_connect(host) {
         if (gps_raw_topic !== '') {
             tr_mqtt_client.subscribe(gps_raw_topic, () => {
                 console.log('[tr_mqtt_client] gps_raw_topic is subscribed -> ', gps_raw_topic);
+            });
+        }
+
+        if (gps_type_topic !== '') {
+            tr_mqtt_client.subscribe(gps_type_topic, () => {
+                console.log('[tr_mqtt_client] gps_type_topic is subscribed -> ', gps_type_topic);
             });
         }
 
@@ -179,6 +187,9 @@ function tr_mqtt_connect(host) {
             tracker_pitch = ((tracker_att.pitch * 180) / Math.PI);
 
             countBPM++;
+        }
+        else if (topic === gps_type_topic) {
+            antType = message.toString();
         }
         else if (topic === pn_ctrl_topic) { // 모터 제어 메세지 수신
             tracker_control_message = message.toString();
@@ -519,6 +530,7 @@ catch (e) {
     tr_heartbeat.pan_offset = 0;
     tr_heartbeat.tilt_offset = 0;
     tr_heartbeat.gps_update = true;
+    tr_heartbeat.ant_type = "T0";
 
     fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
 }
@@ -553,6 +565,8 @@ let watchdogCtrl = () => {
         tr_heartbeat.pan_offset = pan_offset;
         tr_heartbeat.tilt_offset = tilt_offset;
         tr_heartbeat.gps_update = gpsUpdateFlag;
+        tr_heartbeat.ant_type = antType;
+
         if (tr_mqtt_client) {
             tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
                 //console.log(tr_data_topic, JSON.stringify(tr_heartbeat));
