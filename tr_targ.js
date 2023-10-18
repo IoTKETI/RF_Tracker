@@ -20,8 +20,7 @@ let rc_data_topic = '/Mobius/' + GcsName + '/RC_Data/' + DroneName;
 
 let res_data_topic = '/Mobius/' + GcsName + '/RC_Res_Data/' + DroneName;
 
-let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/#';
-
+let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 
 let tr_mqtt_client = null;
 
@@ -72,7 +71,7 @@ function init() {
 
     res_data_topic = '/Mobius/' + GcsName + '/RC_Res_Data/' + DroneName;
 
-    tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/#';
+    tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 
     tr_mqtt_connect('localhost');
 
@@ -142,21 +141,9 @@ function tr_mqtt_connect(serverip) {
         }
 
         if (mobius_mqtt_client) {
-            let _tr_data_topic = tr_data_topic;
-            if (topic.includes('/pan')) {
-                _tr_data_topic = tr_data_topic.replace('/#', '/pan');
-                // _tr_data_topic = tr_data_topic.replace('/#', '/pan');
-                mobius_mqtt_client.publish(_tr_data_topic, message, () => {
-                    console.log(_tr_data_topic, message.toString());
-                });
-            }
-            else if (topic.includes('/tilt')) {
-                _tr_data_topic = tr_data_topic.replace('/#', '/tilt');
-                // _tr_data_topic = tr_data_topic.replace('/#', '/tilt');
-                mobius_mqtt_client.publish(_tr_data_topic, message, () => {
-                    console.log(_tr_data_topic, message.toString());
-                });
-            }
+            mobius_mqtt_client.publish(topic, message, () => {
+                console.log(topic, message.toString());
+            });
         }
     });
 
