@@ -36,7 +36,7 @@ let DroneData = {};
 let t_id = null;
 let disconnected = true;
 
-init();
+setTimeout(init, 6000);
 
 function init() {
     try {

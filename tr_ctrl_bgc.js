@@ -263,11 +263,11 @@ let tracker_handler = (_msg) => {
     }
     else if (_msg === 'tilt_up') {
         stateCtrl = 'manual';
-        motor_bgc.setDelta(0,STEP);
+        motor_bgc.setDelta(0, STEP);
     }
     else if (_msg === 'tilt_down') {
         stateCtrl = 'manual';
-        motor_bgc.setDelta(0,-STEP);
+        motor_bgc.setDelta(0, -STEP);
     }
     else if (_msg === 'pan_up') {
         stateCtrl = 'manual';
@@ -455,7 +455,7 @@ setInterval(() => {
     }
 }, 3000)
 
-tr_mqtt_connect('localhost');
+setTimeout(tr_mqtt_connect, 3000, 'localhost');
 
 let pan_offset_ctrl = 0;
 let tilt_offset_ctrl = 0;
@@ -496,7 +496,7 @@ let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
     }
 
     motor_bgc.setStop();
-    motor_bgc.setDelta((pan_diff_angle*SPEED), (tilt_diff_angle*SPEED));
+    motor_bgc.setDelta((pan_diff_angle * SPEED), (tilt_diff_angle * SPEED));
 }
 
 let tr_heartbeat = {};
@@ -539,7 +539,7 @@ let watchdogCtrl = () => {
     }
 
     count_tr_heartbeat++;
-    if(count_tr_heartbeat > 10) {
+    if (count_tr_heartbeat > 10) {
         count_tr_heartbeat = 0;
         tr_heartbeat.pan_angle = tracker_yaw;
         tr_heartbeat.tilt_angle = tracker_pitch;
@@ -574,5 +574,5 @@ setTimeout(() => {
     g_pan_t_angle = tracker_yaw;
     g_tilt_t_angle = tracker_pitch;
     setInterval(watchdogCtrl, 100);
-}, 3000);
+}, 6000);
 
