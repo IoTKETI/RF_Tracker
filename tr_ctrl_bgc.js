@@ -573,6 +573,6 @@ setTimeout(() => {
 
     g_pan_t_angle = tracker_yaw;
     g_tilt_t_angle = tracker_pitch;
-    setInterval(watchdogCtrl, 100);
+    setInterval(watchdogCtrl, 250);
 }, 3000);
 
