@@ -95,30 +95,34 @@ let sbus_ch_val = [
 ];
 
 let SbusDataGenerator = () => {
-    Parse_RcData(sbus_ch_val.toString(16));
+    Parse_RcData(sbus_ch_val);
 }
 
 let Parse_RcData = (ch_val) => {
-    let GCS_DataBuffer = Buffer.from(ch_val, 'hex').readUInt16LE(0);;
+    let GCS_DataBuffer = [];
+    for(let i = 0; i < sbus_ch_val.length-1; i++) {
+        SBUS1_CH[i] =  GCS_DataBuffer[i+1];
+    }
+    //Buffer.from(ch_val, 'hex').readUInt16LE(0);;
 
     console.log('GCS_DataBuffer', GCS_DataBuffer);
 
-    SBUS1_CH[0] =  GCS_DataBuffer[1];  //GCS_DataBuffer[1] * CH_SCALE + 1;
-    SBUS1_CH[1] =  GCS_DataBuffer[2];  //GCS_DataBuffer[2] * CH_SCALE + 1;
-    SBUS1_CH[2] =  GCS_DataBuffer[3];  //GCS_DataBuffer[3] * CH_SCALE + 1;
-    SBUS1_CH[3] =  GCS_DataBuffer[4];  //GCS_DataBuffer[4] * CH_SCALE + 1;
-    SBUS1_CH[4] =  GCS_DataBuffer[5];  //GCS_DataBuffer[5] * CH_SCALE + 1;
-    SBUS1_CH[5] =  GCS_DataBuffer[6];  //GCS_DataBuffer[6] * CH_SCALE + 1;
-    SBUS1_CH[6] =  GCS_DataBuffer[7];  //GCS_DataBuffer[7] * CH_SCALE + 1;
-    SBUS1_CH[7] =  GCS_DataBuffer[8];  //GCS_DataBuffer[8] * CH_SCALE + 1;
-    SBUS1_CH[8] =  GCS_DataBuffer[9];  //GCS_DataBuffer[9] * CH_SCALE + 1;
-    SBUS1_CH[9] =  GCS_DataBuffer[10]; //GCS_DataBuffer[10] * CH_SCALE + 1;
-    SBUS1_CH[10] = GCS_DataBuffer[11]; //GCS_DataBuffer[11] * CH_SCALE + 1;
-    SBUS1_CH[11] = GCS_DataBuffer[12]; //GCS_DataBuffer[12] * CH_SCALE + 1;
-    SBUS1_CH[12] = GCS_DataBuffer[13]; //GCS_DataBuffer[13] * CH_SCALE + 1;
-    SBUS1_CH[13] = GCS_DataBuffer[14]; //GCS_DataBuffer[14] * CH_SCALE + 1;
-    SBUS1_CH[14] = GCS_DataBuffer[15]; //GCS_DataBuffer[15] * CH_SCALE + 1;
-    SBUS1_CH[15] = GCS_DataBuffer[16]; //GCS_DataBuffer[16] * CH_SCALE + 1;
+    // SBUS1_CH[0] =  GCS_DataBuffer[1];  //GCS_DataBuffer[1] * CH_SCALE + 1;
+    // SBUS1_CH[1] =  GCS_DataBuffer[2];  //GCS_DataBuffer[2] * CH_SCALE + 1;
+    // SBUS1_CH[2] =  GCS_DataBuffer[3];  //GCS_DataBuffer[3] * CH_SCALE + 1;
+    // SBUS1_CH[3] =  GCS_DataBuffer[4];  //GCS_DataBuffer[4] * CH_SCALE + 1;
+    // SBUS1_CH[4] =  GCS_DataBuffer[5];  //GCS_DataBuffer[5] * CH_SCALE + 1;
+    // SBUS1_CH[5] =  GCS_DataBuffer[6];  //GCS_DataBuffer[6] * CH_SCALE + 1;
+    // SBUS1_CH[6] =  GCS_DataBuffer[7];  //GCS_DataBuffer[7] * CH_SCALE + 1;
+    // SBUS1_CH[7] =  GCS_DataBuffer[8];  //GCS_DataBuffer[8] * CH_SCALE + 1;
+    // SBUS1_CH[8] =  GCS_DataBuffer[9];  //GCS_DataBuffer[9] * CH_SCALE + 1;
+    // SBUS1_CH[9] =  GCS_DataBuffer[10]; //GCS_DataBuffer[10] * CH_SCALE + 1;
+    // SBUS1_CH[10] = GCS_DataBuffer[11]; //GCS_DataBuffer[11] * CH_SCALE + 1;
+    // SBUS1_CH[11] = GCS_DataBuffer[12]; //GCS_DataBuffer[12] * CH_SCALE + 1;
+    // SBUS1_CH[12] = GCS_DataBuffer[13]; //GCS_DataBuffer[13] * CH_SCALE + 1;
+    // SBUS1_CH[13] = GCS_DataBuffer[14]; //GCS_DataBuffer[14] * CH_SCALE + 1;
+    // SBUS1_CH[14] = GCS_DataBuffer[15]; //GCS_DataBuffer[15] * CH_SCALE + 1;
+    // SBUS1_CH[15] = GCS_DataBuffer[16]; //GCS_DataBuffer[16] * CH_SCALE + 1;
 
     //console.log('SBUS1_CH', SBUS1_CH);
 
