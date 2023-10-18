@@ -103,6 +103,7 @@ let Parse_RcData = (ch_val) => {
     for(let i = 0; i < ch_val.length-1; i++) {
         SBUS1_CH[i] =  ch_val[i+1];
     }
+
     //Buffer.from(ch_val, 'hex').readUInt16LE(0);;
 
     //console.log('SBUS1_CH', SBUS1_CH);

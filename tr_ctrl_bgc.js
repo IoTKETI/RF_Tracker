@@ -249,6 +249,9 @@ let tracker_handler = (_msg) => {
             stateCtrl = 'ready';
             flagTracking = 'no';
             motor_bgc.setStop();
+
+            g_pan_t_angle = tracker_yaw;
+            g_tilt_t_angle = tracker_pitch;
         }
         else {
             g_pan_t_angle = 0;
@@ -278,6 +281,9 @@ let tracker_handler = (_msg) => {
             stateCtrl = 'ready';
             flagTracking = 'no';
             motor_bgc.setStop();
+
+            g_pan_t_angle = tracker_yaw;
+            g_tilt_t_angle = tracker_pitch;
         }
         else {
             stateCtrl = 'run';
@@ -512,7 +518,7 @@ catch (e) {
 let count_tr_heartbeat = 0;
 let watchdogCtrl = () => {
     if (stateCtrl === 'ready') {
-        //motor_bgc.setStop();
+        ctrlAngle(g_pan_t_angle, g_tilt_t_angle);
     }
     else if ((stateCtrl === 'arranging') || (stateCtrl === 'run')) {
         if (flagBPM) {
@@ -545,4 +551,8 @@ let watchdogCtrl = () => {
 
 
 let stateCtrl = 'ready'
-setInterval(watchdogCtrl, 250);
+
+setTimeout(() => {
+    setInterval(watchdogCtrl, 250);
+}, 2000);
+
