@@ -100,12 +100,12 @@ let SbusDataGenerator = () => {
 
 let Parse_RcData = (ch_val) => {
     let GCS_DataBuffer = [];
-    for(let i = 0; i < sbus_ch_val.length-1; i++) {
-        SBUS1_CH[i] =  GCS_DataBuffer[i+1];
+    for(let i = 0; i < ch_val.length-1; i++) {
+        SBUS1_CH[i] =  ch_val[i+1];
     }
     //Buffer.from(ch_val, 'hex').readUInt16LE(0);;
 
-    console.log('GCS_DataBuffer', GCS_DataBuffer);
+    console.log('SBUS1_CH', SBUS1_CH);
 
     // SBUS1_CH[0] =  GCS_DataBuffer[1];  //GCS_DataBuffer[1] * CH_SCALE + 1;
     // SBUS1_CH[1] =  GCS_DataBuffer[2];  //GCS_DataBuffer[2] * CH_SCALE + 1;
