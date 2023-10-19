@@ -477,7 +477,7 @@ let tilt_offset = 0;
 
 const DEG = 0.0174533;
 
-const SPEED = 8.88 * 2;
+const SPEED = 8.88 * 3;
 let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
 
     pan_offset_ctrl = tracker_yaw + pan_offset;
