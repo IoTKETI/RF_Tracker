@@ -293,7 +293,7 @@ function tr_mqtt_connect(serverip) {
                         btn_params.target_component = 1;
                         btn_params.param_id = "AHRS_ORIENTATION";
                         btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
-                        btn_params.param_value = 29; // PITCH90
+                        btn_params.param_value = 34; // PITCH270ROLL180
                     }
                     else {
                         btn_params = {};
@@ -530,7 +530,7 @@ function parseMavFromDrone(mavPacket) {
                 if (param_value.toString() === '0') {
                     ant_type = "T0";
                 }
-                else if (param_value.toString() === '29') {
+                else if (param_value.toString() === '34') {
                     ant_type = "T90";
                 }
 
