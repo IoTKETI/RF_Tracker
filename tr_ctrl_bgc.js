@@ -17,8 +17,7 @@ let tracker_gri = '';
 
 let tracker_latitude = 37.4036621604629;
 let tracker_longitude = 127.16176249708046;
-let tracker_altitude = 0.0;
-let tracker_relative_altitude = 0.0;
+let tracker_altitude = 0.5;
 
 let tracker_fix_type = 0;
 let tracker_satellites_visible = 0;
@@ -29,8 +28,7 @@ let tracker_yaw = 0.0;
 
 let target_latitude = '';
 let target_longitude = '';
-let target_altitude = '';
-let target_relative_altitude = '';
+let target_altitude = 0.0;
 
 let gpsUpdateFlag = true;
 
@@ -171,10 +169,10 @@ function tr_mqtt_connect(host) {
                 if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
                     tracker_latitude = tracker_gpi.lat / 10000000;
                     tracker_longitude = tracker_gpi.lon / 10000000;
-                    // tracker_altitude = tracker_gpi.alt / 1000;
-                    // tracker_altitude = tracker_gpi.relative_alt / 1000;
-                    tracker_altitude = 0;
-                    tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
+
+                    tracker_altitude = tracker_gpi.alt / 1000;
+                    tracker_altitude = tracker_gpi.relative_alt / 1000;
+                    tracker_altitude = 0.5;
                 }
             }
 
@@ -234,11 +232,11 @@ function tr_mqtt_connect(host) {
         else if (topic === pn_alt_topic) {
             motor_altitude_message = message.toString();
             if (typeof (parseInt(motor_altitude_message)) === 'number') {
-                tracker_relative_altitude = motor_altitude_message;
+                tracker_altitude = motor_altitude_message;
             }
 
             tr_heartbeat.alt = motor_altitude_message;
-            tr_heartbeat.relative_alt = motor_altitude_message;
+
             fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
         else if (_topic === _dr_data_topic) { // 드론데이터 수신
@@ -250,7 +248,7 @@ function tr_mqtt_connect(host) {
                     target_latitude = target_gpi.lat / 10000000;
                     target_longitude = target_gpi.lon / 10000000;
                     target_altitude = target_gpi.alt / 1000;
-                    target_relative_altitude = target_gpi.relative_alt / 1000;
+                    target_altitude = target_gpi.relative_alt / 1000;
 
                     //console.log('target_gpi: ', JSON.stringify(target_gpi));
 
@@ -534,7 +532,6 @@ catch (e) {
     tr_heartbeat.lat = 37.4036621604629;
     tr_heartbeat.lon = 127.16176249708046;
     tr_heartbeat.alt = 0;
-    tr_heartbeat.relative_alt = 0;
     tr_heartbeat.fix_type = 0;
     tr_heartbeat.pan_offset = 0;
     tr_heartbeat.tilt_offset = 0;
@@ -570,7 +567,6 @@ let watchdogCtrl = () => {
         tr_heartbeat.lat = tracker_latitude;
         tr_heartbeat.lon = tracker_longitude;
         tr_heartbeat.alt = tracker_altitude;
-        tr_heartbeat.relative_alt = tracker_relative_altitude;
         tr_heartbeat.fix_type = tracker_fix_type;
         tr_heartbeat.pan_offset = pan_offset;
         tr_heartbeat.tilt_offset = tilt_offset;
