@@ -64,6 +64,7 @@ let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
+let pn_speed_topic = '/Mobius/' + GcsName + '/Speed_Data/' + DroneName + '/Panel';
 let pn_gps_ctrl_topic = '/Mobius/' + GcsName + '/Gps_Ctrl_Data/' + DroneName + '/Panel';
 
 let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
@@ -106,6 +107,12 @@ function tr_mqtt_connect(host) {
         if (gps_alt_topic !== '') {
             tr_mqtt_client.subscribe(gps_alt_topic, () => {
                 console.log('[tr_mqtt_client] gps_alt_topic is subscribed -> ', gps_alt_topic);
+            });
+        }
+
+        if (pn_speed_topic !== '') {
+            tr_mqtt_client.subscribe(pn_speed_topic, () => {
+                console.log('[pn_speed_topic] gps_alt_topic is subscribed -> ', pn_speed_topic);
             });
         }
 
@@ -164,8 +171,9 @@ function tr_mqtt_connect(host) {
                 if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
                     tracker_latitude = tracker_gpi.lat / 10000000;
                     tracker_longitude = tracker_gpi.lon / 10000000;
-                    tracker_altitude = tracker_gpi.alt / 1000;
+                    // tracker_altitude = tracker_gpi.alt / 1000;
                     // tracker_altitude = tracker_gpi.relative_alt / 1000;
+                    tracker_altitude = 0;
                     tracker_relative_altitude = tracker_gpi.relative_alt / 1000;
                 }
             }
@@ -187,6 +195,12 @@ function tr_mqtt_connect(host) {
             tracker_pitch = ((tracker_att.pitch * 180) / Math.PI);
 
             countBPM++;
+        }
+        else if (topic === pn_speed_topic) {
+            SPEED = message.toString();
+
+            tr_heartbeat.speed = SPEED;
+            fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
         else if (topic === gps_type_topic) {
             antType = message.toString();
@@ -214,6 +228,7 @@ function tr_mqtt_connect(host) {
                 gpsUpdateFlag = false;
             }
 
+            tr_heartbeat.gps_update = gpsUpdateFlag;
             fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
         else if (topic === pn_alt_topic) {
@@ -222,6 +237,8 @@ function tr_mqtt_connect(host) {
                 tracker_relative_altitude = motor_altitude_message;
             }
 
+            tr_heartbeat.alt = motor_altitude_message;
+            tr_heartbeat.relative_alt = motor_altitude_message;
             fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
         else if (_topic === _dr_data_topic) { // 드론데이터 수신
@@ -334,10 +351,6 @@ function calcTargetPanAngle(targetLatitude, targetLongitude) {
     let x = result2.x - result1.x + 0.000001;
     let y = result2.y - result1.y + 0.000001;
 
-    // console.log(cur_lat, cur_lon);
-    // console.log(tar_lat, tar_lon);
-    // console.log('x: ', x, '     y: ', y);
-
     let angle = Math.atan2(y, x);
     angle = -Math.round(angle * 180 / Math.PI) + 90;
     return angle;
@@ -378,10 +391,6 @@ function calcTargetTiltAngle(targetLatitude, targetLongitude, targetAltitude) {
     let x = Math.sqrt(Math.pow(result2.x - result1.x, 2) + Math.pow(result2.y - result1.y, 2) + Math.pow((tar_alt - cur_alt), 2));
 
     let y = targetAltitude - tracker_altitude;
-
-    // console.log(cur_lat, cur_lon, cur_alt);
-    // console.log(tar_lat, tar_lon, tar_alt);
-    // console.log('x: ', x, '     y: ', y);
 
     let angle = Math.atan2(y, x);
 
@@ -477,7 +486,7 @@ let tilt_offset = 0;
 
 const DEG = 0.0174533;
 
-const SPEED = 8.88 * 3;
+let SPEED = 8.88 * 4;
 let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
 
     pan_offset_ctrl = tracker_yaw + pan_offset;
@@ -506,7 +515,7 @@ let ctrlAngle = (pan_t_angle, tilt_t_angle) => {
         }
     }
 
-    motor_bgc.setStop();
+    // motor_bgc.setStop();
     motor_bgc.setDelta((pan_diff_angle * SPEED), (tilt_diff_angle * SPEED));
 }
 
@@ -531,6 +540,7 @@ catch (e) {
     tr_heartbeat.tilt_offset = 0;
     tr_heartbeat.gps_update = true;
     tr_heartbeat.ant_type = "T0";
+    tr_heartbeat.speed = SPEED;
 
     fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
 }
@@ -566,6 +576,7 @@ let watchdogCtrl = () => {
         tr_heartbeat.tilt_offset = tilt_offset;
         tr_heartbeat.gps_update = gpsUpdateFlag;
         tr_heartbeat.ant_type = antType;
+        tr_heartbeat.speed = SPEED;
 
         if (tr_mqtt_client) {
             tr_mqtt_client.publish(tr_data_topic, JSON.stringify(tr_heartbeat), () => {
@@ -576,12 +587,12 @@ let watchdogCtrl = () => {
 }
 
 
-let stateCtrl = 'ready'
+let stateCtrl = 'ready';
 
 setTimeout(() => {
-
     tilt_offset = tr_heartbeat.tilt_offset;
     pan_offset = tr_heartbeat.pan_offset;
+    gpsUpdateFlag = tr_heartbeat.gps_update;
 
     console.log(pan_offset, tilt_offset);
 
