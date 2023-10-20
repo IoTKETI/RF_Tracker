@@ -57,6 +57,7 @@ let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
 let pn_drone_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/Panel';
+let pn_cmd_topic = '/Mobius/' + GcsName + '/TrCmd_Data/' + DroneName + '/Panel';
 
 let ant_type = '';
 
@@ -273,6 +274,11 @@ function tr_mqtt_connect(serverip) {
                     console.log('[tr_mqtt_client] pn_offset_topic is subscribed -> ', pn_offset_topic);
                 });
             }
+            if (pn_cmd_topic !== '') {
+                tr_mqtt_client.subscribe(pn_cmd_topic, () => {
+                    console.log('[tr_mqtt_client] pn_cmd_topic is subscribed -> ', pn_cmd_topic);
+                });
+            }
         });
 
         tr_mqtt_client.on('error', (err) => {
@@ -283,6 +289,13 @@ function tr_mqtt_connect(serverip) {
             if (topic === pn_dinfo_topic) { // 모터 제어 메세지 수신
                 let drone_info = JSON.parse(message.toString());
                 fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
+            }
+            else if (topic === pn_cmd_topic) {
+                if (mavPort) {
+                    if (mavPort.isOpen) {
+                        mavPort.write(message);
+                    }
+                }
             }
             else if (topic === pn_offset_topic) {
                 let offsetObj = JSON.parse(message.toString());
