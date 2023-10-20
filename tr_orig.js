@@ -546,10 +546,10 @@ function parseMavFromDrone(mavPacket) {
             if (param_id.includes('AHRS_ORIENTATION')) {
                 param_value = Buffer.from(param_value, 'hex').readFloatLE(0);
 
-                if (param_value.toString() === '0') {
+                if (param_value === 0) {
                     ant_type = "T0";
                 }
-                else if (param_value.toString() === '24') {
+                else if (param_value === 24) {
                     ant_type = "T90";
                 }
 
