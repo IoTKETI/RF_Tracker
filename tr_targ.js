@@ -12,6 +12,7 @@ let dr_info_topic = '/Mobius/' + GcsName + '/Drinfo_Data/' + DroneName + '/Panel
 
 let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
 let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
+let pn_speed_topic = '/Mobius/' + GcsName + '/Speed_Data/' + DroneName + '/Panel';
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
 let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
@@ -63,6 +64,7 @@ function init() {
 
     pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
     pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
+    pn_speed_topic = '/Mobius/' + GcsName + '/Speed_Data/' + DroneName + '/Panel';
     pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
     dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
@@ -282,6 +284,10 @@ function mobius_mqtt_connect(serverip) {
             console.log('[mobius_mqtt_client] pn_alt_topic is subscribed -> ' + pn_alt_topic);
         });
 
+        mobius_mqtt_client.subscribe(pn_speed_topic, () => {
+            console.log('[mobius_mqtt_client] pn_speed_topic is subscribed -> ' + pn_speed_topic);
+        });
+
         mobius_mqtt_client.subscribe(pn_offset_topic, () => {
             console.log('[mobius_mqtt_client] pn_offset_topic is subscribed -> ' + pn_offset_topic);
         });
@@ -338,6 +344,16 @@ function mobius_mqtt_connect(serverip) {
             });
         }
         else if (topic === pn_ctrl_topic) {
+            if (tr_mqtt_client) {
+                tr_mqtt_client.publish(topic, message);
+            }
+        }
+        else if (topic === pn_alt_topic) {
+            if (tr_mqtt_client) {
+                tr_mqtt_client.publish(topic, message);
+            }
+        }
+        else if (topic === pn_speed_topic) {
             if (tr_mqtt_client) {
                 tr_mqtt_client.publish(topic, message);
             }
