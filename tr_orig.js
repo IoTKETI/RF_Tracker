@@ -236,7 +236,7 @@ function send_param_get_command(){
     }
 
     if (ant_type === '') {
-        setTimeout(send_param_get_command, 500);
+        setTimeout(send_param_get_command, 1000);
     }
 }
 function tr_mqtt_connect(serverip) {
@@ -293,7 +293,7 @@ function tr_mqtt_connect(serverip) {
                         btn_params.target_component = 1;
                         btn_params.param_id = "AHRS_ORIENTATION";
                         btn_params.param_type = mavlink.MAV_PARAM_TYPE_INT8;
-                        btn_params.param_value = 34; // PITCH270ROLL180
+                        btn_params.param_value = 24; // PITCH90
                     }
                     else {
                         btn_params = {};
@@ -530,7 +530,7 @@ function parseMavFromDrone(mavPacket) {
                 if (param_value.toString() === '0') {
                     ant_type = "T0";
                 }
-                else if (param_value.toString() === '34') {
+                else if (param_value.toString() === '24') {
                     ant_type = "T90";
                 }
 
@@ -549,9 +549,9 @@ function parseMavFromDrone(mavPacket) {
 
 function mavlinkGenerateMessage(src_sys_id, src_comp_id, type, params) {
     const mavlinkParser = new MAVLink(null/*logger*/, src_sys_id, src_comp_id, mavVersion);
+    let mavMsg = null;
+    let genMsg = null;
     try {
-        var mavMsg = null;
-        var genMsg = null;
         //var targetSysId = sysId;
         // eslint-disable-next-line no-unused-vars
         //var targetCompId = (params.targetCompId === undefined) ? 0 : params.targetCompId;
@@ -565,6 +565,14 @@ function mavlinkGenerateMessage(src_sys_id, src_comp_id, type, params) {
                     params.param_id,
                     params.param_value,
                     params.param_type
+                );
+                break;
+            case mavlink.MAVLINK_MSG_ID_PARAM_REQUEST_READ:
+                mavMsg = new mavlink.messages.param_request_read(
+                    params.target_system,
+                    params.target_component,
+                    params.param_id,
+                    params.param_index
                 );
                 break;
         }
