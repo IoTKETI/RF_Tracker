@@ -56,6 +56,8 @@ let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
 
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 
+let pn_drone_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/Panel';
+
 let ant_type = '';
 
 mavPortOpening();
@@ -344,6 +346,10 @@ function parseMavFromDrone(mavPacket) {
             sys_id = parseInt(mavPacket.substring(6, 8).toLowerCase(), 16);
             msg_id = parseInt(mavPacket.substring(10, 12).toLowerCase(), 16);
             base_offset = 12;
+        }
+
+        if (tr_mqtt_client) {
+            tr_mqtt_client.publish(pn_drone_topic, Buffer.from(mavPacket, 'hex'));
         }
 
         if (msg_id === mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) { // #33
