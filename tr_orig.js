@@ -212,7 +212,7 @@ function mavPortData(data) {
     }
 }
 
-function send_param_get_command(){
+function send_param_get_command() {
     let btn_params = {};
     btn_params.target_system = 254;
     btn_params.target_component = -1;
@@ -242,6 +242,7 @@ function send_param_get_command(){
         setTimeout(send_param_get_command, 1000);
     }
 }
+
 function tr_mqtt_connect(serverip) {
     if (!tr_mqtt_client) {
         let connectOptions = {
@@ -291,9 +292,42 @@ function tr_mqtt_connect(serverip) {
                 fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
             }
             else if (topic === pn_cmd_topic) {
-                if (mavPort) {
-                    if (mavPort.isOpen) {
-                        mavPort.write(message);
+                if (message.toString() === 'run') {
+                    let btn_params={};
+                    btn_params.target_system = 254;
+                    btn_params.target_component = 1;
+                    btn_params.command = mavlink.MAV_CMD_COMPONENT_ARM_DISARM;
+                    btn_params.confirmation = 0;
+                    btn_params.param1 = 1;
+                    btn_params.param2 = 1;
+                    btn_params.param3 = 65535;
+                    btn_params.param4 = 65535;
+                    btn_params.param5 = 65535;
+                    btn_params.param6 = 65535;
+                    btn_params.param7 = 65535;
+
+                    try {
+                        let msg = mavlinkGenerateMessage(255, 0xbe, mavlink.MAVLINK_MSG_ID_COMMAND_LONG, btn_params);
+                        if (!msg) {
+                            console.log("mavlink message is null");
+                        }
+                        else {
+                            if (mavPort) {
+                                if (mavPort.isOpen) {
+                                    mavPort.write(msg);
+                                }
+                            }
+                        }
+                    }
+                    catch (ex) {
+                        console.log('[ERROR] ' + ex);
+                    }
+                }
+                else {
+                    if (mavPort) {
+                        if (mavPort.isOpen) {
+                            mavPort.write(message);
+                        }
                     }
                 }
             }
@@ -526,20 +560,20 @@ function parseMavFromDrone(mavPacket) {
             let my_len = 25;
             let ar = mavPacket.split('');
             for (let i = 0; i < (my_len - msg_len); i++) {
-                ar.splice(ar.length-4, 0, '0');
-                ar.splice(ar.length-4, 0, '0');
+                ar.splice(ar.length - 4, 0, '0');
+                ar.splice(ar.length - 4, 0, '0');
             }
             mavPacket = ar.join('');
 
-            var param_value = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
+            let param_value = mavPacket.substring(base_offset, base_offset + 8).toLowerCase();
             base_offset += 8;
-            var param_count = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
+            let param_count = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
             base_offset += 4;
-            var param_index = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
+            let param_index = mavPacket.substring(base_offset, base_offset + 4).toLowerCase();
             base_offset += 4;
-            var param_id = mavPacket.substring(base_offset, base_offset + 32).toLowerCase();
+            let param_id = mavPacket.substring(base_offset, base_offset + 32).toLowerCase();
             base_offset += 32;
-            var param_type = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
+            let param_type = mavPacket.substring(base_offset, base_offset + 2).toLowerCase();
 
             param_id = Buffer.from(param_id, "hex").toString('ASCII');
 
@@ -592,6 +626,21 @@ function mavlinkGenerateMessage(src_sys_id, src_comp_id, type, params) {
                     params.target_component,
                     params.param_id,
                     params.param_index
+                );
+                break;
+            case mavlink.MAVLINK_MSG_ID_COMMAND_LONG:
+                mavMsg = new mavlink.messages.command_long(
+                    params.target_system,
+                    params.target_component,
+                    params.command,
+                    params.confirmation,
+                    params.param1,
+                    params.param2,
+                    params.param3,
+                    params.param4,
+                    params.param5,
+                    params.param6,
+                    params.param7
                 );
                 break;
         }
