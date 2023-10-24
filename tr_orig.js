@@ -48,7 +48,7 @@ let DroneName = drone_info.drone;
 let tr_mqtt_client = null;
 
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
-let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
+let gps_att_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
 let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
@@ -506,8 +506,8 @@ function parseMavFromDrone(mavPacket) {
             attitude_msg = JSON.parse(JSON.stringify(_attitude_msg));
 
             if (tr_mqtt_client) {
-                tr_mqtt_client.publish(gps_alt_topic, JSON.stringify(attitude_msg), () => {
-                    console.log('publish attitude_msg to local mqtt(' + gps_alt_topic + ') : ', JSON.stringify(attitude_msg));
+                tr_mqtt_client.publish(gps_att_topic, JSON.stringify(attitude_msg), () => {
+                    console.log('publish attitude_msg to local mqtt(' + gps_att_topic + ') : ', JSON.stringify(attitude_msg));
                 });
             }
         }
