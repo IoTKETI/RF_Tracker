@@ -19,6 +19,7 @@ let tracker_latitude = 37.4036621604629;
 let tracker_longitude = 127.16176249708046;
 let OFFSET_ALT = 0.5;
 let tracker_altitude = OFFSET_ALT;
+let origin_tracker_altitude = OFFSET_ALT;
 
 let tracker_fix_type = 0;
 let tracker_satellites_visible = 0;
@@ -70,7 +71,7 @@ let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
-let gps_alt_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
+let gps_att_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
 let antType = 'T0';
@@ -103,15 +104,15 @@ function tr_mqtt_connect(host) {
             });
         }
 
-        if (gps_alt_topic !== '') {
-            tr_mqtt_client.subscribe(gps_alt_topic, () => {
-                console.log('[tr_mqtt_client] gps_alt_topic is subscribed -> ', gps_alt_topic);
+        if (gps_att_topic !== '') {
+            tr_mqtt_client.subscribe(gps_att_topic, () => {
+                console.log('[tr_mqtt_client] gps_att_topic is subscribed -> ', gps_att_topic);
             });
         }
 
         if (pn_speed_topic !== '') {
             tr_mqtt_client.subscribe(pn_speed_topic, () => {
-                console.log('[pn_speed_topic] gps_alt_topic is subscribed -> ', pn_speed_topic);
+                console.log('[pn_speed_topic] pn_speed_topic is subscribed -> ', pn_speed_topic);
             });
         }
 
@@ -167,14 +168,14 @@ function tr_mqtt_connect(host) {
             tracker_gpi = JSON.parse(message.toString());
 
             if (gpsUpdateFlag) {
-                if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
+                // if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
                     tracker_latitude = tracker_gpi.lat / 10000000;
                     tracker_longitude = tracker_gpi.lon / 10000000;
 
                     // tracker_altitude = tracker_gpi.alt / 1000;
-                    tracker_altitude = tracker_gpi.relative_alt / 1000;
-                    tracker_altitude += OFFSET_ALT;
-                }
+                    origin_tracker_altitude = tracker_gpi.relative_alt / 1000;
+                    tracker_altitude = origin_tracker_altitude + OFFSET_ALT;
+                // }
             }
 
             countBPM++;
@@ -187,7 +188,7 @@ function tr_mqtt_connect(host) {
 
             countBPM++;
         }
-        else if (topic === gps_alt_topic) {
+        else if (topic === gps_att_topic) {
             tracker_att = JSON.parse(message.toString());
 
             tracker_yaw = ((tracker_att.yaw * 180) / Math.PI);
@@ -231,9 +232,10 @@ function tr_mqtt_connect(host) {
             fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
         else if (topic === pn_alt_topic) {
-            motor_altitude_message = parseInt(message.toString());
+            motor_altitude_message = parseFloat(message.toString());
             if (typeof (motor_altitude_message) === 'number') {
                 OFFSET_ALT = motor_altitude_message;
+                tracker_altitude = origin_tracker_altitude + OFFSET_ALT;
             }
 
             tr_heartbeat.offset_alt = OFFSET_ALT;
