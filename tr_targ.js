@@ -216,6 +216,7 @@ function dr_mqtt_connect(serverip) {
                 DroneData[sequence] = droneData;
             }
             console.log('[RF]', sequence);
+            // TODO: Mobius로 전달하는 부분 추가
             tr_message_handler(topic, message);
         }
         else if (topic === res_data_topic) {
