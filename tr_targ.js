@@ -216,7 +216,12 @@ function dr_mqtt_connect(serverip) {
                 DroneData[sequence] = droneData;
             }
             console.log('[RF]', sequence);
-            // TODO: Mobius로 전달하는 부분 추가
+
+            // RF로 받은 드론 데이터를 Mobius에게 LTE로 전달
+            if (mobius_mqtt_client) {
+                mobius_mqtt_client.publish(topic + '/tr', message);
+            }
+
             tr_message_handler(topic, message);
         }
         else if (topic === res_data_topic) {
@@ -227,7 +232,7 @@ function dr_mqtt_connect(serverip) {
     });
 
     dr_mqtt_client.on('error', (err) => {
-        console.log('[mqtt_client] error - ' + err.message);
+        console.log('[dr_mqtt_client] error - ' + err.message);
     });
 }
 
@@ -376,7 +381,7 @@ function mobius_mqtt_connect(serverip) {
     });
 
     mobius_mqtt_client.on('error', (err) => {
-        console.log('[rf_mqtt_client] error - ' + err.message);
+        console.log('[mobius_mqtt_client] error - ' + err.message);
     });
 }
 
