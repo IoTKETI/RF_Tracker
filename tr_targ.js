@@ -78,7 +78,7 @@ function init() {
     tr_mqtt_connect('localhost');
 
     let host_arr = drone_info.gcs_ip.split('.');
-    host_arr[3] = '200';
+    host_arr[3] = parseInt(drone_info.system_id);
     let drone_ip = host_arr.join('.');
 
     dr_mqtt_connect(drone_ip);
