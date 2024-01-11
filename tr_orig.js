@@ -49,7 +49,7 @@ let tr_mqtt_client = null;
 
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_att_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
-let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
+let gps_raw_topic = '/Mobius/' + GcsName + '/Gps_Data/GPS';
 let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
 let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';

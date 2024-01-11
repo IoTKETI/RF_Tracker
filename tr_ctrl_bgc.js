@@ -70,7 +70,7 @@ let pn_gps_ctrl_topic = '/Mobius/' + GcsName + '/Gps_Ctrl_Data/' + DroneName + '
 let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
-let gps_raw_topic = '/Mobius/' + GcsName + '/Gcs_Data/GPS';
+let gps_raw_topic = '/Mobius/' + GcsName + '/Gps_Data/GPS';
 let gps_att_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
