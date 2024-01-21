@@ -168,7 +168,7 @@ function tr_mqtt_connect(host) {
             tracker_gpi = JSON.parse(message.toString());
 
             if (gpsUpdateFlag) {
-                if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_DGPS) {
+                if (mavlink.GPS_FIX_TYPE_2D_FIX <= tracker_fix_type && tracker_fix_type <= mavlink.GPS_FIX_TYPE_RTK_FIXED) {
                     tracker_latitude = tracker_gpi.lat / 10000000;
                     tracker_longitude = tracker_gpi.lon / 10000000;
 
