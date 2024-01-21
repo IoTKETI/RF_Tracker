@@ -4,6 +4,7 @@
     "description": "RF_Tracker",
     "dependencies": {
         "jspack": "0.0.4",
+        "long": "^5.2.3",
         "mqtt": "^4.3.6",
         "nanoid": "^3.1.30",
         "serialport": "^10.4.0",
