@@ -156,6 +156,9 @@ function mavPortData(data) {
             }
             // console.log(mavVersion, mavPacket._msgbuf.toString('hex'))
 
+            if (tr_mqtt_client) {
+                tr_mqtt_client.publish(pn_drone_topic, mavPacket._msgbuf)
+            }
             setTimeout(parseMavFromDrone, 0, mavPacket);
 
             mavStrFromDrone = mavStrFromDrone.slice(expectedBufferLength)

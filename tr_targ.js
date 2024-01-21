@@ -143,7 +143,7 @@ function tr_mqtt_connect(serverip) {
             });
         }
 
-        if (topic === tr_data_topic) {
+        else if (topic === tr_data_topic) {
             if (mobius_mqtt_client) {
                 mobius_mqtt_client.publish(topic, message, () => {
                     console.log(topic, message.toString());
