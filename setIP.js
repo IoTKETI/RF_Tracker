@@ -4,15 +4,9 @@
 
 const {exec} = require("child_process");
 const os = require("os");
-const mqtt = require('mqtt');
-const {nanoid} = require('nanoid');
-
 const fs = require("fs");
 
 const rfPort = 'eth0';
-
-let tr_mqtt_client = null;
-let local_pub_ready_topic = '/ip/ready';
 
 let drone_info = {};
 try {
@@ -24,11 +18,10 @@ catch (e) {
     drone_info.id = "Dione";
     drone_info.approval_gcs = "MUV";
     drone_info.host = "gcs.iotocean.org";
-    drone_info.drone = "Drone1";
+    drone_info.drone = "KETI_Drone";
     drone_info.gcs = "KETI_GCS";
     drone_info.type = "ardupilot";
-    drone_info.system_id = 1;
-    drone_info.gcs_ip = "192.168.1.150";
+    drone_info.system_id = 250;
 
     fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
 }
@@ -36,149 +29,165 @@ catch (e) {
 let IPready = {"status": "not ready"};
 fs.writeFileSync('./readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
 
-let host_arr = drone_info.gcs_ip.split('.');
-host_arr[3] = parseInt(drone_info.system_id) - 2;
-let tr_ip = host_arr.join('.');
+let status = '';
 
-tr_mqtt_connect('localhost');
+status = 'setIP';
+let tr_ip = '192.168.' + drone_info.system_id + '.' + (parseInt(drone_info.system_id) - 2);
+setTimeout(setIPandRoute, 200, tr_ip);
 
-function tr_mqtt_connect(serverip) {
-    if (!tr_mqtt_client) {
-        let connectOptions = {
-            host: serverip,
-            port: 1883,
-            protocol: "mqtt",
-            keepalive: 60,
-            clientId: 'SET_IP_' + nanoid(15),
-            protocolId: "MQTT",
-            protocolVersion: 4,
-            clean: true,
-            reconnectPeriod: 2 * 1000,
-            connectTimeout: 30 * 1000,
-            queueQoSZero: false,
-            rejectUnauthorized: false
+let diffIpCount = 0;
+
+function checkIP(host) {
+    let host_arr = host.split('.');
+    host_arr[3] = drone_info.system_id;
+    let drone_ip = host_arr.join('.');
+
+    let networkInterfaces = os.networkInterfaces();
+    if (networkInterfaces.hasOwnProperty(rfPort)) {
+        let alreadySet = false;
+        let prev_ip;
+        let setIP;
+        for (let idx in networkInterfaces[rfPort]) {
+            if (networkInterfaces[rfPort][idx].family === 'IPv4') {
+                if (networkInterfaces[rfPort][idx].address === drone_ip) {
+                    alreadySet = true;
+                    setIP = networkInterfaces[rfPort][idx].address;
+                }
+                else {
+                    prev_ip = networkInterfaces[rfPort][idx].address;
+                }
+            }
+            else {
+                console.log('waiting for IPv4');
+            }
         }
 
-        tr_mqtt_client = mqtt.connect(connectOptions);
-
-        tr_mqtt_client.on('connect', () => {
-            console.log('tr_mqtt_client is connected to Drone( ' + serverip + ' )');
-
-            setIPandRoute(tr_ip);
-        });
-
-        tr_mqtt_client.on('message', (topic, message) => {
-            console.log('[tr_mqtt_client] Received ' + message.toString() + ' From ' + topic);
-        });
-
-        tr_mqtt_client.on('error', (err) => {
-            console.log('[tr_mqtt_client] error - ' + err.message);
-        });
+        if (!alreadySet) {
+            if (diffIpCount > 5) {
+                status = 'setIP';
+                setTimeout(setIPandRoute, 200, drone_ip);
+                diffIpCount = 0;
+            }
+            else {
+                diffIpCount++;
+                setTimeout(checkIP, 1000, drone_ip);
+            }
+        }
+        else {
+            console.log('already set ' + rfPort + ' IP --> ' + setIP)
+            setTimeout(checkIP, 3000, drone_ip);
+        }
     }
 }
 
 function setIPandRoute(host) {
+    let host_arr = host.split('.');
+    host_arr[3] = drone_info.system_id;
+    let drone_ip = host_arr.join('.');
+
     let networkInterfaces = os.networkInterfaces();
     if (networkInterfaces.hasOwnProperty(rfPort)) {
-        for (let idx in networkInterfaces[rfPort]) {
-            if (networkInterfaces[rfPort][idx].family === 'IPv4') {
-                if (networkInterfaces[rfPort][idx].address !== host) {
-                    // set static ip
-                    exec('sudo ifconfig ' + rfPort + ' ' + host, (error, stdout, stderr) => {
-                        if (error) {
-                            console.error(`[error] in static ip setting : ${error}`);
-                            return;
-                        }
-                        if (stdout) {
-                            console.log(`stdout: ${stdout}`);
-                        }
-                        if (stderr) {
-                            console.error(`stderr: ${stderr}`);
-                        }
-                        // console.log(os.networkInterfaces());
-                        // set route
-                        exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + host, (error, stdout, stderr) => {
-                            if (error) {
-                                console.error(`[error] in routing table setting : ${error}`);
-                                return;
-                            }
-                            if (stdout) {
-                                console.log(`stdout: ${stdout}`);
-                            }
-                            if (stderr) {
-                                console.error(`stderr: ${stderr}`);
-                            }
-                            exec('route', (error, stdout, stderr) => {
-                                if (error) {
-                                    console.error(`[error] in routing table setting : ${error}`);
-                                    return;
-                                }
-                                if (stdout) {
-                                    console.log(`stdout: ${stdout}`);
-                                    if (tr_mqtt_client) {
-                                        tr_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
-                                            console.log('send ready message to localhost(' + local_pub_ready_topic + ')-', 'ready');
-                                        });
-                                        IPready.status = 'ready';
-                                        fs.writeFileSync('../readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
-                                        tr_mqtt_client.end(() => {
-                                            console.log('Finish IP setting');
-                                        });
-                                    }
-                                }
-                                if (stderr) {
-                                    console.error(`stderr: ${stderr}`);
-                                }
-                            });
-                        });
-                    });
+        if (status === 'setIP') {
+            let alreadySet = false;
+            let prev_ip;
+            for (let idx in networkInterfaces[rfPort]) {
+                if (networkInterfaces[rfPort][idx].family === 'IPv4') {
+                    if (networkInterfaces[rfPort][idx].address === drone_ip) {
+                        alreadySet = true;
+                    }
+                    else {
+                        prev_ip = networkInterfaces[rfPort][idx].address;
+                    }
                 }
                 else {
-                    IPready.status = 'ready';
-                    fs.writeFileSync('../readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
-                    // set route
-                    exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + host, (error, stdout, stderr) => {
-                        if (error) {
-                            console.error(`[error] in routing table setting : ${error}`);
-                            return;
-                        }
-                        if (stdout) {
-                            console.log(`stdout: ${stdout}`);
-                        }
-                        if (stderr) {
-                            console.error(`stderr: ${stderr}`);
-                        }
-                        exec('route', (error, stdout, stderr) => {
-                            if (error) {
-                                console.error(`[error] in routing table setting : ${error}`);
-                                return;
-                            }
-                            if (stdout) {
-                                console.log(`stdout: ${stdout}`);
-                                if (tr_mqtt_client) {
-                                    tr_mqtt_client.publish(local_pub_ready_topic, 'ready', () => {
-                                        console.log('send ready message to localhost(' + local_pub_ready_topic + ')-', 'ready');
-                                    });
-                                }
-                                IPready.status = 'ready';
-                                fs.writeFileSync('../readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
-                                tr_mqtt_client.end(() => {
-                                    console.log('Finish IP setting');
-                                });
-                            }
-                            if (stderr) {
-                                console.error(`stderr: ${stderr}`);
-                            }
-                        });
-                    });
+                    console.log('waiting for IPv4');
                 }
             }
-            else {
-                setTimeout(setIPandRoute, 500, host);
+
+            if (!alreadySet) {
+                // set static ip
+                console.log('eth0 address different from drone IP --> ' + prev_ip + ' - ' + drone_ip);
+                exec('sudo ifconfig ' + rfPort + ' ' + drone_ip, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`[error] in static ip setting : ${error}`);
+                        return;
+                    }
+                    if (stdout) {
+                        console.log(`stdout: ${stdout}`);
+                    }
+                    if (stderr) {
+                        console.error(`stderr: ${stderr}`);
+                    }
+                    status = 'checkRoutingTable';
+                    setTimeout(setIPandRoute, 500, drone_ip);
+                });
             }
+            else {
+                console.log('eth0 address same as drone IP --> ' + prev_ip + ' - ' + drone_ip);
+
+                status = 'checkRoutingTable';
+                setTimeout(setIPandRoute, 500, drone_ip);
+            }
+        }
+        else if (status === 'checkRoutingTable') {
+            console.log('ip setting successful. then routing table checking');
+            exec('route', (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[error] Checking the routing table : ${error}`);
+                    return;
+                }
+                if (stdout) {
+                    console.log(`stdout: ${stdout}`);
+                    let routing_table = stdout.split('\n');
+
+                    let addedRoutingTable = false;
+
+                    routing_table.forEach((routingList) => {
+                        if (routingList.includes(rfPort)) {
+                            if (routingList.includes(host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0')) {
+                                addedRoutingTable = true;
+                            }
+                        }
+                    });
+
+                    if (addedRoutingTable) {
+                        IPready.status = 'ready';
+                        fs.writeFileSync('../readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
+                        status = 'Finish';
+                        console.log('Finish IP setting');
+                        setTimeout(checkIP, 1000, drone_ip);
+                    }
+                    else {
+                        status = 'addedRoutingTable';
+                        setTimeout(setIPandRoute, 500, drone_ip);
+                    }
+                }
+                if (stderr) {
+                    console.error(`stderr: ${stderr}`);
+                }
+            });
+        }
+        else if (status === 'addedRoutingTable') {
+            // set route
+            console.log('ip setting successful. then add route');
+            exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + drone_ip, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[error] Setting up the routing table : ${error}`);
+                }
+                if (stdout) {
+                    console.log(`stdout: ${stdout}`);
+                }
+                if (stderr) {
+                    console.error(`stderr: ${stderr}`);
+                }
+                console.log('route addition was successful. then routing table checking');
+                status = 'checkRoutingTable';
+                setTimeout(setIPandRoute, 500, drone_ip);
+            });
         }
     }
     else {
-        setTimeout(setIPandRoute, 500, host);
+        console.log('waiting for ' + rfPort)
+        setTimeout(setIPandRoute, 2000, drone_ip);
     }
 }

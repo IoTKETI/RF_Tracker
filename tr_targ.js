@@ -46,14 +46,14 @@ function init() {
     }
     catch (e) {
         console.log('can not find [ ./drone_info.json ] file');
+
         drone_info.id = "Dione";
         drone_info.approval_gcs = "MUV";
-        drone_info.host = "121.137.228.240";
-        drone_info.drone = "KETI_Simul_1";
+        drone_info.host = "gcs.iotocean.org";
+        drone_info.drone = "KETI_Drone";
         drone_info.gcs = "KETI_GCS";
         drone_info.type = "ardupilot";
-        drone_info.system_id = 1;
-        drone_info.gcs_ip = "192.168.1.150";
+        drone_info.system_id = 250;
 
         fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
     }
@@ -70,17 +70,16 @@ function init() {
 
     dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
 
-    rc_data_topic = '/Mobius/' + GcsName + '/RC_Data/' + DroneName;
+    rc_data_topic = '/Mobius/' + GcsName + '/Rc_Data/' + DroneName;
 
-    res_data_topic = '/Mobius/' + GcsName + '/RC_Res_Data/' + DroneName;
+    res_data_topic = '/Mobius/' + GcsName + '/Res_Data/' + DroneName;
+    res_data_topic = '/Mobius/' + GcsName + '/Mav_Res_Data/' + DroneName;
 
     tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 
-    tr_mqtt_connect('localhost');
+    tr_mqtt_connect('127.0.0.1');
 
-    let host_arr = drone_info.gcs_ip.split('.');
-    host_arr[3] = parseInt(drone_info.system_id);
-    let drone_ip = host_arr.join('.');
+    let drone_ip = '192.168.' + drone_info.system_id + '.' + drone_info.system_id;
 
     dr_mqtt_connect(drone_ip);
 

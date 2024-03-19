@@ -46,12 +46,11 @@ catch (e) {
 
     drone_info.id = "Dione";
     drone_info.approval_gcs = "MUV";
-    drone_info.host = "121.137.228.240";
-    drone_info.drone = "KETI_Simul_1";
+    drone_info.host = "gcs.iotocean.org";
+    drone_info.drone = "KETI_Drone";
     drone_info.gcs = "KETI_GCS";
     drone_info.type = "ardupilot";
-    drone_info.system_id = 1;
-    drone_info.gcs_ip = "192.168.1.150";
+    drone_info.system_id = 250;
 
     fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
 }
@@ -479,7 +478,7 @@ setInterval(() => {
     }
 }, 3000)
 
-setTimeout(tr_mqtt_connect, 3000, 'localhost');
+setTimeout(tr_mqtt_connect, 3000, '127.0.0.1');
 
 let pan_offset_ctrl = 0;
 let tilt_offset_ctrl = 0;

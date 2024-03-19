@@ -16,14 +16,14 @@ try {
 }
 catch (e) {
     console.log('can not find [ ./drone_info.json ] file');
+
     drone_info.id = "Dione";
     drone_info.approval_gcs = "MUV";
-    drone_info.host = "121.137.228.240";
-    drone_info.drone = "KETI_Simul_1";
+    drone_info.host = "gcs.iotocean.org";
+    drone_info.drone = "KETI_Drone";
     drone_info.gcs = "KETI_GCS";
     drone_info.type = "ardupilot";
-    drone_info.system_id = 1;
-    drone_info.gcs_ip = "192.168.1.150";
+    drone_info.system_id = 250;
 
     fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
 }
@@ -53,18 +53,17 @@ let gps_att_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gps_Data/GPS';
 let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
-let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
-
-let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
-
 let pn_drone_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/Panel';
+
+let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
+let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 let pn_cmd_topic = '/Mobius/' + GcsName + '/TrCmd_Data/' + DroneName + '/Panel';
 
 let ant_type = '';
 
 mavPortOpening();
 
-tr_mqtt_connect('localhost');
+tr_mqtt_connect('127.0.0.1');
 
 function mavPortOpening() {
     if (!mavPort) {
