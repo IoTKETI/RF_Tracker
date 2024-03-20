@@ -6,8 +6,6 @@ const motor_bgc = require('./motor_bgc');
 
 const mavlink = require('./mavlibrary/mavlink.js');
 
-let tr_mqtt_client = null;
-
 let target_gpi = {};
 let tracker_control_message = '';
 let motor_altitude_message = '';
@@ -58,7 +56,8 @@ catch (e) {
 let GcsName = drone_info.gcs;
 let DroneName = drone_info.drone;
 
-let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
+let tr_mqtt_client = null;
+let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/+/tr';
 
 let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
@@ -66,12 +65,13 @@ let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 let pn_speed_topic = '/Mobius/' + GcsName + '/Speed_Data/' + DroneName + '/Panel';
 let pn_gps_ctrl_topic = '/Mobius/' + GcsName + '/Gps_Ctrl_Data/' + DroneName + '/Panel';
 
-let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
-
 let gps_pos_topic = '/Mobius/' + GcsName + '/Pos_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gps_Data/GPS';
 let gps_att_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
+
+let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
+let tr_cmd_data_topic = '/Mobius/' + GcsName + '/TrCmd_Data/' + DroneName + '/Panel';
 
 let antType = 'T0';
 
@@ -82,7 +82,7 @@ function tr_mqtt_connect(host) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'local_motor_can_' + nanoid(15),
+        clientId: 'tr_ctrl_bgc_local_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
@@ -159,9 +159,7 @@ function tr_mqtt_connect(host) {
     });
 
     tr_mqtt_client.on('message', (topic, message) => {
-        let _dr_data_topic = dr_data_topic.replace('/#', '');
         let arr_topic = topic.split('/');
-        let _topic = arr_topic.splice(0, arr_topic.length - 1).join('/');
 
         if (topic === gps_pos_topic) { // 픽스호크로부터 받아오는 트래커 위치 좌표
             tracker_gpi = JSON.parse(message.toString());
@@ -208,17 +206,6 @@ function tr_mqtt_connect(host) {
             tracker_control_message = message.toString();
             tracker_handler(tracker_control_message);
         }
-            // else if (topic === pn_offset_topic) { // 모터 옵셋 설정 메세지 수신
-            //     let offsetObj = JSON.parse(message.toString());
-            //     if (!offsetObj.hasOwnProperty('type')) {
-            //         pan_offset = offsetObj.p_offset;
-            //         tilt_offset = offsetObj.t_offset;
-            //
-            //         fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
-            //
-            //         console.log('[pan_offset_ctrl] -->', pan_offset, '[tilt_offset_ctrl] -->', tilt_offset);
-            //     }
-        // }
         else if (topic === pn_gps_ctrl_topic) { // GPS 좌표 고정 여부 메세지 수신
             if (message.toString() === 'release') {
                 gpsUpdateFlag = true;
@@ -241,7 +228,7 @@ function tr_mqtt_connect(host) {
 
             fs.writeFileSync('./tr_heartbeat.json', JSON.stringify(tr_heartbeat, null, 4), 'utf8');
         }
-        else if (_topic === _dr_data_topic) { // 드론데이터 수신
+        else if (arr_topic[3] === 'Drone_Data' && arr_topic[6] === 'tr') { // 드론데이터 수신
             if (flagTracking === 'yes') {
                 let arr_msg = message.toString().split(';');
                 if (arr_msg[0] === 'gpi') {
@@ -266,8 +253,6 @@ function tr_mqtt_connect(host) {
     });
 }
 
-
-let tidControlTracker = null;
 let flagTracking = 'no';
 const STEP = 152;
 let tracker_handler = (_msg) => {
@@ -322,7 +307,7 @@ let tracker_handler = (_msg) => {
         }
         else {
             if (tr_mqtt_client) {
-                tr_mqtt_client.publish('/Mobius/' + GcsName + '/TrCmd_Data/' + DroneName + '/Panel', 'run');
+                tr_mqtt_client.publish(tr_cmd_data_topic, 'run');
             }
             stateCtrl = 'run';
             flagTracking = 'yes';
@@ -591,7 +576,6 @@ let watchdogCtrl = () => {
     }
 }
 
-
 let stateCtrl = 'ready';
 
 setTimeout(() => {
@@ -605,4 +589,3 @@ setTimeout(() => {
     g_tilt_t_angle = tracker_pitch;
     setInterval(watchdogCtrl, 100);
 }, 6000);
-

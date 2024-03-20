@@ -53,9 +53,8 @@ let gps_att_topic = '/Mobius/' + GcsName + '/Att_Data/GPS';
 let gps_raw_topic = '/Mobius/' + GcsName + '/Gps_Data/GPS';
 let gps_type_topic = '/Mobius/' + GcsName + '/Type_Data/GPS';
 
-let pn_drone_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/Panel';
+let pn_drone_topic = '/Mobius/' + GcsName + '/Tr_Mav_Data/' + DroneName + '/Panel';
 
-let pn_dinfo_topic = '/Mobius/' + GcsName + '/Drone_Info_Data/Panel';
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
 let pn_cmd_topic = '/Mobius/' + GcsName + '/TrCmd_Data/' + DroneName + '/Panel';
 
@@ -264,11 +263,6 @@ function tr_mqtt_connect(serverip) {
         tr_mqtt_client.on('connect', () => {
             console.log('tr_mqtt_client is connected ' + serverip);
 
-            if (pn_dinfo_topic !== '') {
-                tr_mqtt_client.subscribe(pn_dinfo_topic, () => {
-                    console.log('[tr_mqtt_client] pn_ctrl_topic is subscribed -> ', pn_dinfo_topic);
-                });
-            }
             if (pn_offset_topic !== '') {
                 tr_mqtt_client.subscribe(pn_offset_topic, () => {
                     console.log('[tr_mqtt_client] pn_offset_topic is subscribed -> ', pn_offset_topic);
@@ -286,11 +280,7 @@ function tr_mqtt_connect(serverip) {
         });
 
         tr_mqtt_client.on('message', (topic, message) => {
-            if (topic === pn_dinfo_topic) { // 모터 제어 메세지 수신
-                let drone_info = JSON.parse(message.toString());
-                fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
-            }
-            else if (topic === pn_cmd_topic) {
+            if (topic === pn_cmd_topic) {
                 if (message.toString() === 'run') {
                     let btn_params = {};
                     btn_params.target_system = my_system_id;

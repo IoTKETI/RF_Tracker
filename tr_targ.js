@@ -9,26 +9,22 @@ const {mavlink20, MAVLink20Processor} = require('./mavlibrary/mavlink2');
 let GcsName = 'KETI_GCS';
 let DroneName = 'KETI_Simul_1';
 
+let tr_mqtt_client = null;
 let dr_info_topic = '/Mobius/' + GcsName + '/Drinfo_Data/' + DroneName + '/Panel';
+let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
 
+let dr_mqtt_client = null;
+let dr_data_rf_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/+/rf';
+let res_data_rf_topic = '/Mobius/' + GcsName + '/Res_Data/' + DroneName + '/rf';
+let mav_res_data_rf_topic = '/Mobius/' + GcsName + '/Mav_Res_Data/' + DroneName + '/rf';
+
+let mobius_mqtt_client = null;
 let pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
 let pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
 let pn_speed_topic = '/Mobius/' + GcsName + '/Speed_Data/' + DroneName + '/Panel';
 let pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
-
-let dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
-
-let rc_data_topic = '/Mobius/' + GcsName + '/RC_Data/' + DroneName;
-
-let res_data_topic = '/Mobius/' + GcsName + '/RC_Res_Data/' + DroneName;
-
-let tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
-
-let tr_mqtt_client = null;
-
-let dr_mqtt_client = null;
-
-let mobius_mqtt_client = null;
+let dr_data_lte_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/+/orig';
+let rc_data_lte_topic = '/Mobius/' + GcsName + '/Rc_Data/' + DroneName + '/lte';
 
 let my_sortie_name = 'unknown';
 
@@ -62,25 +58,22 @@ function init() {
     DroneName = drone_info.drone;
 
     dr_info_topic = '/Mobius/' + GcsName + '/Drinfo_Data/' + DroneName + '/Panel';
+    tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
+
+    dr_data_rf_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/+/rf';
+    res_data_rf_topic = '/Mobius/' + GcsName + '/Res_Data/' + DroneName + '/rf';
+    mav_res_data_rf_topic = '/Mobius/' + GcsName + '/Mav_Res_Data/' + DroneName + '/rf';
 
     pn_ctrl_topic = '/Mobius/' + GcsName + '/Ctrl_Data/' + DroneName + '/Panel';
     pn_alt_topic = '/Mobius/' + GcsName + '/Alt_Data/' + DroneName + '/Panel';
     pn_speed_topic = '/Mobius/' + GcsName + '/Speed_Data/' + DroneName + '/Panel';
     pn_offset_topic = '/Mobius/' + GcsName + '/Offset_Data/' + DroneName + '/Panel';
-
-    dr_data_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/#';
-
-    rc_data_topic = '/Mobius/' + GcsName + '/Rc_Data/' + DroneName;
-
-    res_data_topic = '/Mobius/' + GcsName + '/Res_Data/' + DroneName;
-    res_data_topic = '/Mobius/' + GcsName + '/Mav_Res_Data/' + DroneName;
-
-    tr_data_topic = '/Mobius/' + GcsName + '/Tr_Data/' + DroneName + '/pantilt';
+    dr_data_lte_topic = '/Mobius/' + GcsName + '/Drone_Data/' + DroneName + '/+/orig';
+    rc_data_lte_topic = '/Mobius/' + GcsName + '/Rc_Data/' + DroneName + '/lte';
 
     tr_mqtt_connect('127.0.0.1');
 
     let drone_ip = '192.168.' + drone_info.system_id + '.' + drone_info.system_id;
-
     dr_mqtt_connect(drone_ip);
 
     mobius_mqtt_connect(drone_info.host);
@@ -92,7 +85,7 @@ function tr_mqtt_connect(serverip) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'tr_mqtt_' + nanoid(15),
+        clientId: 'tr_targ_local_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
@@ -121,13 +114,8 @@ function tr_mqtt_connect(serverip) {
 
     tr_mqtt_client.on('message', (topic, message) => {
         if (topic === dr_info_topic) {
-            let prev_ip = drone_info.gcs_ip;
-            let host_arr = prev_ip.split('.');
-            host_arr[3] = parseInt(drone_info.system_id) - 2;
-
-            drone_info = JSON.parse(message.toString());
             fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
-            exec('sudo route delete -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + prev_ip, (error, stdout, stderr) => {
+            exec('sudo route delete -net 192.168.' + drone_info.system_id + '.0 netmask 255.255.255.0 gw 192.168.' + drone_info.system_id + '.' + (parseInt(drone_info.system_id) - 2), (error, stdout, stderr) => {
                 if (error) {
                     console.error(`[error] in routing table setting : ${error}`);
                     return;
@@ -138,6 +126,9 @@ function tr_mqtt_connect(serverip) {
                 if (stderr) {
                     console.error(`stderr: ${stderr}`);
                 }
+                drone_info = JSON.parse(message.toString());
+                fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
+
                 exec('pm2 restart all');
             });
         }
@@ -162,7 +153,7 @@ function dr_mqtt_connect(serverip) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'dr_mqtt_' + nanoid(15),
+        clientId: 'tr_targ_rf_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
@@ -177,34 +168,31 @@ function dr_mqtt_connect(serverip) {
     dr_mqtt_client.on('connect', () => {
         console.log('dr_mqtt_client is connected to ' + serverip);
 
-        if (dr_data_topic !== '') {
-            dr_mqtt_client.subscribe(dr_data_topic, () => {
-                console.log('[dr_mqtt_client] dr_data_topic is subscribed -> ', dr_data_topic);
+        if (dr_data_rf_topic !== '') {
+            dr_mqtt_client.subscribe(dr_data_rf_topic, () => {
+                console.log('[dr_mqtt_client] dr_data_rf_topic is subscribed -> ', dr_data_rf_topic);
             });
         }
-        if (res_data_topic !== '') {
-            dr_mqtt_client.subscribe(res_data_topic, () => {
-                console.log('[dr_mqtt_client] res_data_topic is subscribed -> ', res_data_topic);
+        if (res_data_rf_topic !== '') {
+            dr_mqtt_client.subscribe(res_data_rf_topic, () => {
+                console.log('[dr_mqtt_client] res_data_rf_topic is subscribed -> ', res_data_rf_topic);
+            });
+        }
+        if (mav_res_data_rf_topic !== '') {
+            dr_mqtt_client.subscribe(mav_res_data_rf_topic, () => {
+                console.log('[dr_mqtt_client] mav_res_data_rf_topic is subscribed -> ', mav_res_data_rf_topic);
             });
         }
     });
 
     dr_mqtt_client.on('message', (topic, message) => {
-        let _dr_data_topic = dr_data_topic.replace('/#', '');
         let arr_topic = topic.split('/');
-        let _topic = arr_topic.splice(0, arr_topic.length - 1).join('/');
 
-        if (_topic === _dr_data_topic) {
+        if (arr_topic[3] === 'Drone_Data' && arr_topic[6] === 'rf') {
             if (t_id) {
                 clearTimeout(t_id);
                 disconnected = false;
             }
-
-            t_id = setTimeout(() => {
-                disconnected = true;
-                t_id = null;
-                DroneData = {};
-            }, 200);
 
             let droneData = message.toString('hex');
             let sequence;
@@ -221,14 +209,31 @@ function dr_mqtt_connect(serverip) {
 
             // RF로 받은 드론 데이터를 Mobius에게 LTE로 전달
             if (mobius_mqtt_client) {
-                mobius_mqtt_client.publish(topic + '/tr', message);
+                arr_topic.pop();
+                let _drone_data_topic = arr_topic.join('/');
+                mobius_mqtt_client.publish(_drone_data_topic + '/tr', message);
             }
 
             tr_message_handler(topic, message);
+
+            t_id = setTimeout(() => {
+                disconnected = true;
+                t_id = null;
+                DroneData = {};
+            }, 200);
         }
-        else if (topic === res_data_topic) {
+        else if (topic === res_data_rf_topic) {
             if (mobius_mqtt_client) {
-                mobius_mqtt_client.publish(topic + '/tr', message);
+                arr_topic.pop();
+                let _res_data_rf_topic = arr_topic.join('/');
+                mobius_mqtt_client.publish(_res_data_rf_topic + '/tr', message);
+            }
+        }
+        else if (topic === mav_res_data_rf_topic) {
+            if (mobius_mqtt_client) {
+                arr_topic.pop();
+                let _mav_res_data_rf_topic = arr_topic.join('/');
+                mobius_mqtt_client.publish(_mav_res_data_rf_topic + '/tr', message);
             }
         }
     });
@@ -263,7 +268,7 @@ function mobius_mqtt_connect(serverip) {
         port: 1883,
         protocol: "mqtt",
         keepalive: 10,
-        clientId: 'mobius_mqtt_' + nanoid(15),
+        clientId: 'tr_targ_global_' + nanoid(15),
         protocolId: "MQTT",
         protocolVersion: 4,
         clean: true,
@@ -282,8 +287,8 @@ function mobius_mqtt_connect(serverip) {
             console.log('[mobius_mqtt_client] dr_info_topic is subscribed -> ', dr_info_topic);
         });
 
-        mobius_mqtt_client.subscribe(dr_data_topic, () => {
-            console.log('[mobius_mqtt_client] dr_data_topic is subscribed -> ', dr_data_topic);
+        mobius_mqtt_client.subscribe(dr_data_lte_topic, () => {
+            console.log('[mobius_mqtt_client] dr_data_lte_topic is subscribed -> ', dr_data_lte_topic);
         });
 
         mobius_mqtt_client.subscribe(pn_ctrl_topic, () => {
@@ -302,17 +307,15 @@ function mobius_mqtt_connect(serverip) {
             console.log('[mobius_mqtt_client] pn_offset_topic is subscribed -> ' + pn_offset_topic);
         });
 
-        mobius_mqtt_client.subscribe(rc_data_topic, () => {
-            console.log('[mobius_mqtt_client] rc_data_topic is subscribed: ' + rc_data_topic);
+        mobius_mqtt_client.subscribe(rc_data_lte_topic, () => {
+            console.log('[mobius_mqtt_client] rc_data_lte_topic is subscribed: ' + rc_data_lte_topic);
         });
     });
 
     mobius_mqtt_client.on('message', (topic, message) => {
-        let _dr_data_topic = dr_data_topic.replace('/#', '');
         let arr_topic = topic.split('/');
-        let _topic = arr_topic.splice(0, arr_topic.length - 1).join('/');
 
-        if (_topic === _dr_data_topic) {
+        if (arr_topic[3] === 'Drone_Data' && arr_topic[6] === 'orig') {
             let droneData = message.toString('hex');
             let sequence;
             if (droneData.substring(0, 2) === 'fe') {
@@ -330,7 +333,9 @@ function mobius_mqtt_connect(serverip) {
                 }
             }
             // console.log('[LTE-Drone]', sequence);
-            tr_message_handler(topic, message);
+            arr_topic.pop();
+            let _drone_data_topic = arr_topic.join('/');
+            tr_message_handler(_drone_data_topic + '/tr', message);
         }
         else if (topic === dr_info_topic) {
             let prev_ip = drone_info.gcs_ip;
@@ -368,10 +373,12 @@ function mobius_mqtt_connect(serverip) {
                 tr_mqtt_client.publish(topic, message);
             }
         }
-        else if (topic === rc_data_topic) {
+        else if (topic === rc_data_lte_topic) {
             if (dr_mqtt_client) {
-                dr_mqtt_client.publish(rc_data_topic + '/tr', message, () => {
-                    // console.log("send to " + rc_data_topic + " -", message.toString('hex'));
+                arr_topic.pop();
+                let _rc_data_lte_topic = arr_topic.join('/');
+                dr_mqtt_client.publish(_rc_data_lte_topic + '/tr', message, () => {
+                    // console.log("send to " + rc_data_lte_topic + " -", message.toString('hex'));
                 });
             }
         }
