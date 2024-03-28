@@ -1,7 +1,7 @@
 const {SerialPort} = require('serialport');
 
 let sbus1Port = null;
-let sbus1PortNum = '/dev/ttyAMA3';
+let sbus1PortNum = '/dev/ttyAMA1';
 let sbus1Baudrate = 100000;
 
 let sequence = 0;
