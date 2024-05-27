@@ -214,7 +214,7 @@ function dr_mqtt_connect(serverip) {
                 mobius_mqtt_client.publish(_drone_data_topic + '/tr', message);
             }
 
-            tr_message_handler(topic, message);
+            tr_message_handler(topic + '/tr', message);
 
             t_id = setTimeout(() => {
                 disconnected = true;
