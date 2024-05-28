@@ -32,7 +32,7 @@ fs.writeFileSync('./readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
 let status = '';
 
 status = 'setIP';
-let tr_ip = '192.168.' + drone_info.system_id + '.' + (parseInt(drone_info.system_id) - 2);
+let tr_ip = '192.168.' + drone_info.system_id + '.' + (parseInt(drone_info.system_id) - 6);
 setTimeout(setIPandRoute, 200, tr_ip);
 
 let diffIpCount = 0;
