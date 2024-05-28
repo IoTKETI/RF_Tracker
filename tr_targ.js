@@ -115,7 +115,7 @@ function tr_mqtt_connect(serverip) {
     tr_mqtt_client.on('message', (topic, message) => {
         if (topic === dr_info_topic) {
             fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
-            exec('sudo route delete -net 192.168.' + drone_info.system_id + '.0 netmask 255.255.255.0 gw 192.168.' + drone_info.system_id + '.' + (parseInt(drone_info.system_id) - 2), (error, stdout, stderr) => {
+            exec('sudo route delete -net 192.168.' + drone_info.system_id + '.0 netmask 255.255.255.0 gw 192.168.' + drone_info.system_id + '.' + (parseInt(drone_info.system_id) - 6), (error, stdout, stderr) => {
                 if (error) {
                     console.error(`[error] in routing table setting : ${error}`);
                     return;
@@ -340,7 +340,7 @@ function mobius_mqtt_connect(serverip) {
         else if (topic === dr_info_topic) {
             let prev_ip = drone_info.gcs_ip;
             let host_arr = prev_ip.split('.');
-            host_arr[3] = parseInt(drone_info.system_id) - 2;
+            host_arr[3] = parseInt(drone_info.system_id) - 6;
 
             drone_info = JSON.parse(message.toString());
             fs.writeFileSync('./drone_info.json', JSON.stringify(drone_info, null, 4), 'utf8');
