@@ -38,10 +38,6 @@ setTimeout(setIPandRoute, 200, tr_ip);
 let diffIpCount = 0;
 
 function checkIP(host) {
-    let host_arr = host.split('.');
-    host_arr[3] = drone_info.system_id;
-    let drone_ip = host_arr.join('.');
-
     let networkInterfaces = os.networkInterfaces();
     if (networkInterfaces.hasOwnProperty(rfPort)) {
         let alreadySet = false;
@@ -49,7 +45,7 @@ function checkIP(host) {
         let setIP;
         for (let idx in networkInterfaces[rfPort]) {
             if (networkInterfaces[rfPort][idx].family === 'IPv4') {
-                if (networkInterfaces[rfPort][idx].address === drone_ip) {
+                if (networkInterfaces[rfPort][idx].address === host) {
                     alreadySet = true;
                     setIP = networkInterfaces[rfPort][idx].address;
                 }
@@ -65,25 +61,23 @@ function checkIP(host) {
         if (!alreadySet) {
             if (diffIpCount > 5) {
                 status = 'setIP';
-                setTimeout(setIPandRoute, 200, drone_ip);
+                setTimeout(setIPandRoute, 200, host);
                 diffIpCount = 0;
             }
             else {
                 diffIpCount++;
-                setTimeout(checkIP, 1000, drone_ip);
+                setTimeout(checkIP, 1000, host);
             }
         }
         else {
             console.log('already set ' + rfPort + ' IP --> ' + setIP)
-            setTimeout(checkIP, 3000, drone_ip);
+            setTimeout(checkIP, 3000, host);
         }
     }
 }
 
 function setIPandRoute(host) {
     let host_arr = host.split('.');
-    host_arr[3] = drone_info.system_id;
-    let drone_ip = host_arr.join('.');
 
     let networkInterfaces = os.networkInterfaces();
     if (networkInterfaces.hasOwnProperty(rfPort)) {
@@ -92,7 +86,7 @@ function setIPandRoute(host) {
             let prev_ip;
             for (let idx in networkInterfaces[rfPort]) {
                 if (networkInterfaces[rfPort][idx].family === 'IPv4') {
-                    if (networkInterfaces[rfPort][idx].address === drone_ip) {
+                    if (networkInterfaces[rfPort][idx].address === host) {
                         alreadySet = true;
                     }
                     else {
@@ -106,8 +100,8 @@ function setIPandRoute(host) {
 
             if (!alreadySet) {
                 // set static ip
-                console.log('eth0 address different from drone IP --> ' + prev_ip + ' - ' + drone_ip);
-                exec('sudo ifconfig ' + rfPort + ' ' + drone_ip, (error, stdout, stderr) => {
+                console.log('eth0 address different from drone IP --> ' + prev_ip + ' - ' + host);
+                exec('sudo ifconfig ' + rfPort + ' ' + host, (error, stdout, stderr) => {
                     if (error) {
                         console.error(`[error] in static ip setting : ${error}`);
                         return;
@@ -119,14 +113,14 @@ function setIPandRoute(host) {
                         console.error(`stderr: ${stderr}`);
                     }
                     status = 'checkRoutingTable';
-                    setTimeout(setIPandRoute, 500, drone_ip);
+                    setTimeout(setIPandRoute, 500, host);
                 });
             }
             else {
-                console.log('eth0 address same as drone IP --> ' + prev_ip + ' - ' + drone_ip);
+                console.log('eth0 address same as drone IP --> ' + prev_ip + ' - ' + host);
 
                 status = 'checkRoutingTable';
-                setTimeout(setIPandRoute, 500, drone_ip);
+                setTimeout(setIPandRoute, 500, host);
             }
         }
         else if (status === 'checkRoutingTable') {
@@ -155,11 +149,11 @@ function setIPandRoute(host) {
                         fs.writeFileSync('../readyIP.json', JSON.stringify(IPready, null, 4), 'utf8');
                         status = 'Finish';
                         console.log('Finish IP setting');
-                        setTimeout(checkIP, 1000, drone_ip);
+                        setTimeout(checkIP, 1000, host);
                     }
                     else {
                         status = 'addedRoutingTable';
-                        setTimeout(setIPandRoute, 500, drone_ip);
+                        setTimeout(setIPandRoute, 500, host);
                     }
                 }
                 if (stderr) {
@@ -170,7 +164,7 @@ function setIPandRoute(host) {
         else if (status === 'addedRoutingTable') {
             // set route
             console.log('ip setting successful. then add route');
-            exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + drone_ip, (error, stdout, stderr) => {
+            exec('sudo route add -net ' + host_arr[0] + '.' + host_arr[1] + '.' + host_arr[2] + '.0 netmask 255.255.255.0 gw ' + host, (error, stdout, stderr) => {
                 if (error) {
                     console.error(`[error] Setting up the routing table : ${error}`);
                 }
@@ -182,12 +176,12 @@ function setIPandRoute(host) {
                 }
                 console.log('route addition was successful. then routing table checking');
                 status = 'checkRoutingTable';
-                setTimeout(setIPandRoute, 500, drone_ip);
+                setTimeout(setIPandRoute, 500, host);
             });
         }
     }
     else {
         console.log('waiting for ' + rfPort)
-        setTimeout(setIPandRoute, 2000, drone_ip);
+        setTimeout(setIPandRoute, 2000, host);
     }
 }
